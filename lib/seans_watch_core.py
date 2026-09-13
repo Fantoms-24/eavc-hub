@@ -91,6 +91,11 @@ def run_seans_watch_loop(
       в потоке: stop_event.is_set и stop_event.wait(timeout=...)
       в отдельном процессе: проверка файла-флага и sleep чанками
     """
+    position_name = str(position_name or "").strip()
+    if not position_name:
+        raise ValueError("Выберите одну позицию для автопоиска сеансов")
+    with status_lock:
+        status["position_name"] = position_name
     folder = Path(folder_path)
 
     TIME_FOLDER_RE = re.compile(

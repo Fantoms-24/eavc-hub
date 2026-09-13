@@ -96,6 +96,7 @@
 {% elif ep == 'aviation' %}{% set eavc_page_class = 'eavc-page-aviation' %}
 {% elif ep == 'analysis' %}{% set eavc_page_class = 'eavc-page-analysis' %}
 {% elif ep == 'search_online' %}{% set eavc_page_class = 'eavc-page-search-online' %}
+{% elif ep == 'search_online_unit_parent_page' %}{% set eavc_page_class = 'eavc-page-unit-dashboard' %}
 {% elif ep == 'admin_users' %}{% set eavc_page_class = 'eavc-page-admin' %}
 {% endif %}
 <body class="{% if ep != 'login' %}wp-has-app-background{% endif %}{% if use_eavc_shell %} eavc-app{% endif %} {{ eavc_page_class }}"{% if current_user.is_authenticated %} data-wp-deploy-poll="1" data-wp-id-watch-poll="1"{% endif %}>
@@ -573,7 +574,7 @@
   {% endif %}
   <script defer src="{{ url_for('static', filename='js/wp-ui.js') }}"></script>
   {% if use_eavc_shell %}
-  <script defer src="{{ url_for('static', filename='js/eavc-app-shell.js') }}?v=15"></script>
+  <script defer src="{{ url_for('static', filename='js/eavc-app-shell.js') }}?v=16"></script>
   <script defer src="{{ url_for('static', filename='js/eavc-mobile-nav.js') }}?v=5"></script>
   <script defer src="{{ url_for('static', filename='js/eavc-mobile-hub.js') }}?v=1"></script>
   {% endif %}

@@ -175,9 +175,9 @@
       '<defs><linearGradient id="ud-blue-area" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2d83ff" stop-opacity=".31"/><stop offset="1" stop-color="#2d83ff" stop-opacity=".03"/></linearGradient><linearGradient id="ud-cyan-area" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#10c9c1" stop-opacity=".26"/><stop offset="1" stop-color="#10c9c1" stop-opacity=".03"/></linearGradient></defs>' +
       grid + '<path class="ud-chart-area-blue" d="' + sessionArea + '"/><path class="ud-chart-area-cyan" d="' + correspondentArea + '"/>' +
       '<path class="ud-chart-line-blue" d="' + sessionLine + '"/><path class="ud-chart-line-cyan" d="' + correspondentLine + '"/>' +
-      '<line id="ud-chart-guide" class="ud-chart-guide" x1="' + sessionPoints[sessionPoints.length - 1].x + '" y1="' + top + '" x2="' + sessionPoints[sessionPoints.length - 1].x + '" y2="' + base + '"/>' +
+      '<line id="ud-chart-guide" class="ud-chart-guide" style="display:none" x1="' + sessionPoints[sessionPoints.length - 1].x + '" y1="' + top + '" x2="' + sessionPoints[sessionPoints.length - 1].x + '" y2="' + base + '"/>' +
       sessionDots + correspondentDots + hitAreas + '</svg>' +
-      '<div class="ud-chart-tip" id="ud-chart-tip"><b id="ud-chart-tip-date">' + esc(shortDate(last.date)) + " " + esc(String(last.date || "").slice(0, 4)) + '</b><span><i class="blue"></i>Сеансы: <strong id="ud-chart-tip-sessions">' + number(last.sessions) + '</strong></span><br><span><i class="cyan"></i>Корреспонденты: <strong id="ud-chart-tip-correspondents">' + number(last.correspondents) + '</strong></span></div>' +
+      '<div class="ud-chart-tip" id="ud-chart-tip" hidden><b id="ud-chart-tip-date">' + esc(shortDate(last.date)) + " " + esc(String(last.date || "").slice(0, 4)) + '</b><span><i class="blue"></i>Сеансы: <strong id="ud-chart-tip-sessions">' + number(last.sessions) + '</strong></span><br><span><i class="cyan"></i>Корреспонденты: <strong id="ud-chart-tip-correspondents">' + number(last.correspondents) + '</strong></span></div>' +
       '<div class="ud-chart-legend"><span>Сеансы</span><span>Корреспонденты</span></div>';
 
     var selectedIndex = -1;
@@ -190,11 +190,13 @@
       setText("ud-chart-tip-correspondents", number(item.correspondents));
       var guide = document.getElementById("ud-chart-guide");
       if (guide) {
+        guide.style.display = "";
         guide.setAttribute("x1", x(index));
         guide.setAttribute("x2", x(index));
       }
       var tip = document.getElementById("ud-chart-tip");
       if (tip) {
+        tip.hidden = false;
         var percent = 6 + (88 * index / Math.max(days.length - 1, 1));
         tip.style.left = percent + "%";
         tip.style.transform = index > days.length / 2 ? "translateX(-100%)" : "translateX(0)";
@@ -208,7 +210,13 @@
 
     root.onpointermove = pointFromEvent;
     root.onclick = pointFromEvent;
-    selectPoint(days.length - 1);
+    root.onpointerleave = function () {
+      selectedIndex = -1;
+      var guide = document.getElementById("ud-chart-guide");
+      var tip = document.getElementById("ud-chart-tip");
+      if (guide) guide.style.display = "none";
+      if (tip) tip.hidden = true;
+    };
   }
 
   function renderStructure(data, profile) {

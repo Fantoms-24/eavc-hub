@@ -333,7 +333,6 @@ def register_sync_routes(app, ctx: AppContext):
         ensure_db(p)
         conn = connect(p)
         try:
-            pending = list_sync_outbox_pending(conn, limit=200)
             meta_keys = [
                 "last_pull_ts",
                 "seanses_last_rowid",
@@ -341,7 +340,17 @@ def register_sync_routes(app, ctx: AppContext):
                 "online_search_last_ts",
                 "online_search_last_id",
             ]
-            meta = {k: (get_sync_meta(conn, k) or "") for k in meta_keys}
+            if ctx.sync_upstream and ctx.sync_key:
+                from web_portal.lib.sync_delivery import load_cursor, pending_delivery, session_source
+
+                pending = pending_delivery(p, limit=200)
+                meta = {
+                    key: load_cursor(session_source() if key == "seanses_last_rowid" else p, key)
+                    for key in meta_keys
+                }
+            else:
+                pending = list_sync_outbox_pending(conn, limit=200)
+                meta = {k: (get_sync_meta(conn, k) or "") for k in meta_keys}
             return jsonify(
                 {
                     "ok": True,

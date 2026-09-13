@@ -1,9 +1,13 @@
 from __future__ import annotations
 
 from datetime import datetime, timedelta
+from pathlib import Path
 import sqlite3
 
 from web_portal.application.online_search import unit_dashboard
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 
 def _conn() -> sqlite3.Connection:
@@ -84,3 +88,29 @@ def test_dashboard_invalid_period_falls_back_to_seven(monkeypatch) -> None:
 
     assert payload["period"]["days"] == 7
     assert len(payload["days"]) == 7
+
+
+def test_dashboard_uses_route_class_instead_of_root_has_selector() -> None:
+    base = (PROJECT_ROOT / "templates" / "base.html").read_text(encoding="utf-8")
+    dashboard_css = (PROJECT_ROOT / "static" / "css" / "unit-dashboard.css").read_text(encoding="utf-8")
+    shell_js = (PROJECT_ROOT / "static" / "js" / "eavc-app-shell.js").read_text(encoding="utf-8")
+    dashboard_js = (PROJECT_ROOT / "static" / "js" / "unit_dashboard.js").read_text(encoding="utf-8")
+
+    assert "search_online_unit_parent_page" in base
+    assert "eavc-page-unit-dashboard" in base
+    assert "body:has(.up2-page)" not in dashboard_css
+    assert "body.eavc-page-unit-dashboard" in dashboard_css
+    assert "overflow-y: hidden" in dashboard_css
+    assert 'classList.contains("eavc-page-unit-dashboard")' in shell_js
+    assert 'id="ud-chart-tip" hidden' in dashboard_js
+    assert "root.onpointerleave" in dashboard_js
+
+
+def test_search_online_scroll_path_avoids_glass_repaint() -> None:
+    search_css = (PROJECT_ROOT / "static" / "css" / "search-online-workbench.css").read_text(encoding="utf-8")
+
+    assert "body.eavc-page-search-online .eavc-rail" in search_css
+    assert "backdrop-filter: none !important" in search_css
+    assert "body.eavc-page-search-online::before" in search_css
+    assert "contain: paint" in search_css
+    assert "content-visibility: visible" in search_css

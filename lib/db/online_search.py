@@ -1080,12 +1080,14 @@ def list_online_search_rows_after(
     after_updated_at: str,
     after_id: int,
     limit: int = 500,
+    initialize: bool = True,
 ) -> list[dict[str, Any]]:
     """
     Инкрементальная выборка для синхронизации: идём по (updated_at, id).
     """
-    init_db(conn)
-    init_online_search(conn)
+    if initialize:
+        init_db(conn)
+        init_online_search(conn)
     limit = max(1, min(int(limit), 2000))
     ts = str(after_updated_at or "").strip() or "1970-01-01 00:00:00"
     aid = int(after_id or 0)

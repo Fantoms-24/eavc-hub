@@ -8,22 +8,33 @@
   background: #eef5fc;
 }
 
-/* На этой аналитической странице стеклянные blur-слои оболочки заметно тормозят скролл. */
-body:has(.up2-page) {
+/* Дешёвый route-класс: корневой :has() заставлял браузер пересчитывать всё дерево при скролле. */
+body.eavc-page-unit-dashboard {
   background: #eef5fc;
 }
 
-body:has(.up2-page)::before,
-body:has(.up2-page)::after {
+body.eavc-page-unit-dashboard::before,
+body.eavc-page-unit-dashboard::after {
   display: none;
 }
 
-body:has(.up2-page) .eavc-rail,
-body:has(.up2-page) .eavc-topbar,
-body:has(.up2-page) .navbar.wp-nav,
-body:has(.up2-page) .navbar.wp-nav.md3-top-app-bar {
+body.eavc-page-unit-dashboard .eavc-rail,
+body.eavc-page-unit-dashboard .eavc-topbar,
+body.eavc-page-unit-dashboard .navbar.wp-nav,
+body.eavc-page-unit-dashboard .navbar.wp-nav.md3-top-app-bar {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
+}
+
+body.eavc-page-unit-dashboard main.eavc-content {
+  contain: paint;
+  overflow-y: hidden;
+  overscroll-behavior: contain;
+  scroll-behavior: auto;
+}
+
+body.eavc-page-unit-dashboard .eavc-topbar {
+  transition: none !important;
 }
 
 .up2-page .up2.ud-page {

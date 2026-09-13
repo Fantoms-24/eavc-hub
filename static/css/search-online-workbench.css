@@ -592,6 +592,31 @@ html[data-wp-theme="dark"] .md3-search-online.so-workbench-ui {
   background: #eef3fb;
 }
 
+/* The catalogue scrolls inside .so-shell. Fixed glass layers above that
+ * scroller force Chromium to re-blur the page on every frame and become
+ * especially expensive after the first background poll. Keep the visual
+ * hierarchy, but use opaque surfaces on this route. */
+body.eavc-page-search-online {
+  background: #eef3fb;
+}
+
+body.eavc-page-search-online::before,
+body.eavc-page-search-online::after {
+  display: none;
+}
+
+body.eavc-page-search-online .eavc-rail,
+body.eavc-page-search-online .eavc-topbar,
+body.eavc-page-search-online .navbar.wp-nav,
+body.eavc-page-search-online .navbar.wp-nav.md3-top-app-bar {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+body.eavc-page-search-online .eavc-topbar {
+  transition: none !important;
+}
+
 .so-workbench-ui .so-page {
   width: min(100%, 1680px);
   margin: 0 auto;
@@ -604,6 +629,13 @@ html[data-wp-theme="dark"] .md3-search-online.so-workbench-ui {
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
+  contain: paint;
+  scroll-behavior: auto;
+}
+
+body.eavc-page-search-online .os-wb-card {
+  content-visibility: visible;
+  contain-intrinsic-size: none;
 }
 
 .so-workbench-ui .so-topbar {

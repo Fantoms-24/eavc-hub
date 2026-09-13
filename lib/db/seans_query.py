@@ -404,12 +404,14 @@ def list_seanses_ids_for_unit_pair(
 
 
 def list_seanses_rows_after_rowid(
-    conn: sqlite3.Connection, *, after_rowid: int, limit: int = 5000
+    conn: sqlite3.Connection, *, after_rowid: int, limit: int = 5000,
+    initialize: bool = True,
 ) -> list[dict[str, Any]]:
     """
     Инкрементальная выборка seanses через rowid (быстро и удобно для больших импортов).
     """
-    init_seans_tables(conn)
+    if initialize:
+        init_seans_tables(conn)
     limit = max(1, min(int(limit), 20000))
     ar = int(after_rowid or 0)
     rows = conn.execute(

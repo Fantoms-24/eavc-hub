@@ -11,6 +11,7 @@ import os
 import subprocess
 import sys
 import threading
+from functools import wraps
 from datetime import datetime
 from pathlib import Path
 
@@ -19,6 +20,16 @@ from flask import Flask
 from web_portal.config import seans_watch_status_path, seans_watch_stop_path
 
 _log = logging.getLogger("web_portal.webapp.seans_watch")
+_watch_launch_lock = threading.RLock()
+
+
+def _serialize_watch_launch(func):
+    @wraps(func)
+    def launch(*args, **kwargs):
+        with _watch_launch_lock:
+            return func(*args, **kwargs)
+
+    return launch
 
 
 def _normalize_watch_folder_path(path: str) -> str:
@@ -69,6 +80,7 @@ def _clear_seans_watch_autostart() -> None:
     )
 
 
+@_serialize_watch_launch
 def _launch_global_seans_watch_worker(
     app: Flask,
     position_name: str,
@@ -79,6 +91,9 @@ def _launch_global_seans_watch_worker(
     Поднимает глобальный watcher (hub_global). Если уже работает тот же путь/позиция/интервал —
     возвращает ok без остановки процесса (обновление страницы не перезапускает воркер).
     """
+    position_name = str(position_name or "").strip()
+    if not position_name:
+        raise ValueError("Выберите одну позицию для автопоиска сеансов")
     if not hasattr(app, "session_watchers"):
         app.session_watchers = {}
     watcher_key = "hub_global"
@@ -127,6 +142,7 @@ def _launch_global_seans_watch_worker(
                     except Exception:
                         try:
                             proc_prev.kill()
+                            proc_prev.wait(timeout=6)
                         except Exception:
                             _log.debug("_launch_global_seans_watch_worker: suppressed error", exc_info=True)
                 try:
@@ -148,6 +164,19 @@ def _launch_global_seans_watch_worker(
                     _log.debug("_launch_global_seans_watch_worker: suppressed error", exc_info=True)
         except Exception:
             _log.debug("_launch_global_seans_watch_worker: suppressed error", exc_info=True)
+
+    # Старый поиск не должен продолжать запись под другой позицией.
+    if prev:
+        if prev.get("mode") == "subprocess":
+            old_proc = prev.get("proc")
+            still_running = old_proc is not None and old_proc.poll() is None
+        else:
+            old_thread = prev.get("thread")
+            still_running = old_thread is not None and old_thread.is_alive()
+        if still_running:
+            raise RuntimeError(
+                "Предыдущий автопоиск ещё останавливается. Дождитесь его остановки."
+            )
 
     use_subprocess = (
         os.environ.get("WEB_PORTAL_SEANS_WATCH_SUBPROCESS", "1")

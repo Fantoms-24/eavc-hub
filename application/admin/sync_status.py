@@ -48,7 +48,6 @@ def assemble_admin_sync_status_payload(
     sync_upstream: str | None,
     sync_key: str | None,
 ) -> dict[str, Any]:
-    pending = list_sync_outbox_pending(conn, limit=200)
     meta_keys = [
         "last_pull_ts",
         "seanses_last_rowid",
@@ -56,7 +55,20 @@ def assemble_admin_sync_status_payload(
         "online_search_last_ts",
         "online_search_last_id",
     ]
-    meta = {k: (get_sync_meta(conn, k) or "") for k in meta_keys}
+    source_name = conn.execute("PRAGMA database_list").fetchone()[2]
+    if sync_upstream and sync_key and source_name:
+        from pathlib import Path
+        from web_portal.lib.sync_delivery import load_cursor, pending_delivery, session_source
+
+        source = Path(source_name)
+        pending = pending_delivery(source, limit=200)
+        meta = {
+            key: load_cursor(session_source() if key == "seanses_last_rowid" else source, key)
+            for key in meta_keys
+        }
+    else:
+        pending = list_sync_outbox_pending(conn, limit=200)
+        meta = {k: (get_sync_meta(conn, k) or "") for k in meta_keys}
     stats = _collect_sync_db_stats(conn)
 
     return {

@@ -918,12 +918,14 @@ def match_callsign_for_corr(
 
 
 def list_unit_rows_after_rowid(
-    conn: sqlite3.Connection, *, after_rowid: int, limit: int = 5000
+    conn: sqlite3.Connection, *, after_rowid: int, limit: int = 5000,
+    initialize: bool = True,
 ) -> list[dict[str, Any]]:
     """
     Инкрементальная выборка unit через rowid.
     """
-    init_db(conn)
+    if initialize:
+        init_db(conn)
     limit = max(1, min(int(limit), 20000))
     ar = int(after_rowid or 0)
     rows = conn.execute(

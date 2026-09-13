@@ -80,6 +80,10 @@
     var topbar = document.querySelector(".eavc-topbar");
     var scrollRoot = document.querySelector("main.eavc-content") || window;
     if (!topbar) return;
+    if (document.body.classList.contains("eavc-page-unit-dashboard")) {
+      topbar.classList.remove("eavc-topbar--elevated");
+      return;
+    }
     var onScroll = function () {
       var y =
         scrollRoot === window

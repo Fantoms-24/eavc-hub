@@ -21,9 +21,6 @@ from web_portal.lib.db import (
     list_seanses_rows_after_rowid,
     list_unit_rows_after_rowid,
     upsert_unit_rows_from_sync,
-    list_sync_outbox_pending,
-    mark_sync_outbox_failed,
-    mark_sync_outbox_sent,
     set_sync_meta,
     apply_intercept_catalog_delete_from_sync,
     upsert_intercept_catalog_from_sync,
@@ -49,6 +46,9 @@ from web_portal.lib.aviation_db_sync import (
     upsert_aviation_callsign_from_sync,
 )
 from web_portal.config import DEFAULT_DB_NAME, db_path
+from web_portal.lib.sync_delivery import (
+    load_cursor, save_cursors, pending_delivery, record_delivery, read_source, session_source,
+)
 
 _log = logging.getLogger("web_portal.sync_agent")
 _PULL_CURSOR_OVERLAP_SEC = 2
@@ -162,56 +162,50 @@ def sync_push_priority_once(
         return {"ok": False, "error": "empty upstream"}
 
     p = db_path(db_name)
-    ensure_db(p)
-    conn = connect(p)
-    try:
-        batch = list_sync_outbox_pending(conn, limit=limit, priority_only=True)
-        if not batch:
-            return {"ok": True, "sent": 0}
+    batch = pending_delivery(p, limit=limit, priority_only=True)
+    if not batch:
+        return {"ok": True, "sent": 0}
 
-        events = []
-        ids = []
-        for it in batch:
-            try:
-                payload = json.loads(it["payload_json"] or "{}") or {}
-            except Exception:
-                payload = {}
-            events.append({"kind": it["kind"], "payload": payload})
-            ids.append(int(it["id"]))
-
-        import socket
-
+    events = []
+    ids = []
+    for it in batch:
         try:
-            hostname = socket.gethostname()
-            ip_addr = socket.gethostbyname(hostname)
+            payload = json.loads(it["payload_json"] or "{}") or {}
         except Exception:
-            hostname = "unknown"
-            ip_addr = "unknown"
+            payload = {}
+        events.append({"kind": it["kind"], "payload": payload})
+        ids.append(int(it["id"]))
 
-        pos_list = _normalize_positions(position_names)
-        pos_str = ",".join(pos_list)
-        resp = _http_json(
-            "POST",
-            f"{upstream}/api/sync/push",
-            headers={"X-Sync-Key": sync_key},
-            body={
-                "events": events,
-                "hub_id": ip_addr or hostname,
-                "hub_name": hostname,
-                "position_name": pos_str,
-            },
-            timeout=4.0,
-        )
-        if resp.get("ok") is True:
-            mark_sync_outbox_sent(conn, ids)
-            return {"ok": True, "sent": len(ids), "server_now": resp.get("now") or ""}
+    import socket
 
-        err = str(resp.get("error") or "push failed")
-        for oid in ids:
-            mark_sync_outbox_failed(conn, outbox_id=oid, error=err)
-        return {"ok": False, "error": err}
-    finally:
-        conn.close()
+    try:
+        hostname = socket.gethostname()
+        ip_addr = socket.gethostbyname(hostname)
+    except Exception:
+        hostname = "unknown"
+        ip_addr = "unknown"
+
+    pos_list = _normalize_positions(position_names)
+    pos_str = ",".join(pos_list)
+    resp = _http_json(
+        "POST",
+        f"{upstream}/api/sync/push",
+        headers={"X-Sync-Key": sync_key},
+        body={
+            "events": events,
+            "hub_id": ip_addr or hostname,
+            "hub_name": hostname,
+            "position_name": pos_str,
+        },
+        timeout=4.0,
+    )
+    if resp.get("ok") is True:
+        record_delivery(p, batch)
+        return {"ok": True, "sent": len(ids), "server_now": resp.get("now") or ""}
+
+    err = str(resp.get("error") or "push failed")
+    record_delivery(p, batch, error=err)
+    return {"ok": False, "error": err}
 
 
 def sync_push_once(
@@ -230,57 +224,51 @@ def sync_push_once(
         return {"ok": False, "error": "empty upstream"}
 
     p = db_path(db_name)
-    ensure_db(p)
-    conn = connect(p)
-    try:
-        batch = list_sync_outbox_pending(conn, limit=limit)
-        if not batch:
-            return {"ok": True, "sent": 0}
+    batch = pending_delivery(p, limit=limit)
+    if not batch:
+        return {"ok": True, "sent": 0}
 
-        events = []
-        ids = []
-        for it in batch:
-            try:
-                payload = json.loads(it["payload_json"] or "{}") or {}
-            except Exception:
-                payload = {}
-            events.append({"kind": it["kind"], "payload": payload})
-            ids.append(int(it["id"]))
-
-        import socket
-
+    events = []
+    ids = []
+    for it in batch:
         try:
-            hostname = socket.gethostname()
-            ip_addr = socket.gethostbyname(hostname)
+            payload = json.loads(it["payload_json"] or "{}") or {}
         except Exception:
-            hostname = "unknown"
-            ip_addr = "unknown"
+            payload = {}
+        events.append({"kind": it["kind"], "payload": payload})
+        ids.append(int(it["id"]))
 
-        pos_list = _normalize_positions(position_names)
-        pos_str = ",".join(pos_list)
-        resp = _http_json(
-            "POST",
-            f"{upstream}/api/sync/push",
-            headers={"X-Sync-Key": sync_key},
-            body={
-                "events": events,
-                "hub_id": ip_addr or hostname,
-                "hub_name": hostname,
-                "position_name": pos_str,
-            },
-            timeout=6.0,
-        )
-        if resp.get("ok") is True:
-            mark_sync_outbox_sent(conn, ids)
-            return {"ok": True, "sent": len(ids), "server_now": resp.get("now") or ""}
+    import socket
 
-        # отказ сервера — считаем попыткой
-        err = str(resp.get("error") or "push failed")
-        for oid in ids:
-            mark_sync_outbox_failed(conn, outbox_id=oid, error=err)
-        return {"ok": False, "error": err}
-    finally:
-        conn.close()
+    try:
+        hostname = socket.gethostname()
+        ip_addr = socket.gethostbyname(hostname)
+    except Exception:
+        hostname = "unknown"
+        ip_addr = "unknown"
+
+    pos_list = _normalize_positions(position_names)
+    pos_str = ",".join(pos_list)
+    resp = _http_json(
+        "POST",
+        f"{upstream}/api/sync/push",
+        headers={"X-Sync-Key": sync_key},
+        body={
+            "events": events,
+            "hub_id": ip_addr or hostname,
+            "hub_name": hostname,
+            "position_name": pos_str,
+        },
+        timeout=6.0,
+    )
+    if resp.get("ok") is True:
+        record_delivery(p, batch)
+        return {"ok": True, "sent": len(ids), "server_now": resp.get("now") or ""}
+
+    # отказ сервера — считаем попыткой
+    err = str(resp.get("error") or "push failed")
+    record_delivery(p, batch, error=err)
+    return {"ok": False, "error": err}
 
 
 def sync_pull_once(
@@ -503,23 +491,6 @@ def sync_pull_once(
 
                 logging.warning(f"sync_pull: failed to apply analysis_assignment: {e}")
                 continue
-        # seanses (sessions tab)
-        rows = resp.get("seanses")
-        if isinstance(rows, list) and rows:
-            try:
-                from web_portal.lib.seans_db import connect_seans_storage
-
-                seans_conn = connect_seans_storage()
-                try:
-                    upsert_seanses_rows_from_sync(seans_conn, rows=rows)
-                finally:
-                    seans_conn.close()
-                applied += len(rows)
-            except Exception as e:
-                errors.append(f"seanses: {str(e)}")
-                import logging
-
-                logging.warning(f"sync_pull: failed to apply seanses batch: {e}")
         # unit rows
         urows = resp.get("unit_rows")
         if isinstance(urows, list) and urows:
@@ -709,6 +680,22 @@ def sync_pull_once(
         # коммитим все изменения одним fsync (batch вместо commit на каждый item/session)
         conn.commit()
         set_connection_defer_commit(conn, False)
+        # Release main before acquiring the session writer. Legacy storage uses
+        # the same file; separate storage's watcher may need main for ID alerts.
+        rows = resp.get("seanses")
+        if isinstance(rows, list) and rows:
+            try:
+                from web_portal.lib.seans_db import connect_seans_storage
+
+                seans_conn = connect_seans_storage()
+                try:
+                    upsert_seanses_rows_from_sync(seans_conn, rows=rows)
+                finally:
+                    seans_conn.close()
+                applied += len(rows)
+            except Exception as e:
+                errors.append(f"seanses: {str(e)}")
+                _log.warning("sync_pull: failed to apply seanses batch: %s", e)
         new_cursor = _next_pull_cursor(resp, since, max_ts)
         if new_cursor:
             set_sync_meta(conn, "last_pull_ts", new_cursor)
@@ -751,41 +738,36 @@ def sync_push_seanses_once(
     upstream = (upstream_base or "").rstrip("/")
     if not upstream:
         return {"ok": False, "error": "empty upstream"}
-    p = db_path(db_name)
-    ensure_db(p)
-    from web_portal.lib.seans_db import connect_seans_storage
-
-    seans_conn = connect_seans_storage()
-    try:
-        last_rowid = int(get_sync_meta(seans_conn, "seanses_last_rowid") or 0)
-        rows = list_seanses_rows_after_rowid(seans_conn, after_rowid=last_rowid, limit=limit)
-        if not rows:
-            return {"ok": True, "sent": 0}
-        max_rowid = max(int(r.get("rowid") or 0) for r in rows)
-        pos_list = _normalize_positions(position_names)
-        pos_str = ",".join(pos_list)
-        resp = _http_json(
-            "POST",
-            f"{upstream}/api/sync/push",
-            headers={"X-Sync-Key": sync_key},
-            body={
-                "events": [
-                    {
-                        "kind": "seanses:batch",
-                        "payload": {"rows": rows, "max_rowid": max_rowid},
-                    }
-                ],
-                "position_name": pos_str,
-            },
-            timeout=10.0,
+    p = session_source()
+    last_rowid = int(load_cursor(p, "seanses_last_rowid") or 0)
+    with read_source(p) as seans_conn:
+        rows = list_seanses_rows_after_rowid(
+            seans_conn, after_rowid=last_rowid, limit=limit, initialize=False,
         )
-        if resp.get("ok") is True:
-            set_sync_meta(seans_conn, "seanses_last_rowid", str(max_rowid))
-            seans_conn.commit()
-            return {"ok": True, "sent": len(rows), "max_rowid": max_rowid}
-        return {"ok": False, "error": str(resp.get("error") or "push failed")}
-    finally:
-        seans_conn.close()
+    if not rows:
+        return {"ok": True, "sent": 0}
+    max_rowid = max(int(r.get("rowid") or 0) for r in rows)
+    pos_list = _normalize_positions(position_names)
+    pos_str = ",".join(pos_list)
+    resp = _http_json(
+        "POST",
+        f"{upstream}/api/sync/push",
+        headers={"X-Sync-Key": sync_key},
+        body={
+            "events": [
+                {
+                    "kind": "seanses:batch",
+                    "payload": {"rows": rows, "max_rowid": max_rowid},
+                }
+            ],
+            "position_name": pos_str,
+        },
+        timeout=10.0,
+    )
+    if resp.get("ok") is True:
+        save_cursors(p, {"seanses_last_rowid": str(max_rowid)})
+        return {"ok": True, "sent": len(rows), "max_rowid": max_rowid}
+    return {"ok": False, "error": str(resp.get("error") or "push failed")}
 
 
 def sync_push_online_search_once(
@@ -799,51 +781,40 @@ def sync_push_online_search_once(
     upstream = (upstream_base or "").rstrip("/")
     if not upstream:
         return {"ok": False, "error": "empty upstream"}
-    # Читаем из отдельной БД поиска онлайн
     search_p = search_online_db_path()
-    ensure_db(search_p)
-    search_conn = connect(search_p)
-    # Метаданные синхронизации храним в основной БД
     main_p = db_path(db_name)
-    ensure_db(main_p)
-    main_conn = connect(main_p)
-    try:
-        last_ts = (
-            get_sync_meta(main_conn, "online_search_last_ts") or "1970-01-01 00:00:00"
-        )
-        last_id = int(get_sync_meta(main_conn, "online_search_last_id") or 0)
+    last_ts = load_cursor(main_p, "online_search_last_ts") or "1970-01-01 00:00:00"
+    last_id = int(load_cursor(main_p, "online_search_last_id") or 0)
+    with read_source(search_p) as search_conn:
         rows = list_online_search_rows_after(
-            search_conn, after_updated_at=last_ts, after_id=last_id, limit=limit
+            search_conn, after_updated_at=last_ts, after_id=last_id,
+            limit=limit, initialize=False,
         )
-        if not rows:
-            return {"ok": True, "sent": 0}
-        tail = rows[-1]
-        new_ts = str(tail.get("updated_at") or last_ts)
-        new_id = int(tail.get("id") or last_id)
-        pos_list = _normalize_positions(position_names)
-        pos_str = ",".join(pos_list)
-        resp = _http_json(
-            "POST",
-            f"{upstream}/api/sync/push",
-            headers={"X-Sync-Key": sync_key},
-            body={
-                "events": [{"kind": "online_search:batch", "payload": {"rows": rows}}],
-                "position_name": pos_str,
-            },
-            timeout=10.0,
-        )
-        if resp.get("ok") is True:
-            set_sync_meta(main_conn, "online_search_last_ts", new_ts)
-            set_sync_meta(main_conn, "online_search_last_id", str(new_id))
-            return {
-                "ok": True,
-                "sent": len(rows),
-                "cursor": {"ts": new_ts, "id": new_id},
-            }
-        return {"ok": False, "error": str(resp.get("error") or "push failed")}
-    finally:
-        search_conn.close()
-        main_conn.close()
+    if not rows:
+        return {"ok": True, "sent": 0}
+    tail = rows[-1]
+    new_ts = str(tail.get("updated_at") or last_ts)
+    new_id = int(tail.get("id") or last_id)
+    pos_list = _normalize_positions(position_names)
+    pos_str = ",".join(pos_list)
+    resp = _http_json(
+        "POST",
+        f"{upstream}/api/sync/push",
+        headers={"X-Sync-Key": sync_key},
+        body={
+            "events": [{"kind": "online_search:batch", "payload": {"rows": rows}}],
+            "position_name": pos_str,
+        },
+        timeout=10.0,
+    )
+    if resp.get("ok") is True:
+        save_cursors(main_p, {"online_search_last_ts": new_ts, "online_search_last_id": str(new_id)})
+        return {
+            "ok": True,
+            "sent": len(rows),
+            "cursor": {"ts": new_ts, "id": new_id},
+        }
+    return {"ok": False, "error": str(resp.get("error") or "push failed")}
 
 
 def sync_push_unit_once(
@@ -858,37 +829,33 @@ def sync_push_unit_once(
     if not upstream:
         return {"ok": False, "error": "empty upstream"}
     p = db_path(db_name)
-    ensure_db(p)
-    conn = connect(p)
-    try:
-        last_rowid = int(get_sync_meta(conn, "unit_last_rowid") or 0)
-        rows = list_unit_rows_after_rowid(conn, after_rowid=last_rowid, limit=limit)
-        if not rows:
-            return {"ok": True, "sent": 0}
-        max_rowid = max(int(r.get("rowid") or 0) for r in rows)
-        pos_list = _normalize_positions(position_names)
-        pos_str = ",".join(pos_list)
-        resp = _http_json(
-            "POST",
-            f"{upstream}/api/sync/push",
-            headers={"X-Sync-Key": sync_key},
-            body={
-                "events": [
-                    {
-                        "kind": "unit:batch",
-                        "payload": {"rows": rows, "max_rowid": max_rowid},
-                    }
-                ],
-                "position_name": pos_str,
-            },
-            timeout=10.0,
-        )
-        if resp.get("ok") is True:
-            set_sync_meta(conn, "unit_last_rowid", str(max_rowid))
-            return {"ok": True, "sent": len(rows), "max_rowid": max_rowid}
-        return {"ok": False, "error": str(resp.get("error") or "push failed")}
-    finally:
-        conn.close()
+    last_rowid = int(load_cursor(p, "unit_last_rowid") or 0)
+    with read_source(p) as conn:
+        rows = list_unit_rows_after_rowid(conn, after_rowid=last_rowid, limit=limit, initialize=False)
+    if not rows:
+        return {"ok": True, "sent": 0}
+    max_rowid = max(int(r.get("rowid") or 0) for r in rows)
+    pos_list = _normalize_positions(position_names)
+    pos_str = ",".join(pos_list)
+    resp = _http_json(
+        "POST",
+        f"{upstream}/api/sync/push",
+        headers={"X-Sync-Key": sync_key},
+        body={
+            "events": [
+                {
+                    "kind": "unit:batch",
+                    "payload": {"rows": rows, "max_rowid": max_rowid},
+                }
+            ],
+            "position_name": pos_str,
+        },
+        timeout=10.0,
+    )
+    if resp.get("ok") is True:
+        save_cursors(p, {"unit_last_rowid": str(max_rowid)})
+        return {"ok": True, "sent": len(rows), "max_rowid": max_rowid}
+    return {"ok": False, "error": str(resp.get("error") or "push failed")}
 
 
 def run_sync_loop(

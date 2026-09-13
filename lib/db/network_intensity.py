@@ -5,6 +5,11 @@ import sqlite3
 from typing import Any
 
 from web_portal.lib.db.connection import init_db
+from web_portal.lib.db.seans_archive import resolve_seans_conn_for_queries
+from web_portal.lib.db.seans_schema import (
+    init_daily_aggregates,
+    refresh_seanses_daily_aggregates,
+)
 from web_portal.lib.db.units import (
     _build_unit_name_map_for_pairs,
     _is_unknown_intensity_unit_name,

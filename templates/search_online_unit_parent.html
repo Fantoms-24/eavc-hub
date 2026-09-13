@@ -4,7 +4,7 @@
 {% block styles %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/analysis-group-md3.css') }}" />
 <link rel="stylesheet" href="{{ url_for('static', filename='css/unit-portal-parent-v2.css') }}?v=1" />
-<link rel="stylesheet" href="{{ url_for('static', filename='css/unit-dashboard.css') }}?v=7" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/unit-dashboard.css') }}?v=9" />
 {% endblock %}
 {% block content %}
 <div class="unit-portal up2-page" id="up-parent-root">
@@ -149,5 +149,5 @@
   window.__UP_CAN_EDIT__ = {{ 'true' if (current_user.is_authenticated and current_user.has_perm('edit_search')) else 'false' }};
 </script>
 <script src="{{ url_for('static', filename='js/unit_parent_page.js') }}?v=7"></script>
-<script src="{{ url_for('static', filename='js/unit_dashboard.js') }}?v=7"></script>
+<script src="{{ url_for('static', filename='js/unit_dashboard.js') }}?v=10"></script>
 {% endblock %}
