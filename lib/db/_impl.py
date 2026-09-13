@@ -185,6 +185,7 @@ from web_portal.lib.db.units import (  # noqa: E402,F401
     match_callsign_for_corr,
     parse_note_unit_parent_child,
     remove_sessions_favorite,
+    save_unit_parent_manual_groups,
     sessions_favorite_matches_row,
     sessions_row_is_favorite,
     update_unit_name,

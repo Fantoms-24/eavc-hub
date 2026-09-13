@@ -114,6 +114,45 @@ def register_analysis_routes(app, ctx: AppContext):
     """Регистрирует маршруты анализа через AppContext. Код перенесён из create_app дословно."""
     logger = _log
 
+    def attach_graph_unit_avatars(payload: dict) -> dict:
+        """Добавляет фото подразделения к узлам и связям графа.
+
+        Узел-корреспондент хранит своё подразделение в ``unit_name``. У связи
+        это поле описывает группу, в которой корреспонденты встретились. Один
+        запрос к справочнику даёт фото для обеих сущностей и для static-, и
+        для dynamic-режима графа.
+        """
+        nodes = payload.get("nodes") or []
+        edges = payload.get("edges") or []
+        unit_keys = sorted(
+            {
+                str(item.get("unit_name") or "").strip()
+                for item in [*nodes, *edges]
+                if isinstance(item, dict)
+                and str(item.get("unit_name") or "").strip()
+            }
+        )
+        if not unit_keys:
+            return payload
+        search_p = search_online_db_path()
+        ensure_db(search_p)
+        search_conn = connect(search_p)
+        try:
+            avatar_files = list_online_search_unit_avatar_files(search_conn, unit_keys)
+        finally:
+            search_conn.close()
+        for item in [*nodes, *edges]:
+            if not isinstance(item, dict):
+                continue
+            unit_key = str(item.get("unit_name") or "").strip()
+            avatar_file = avatar_files.get(unit_key)
+            item["avatar_url"] = (
+                url_for("api_online_search_unit_avatar_file", filename=avatar_file)
+                if avatar_file
+                else ""
+            )
+        return payload
+
     @app.before_request
     def reject_graph_rendering_on_hub():
         """HUB не строит графы и не тратит ресурсы на тяжёлые запросы графа."""
@@ -952,7 +991,7 @@ def register_analysis_routes(app, ctx: AppContext):
         cache_key = _analysis_cache_key("graph", pos=pos or "__all__")
         cached_payload = _analysis_cache_get(cache_key)
         if cached_payload is not None:
-            return _json_etag_response(cached_payload, max_age=30)
+            return _json_etag_response(attach_graph_unit_avatars(cached_payload), max_age=30)
 
         p = db_path(DEFAULT_DB_NAME)
         ensure_db(p)
@@ -987,28 +1026,7 @@ def register_analysis_routes(app, ctx: AppContext):
                 max_nodes_mode=max_nodes_mode,
                 max_unit_rows=max_unit_rows,
             )
-            unit_keys = sorted(
-                {
-                    str(node.get("unit_name") or "").strip()
-                    for node in payload.get("nodes", [])
-                    if str(node.get("unit_name") or "").strip()
-                }
-            )
-            search_p = search_online_db_path()
-            ensure_db(search_p)
-            search_conn = connect(search_p)
-            try:
-                avatar_files = list_online_search_unit_avatar_files(search_conn, unit_keys)
-            finally:
-                search_conn.close()
-            for node in payload.get("nodes", []):
-                unit_key = str(node.get("unit_name") or "").strip()
-                avatar_file = avatar_files.get(unit_key)
-                node["avatar_url"] = (
-                    url_for("api_online_search_unit_avatar_file", filename=avatar_file)
-                    if avatar_file
-                    else ""
-                )
+            attach_graph_unit_avatars(payload)
         finally:
             conn.close()
 
@@ -1264,27 +1282,26 @@ def register_analysis_routes(app, ctx: AppContext):
         conn = connect(p)
         seans_conn = get_request_seans_db()
         try:
-            return jsonify(
-                assemble_analysis_graph_dynamic_window_payload(
-                    conn,
-                    seans_conn,
-                    pos=pos,
-                    all_positions=all_positions,
-                    unit_name=unit_name,
-                    frequency=frequency,
-                    group_code=group_code,
-                    unit_query=unit_query,
-                    group_query=group_query,
-                    include_other=include_other,
-                    cluster_by=cluster_by,
-                    min_weight=min_weight,
-                    max_nodes=max_nodes,
-                    max_edges=max_edges,
-                    window_minutes=window_minutes,
-                    start_dt=start_dt,
-                    end_dt=end_dt,
-                )
+            payload = assemble_analysis_graph_dynamic_window_payload(
+                conn,
+                seans_conn,
+                pos=pos,
+                all_positions=all_positions,
+                unit_name=unit_name,
+                frequency=frequency,
+                group_code=group_code,
+                unit_query=unit_query,
+                group_query=group_query,
+                include_other=include_other,
+                cluster_by=cluster_by,
+                min_weight=min_weight,
+                max_nodes=max_nodes,
+                max_edges=max_edges,
+                window_minutes=window_minutes,
+                start_dt=start_dt,
+                end_dt=end_dt,
             )
+            return jsonify(attach_graph_unit_avatars(payload))
         finally:
             conn.close()
 

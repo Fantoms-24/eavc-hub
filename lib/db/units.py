@@ -775,6 +775,45 @@ def load_unit_parent_manual_groups() -> list[list[str]]:
     return [g for g in groups if len(g) >= 2]
 
 
+def save_unit_parent_manual_groups(groups: list[dict[str, Any]]) -> list[list[str]]:
+    """Сохраняет ручные группы из интерфейса в простом локальном файле.
+
+    Первая строка блока — название большой группы, следующие строки — точные
+    названия подразделений. Одно подразделение может входить только в одну
+    группу, чтобы результат каталога оставался однозначным.
+    """
+    prepared: list[list[str]] = []
+    assigned: set[str] = set()
+    labels: set[str] = set()
+    for raw in groups or []:
+        if not isinstance(raw, dict):
+            continue
+        label = _norm_unit_note(" ".join(str(raw.get("label") or "").split()))
+        if not label or label == "__none__":
+            raise ValueError("Укажите название группы")
+        if label.casefold() in labels:
+            raise ValueError("Названия групп не должны повторяться")
+        labels.add(label.casefold())
+        units = raw.get("units") if isinstance(raw.get("units"), list) else []
+        members: list[str] = []
+        for item in units:
+            unit = _norm_unit_note(" ".join(str(item or "").split()))
+            if not unit or unit == "__none__":
+                continue
+            if unit in assigned:
+                raise ValueError(f"Подразделение «{unit}» назначено более чем в одну группу")
+            assigned.add(unit)
+            members.append(unit)
+        if members:
+            prepared.append([label, *members])
+
+    p = _unit_parent_groups_file()
+    p.parent.mkdir(parents=True, exist_ok=True)
+    blocks = ["\n".join(group) for group in prepared]
+    p.write_text("\n\n".join(blocks) + ("\n" if blocks else ""), encoding="utf-8")
+    return prepared
+
+
 def get_unit_family_by_parent_key(
     conn: sqlite3.Connection, parent_key: str
 ) -> dict[str, Any] | None:
@@ -1091,6 +1130,7 @@ __all__ = [
     "remove_sessions_favorite",
     "parse_note_unit_parent_child",
     "load_unit_parent_manual_groups",
+    "save_unit_parent_manual_groups",
     "get_unit_family_by_parent_key",
     "match_callsign_for_corr",
     "list_unit_rows_after_rowid",

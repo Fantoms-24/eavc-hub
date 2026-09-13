@@ -48,10 +48,12 @@ from web_portal.lib.db import (
     list_distinct_seans_frequency_groups,
     list_intercept_callsigns_for_unit_pair,
     list_online_search,
+    load_unit_parent_manual_groups,
     list_online_search_ids_for_note_pair,
     list_seanses_ids_for_unit_pair,
     seanses_datetime_extremes_for_unit_pair,
     set_online_search_unit_avatar,
+    save_unit_parent_manual_groups,
     sync_units_from_online_search,
     update_online_search_note,
     upsert_online_search_row,
@@ -122,6 +124,36 @@ def register_online_search_routes(app, ctx: AppContext):
             return jsonify(payload)
         finally:
             conn.close()
+
+    @app.get("/api/online-search/manual-groups")
+    @login_required
+    def api_online_search_manual_groups_list():
+        groups = [
+            {"label": group[0], "units": group[1:]}
+            for group in load_unit_parent_manual_groups()
+            if len(group) >= 2
+        ]
+        return jsonify({"ok": True, "groups": groups})
+
+    @app.post("/api/online-search/manual-groups")
+    @login_required
+    @require_perm("edit_search")
+    def api_online_search_manual_groups_save():
+        body = request.get_json(silent=True) or {}
+        groups = body.get("groups") if isinstance(body.get("groups"), list) else []
+        try:
+            saved = save_unit_parent_manual_groups(groups)
+        except ValueError as exc:
+            return jsonify({"ok": False, "error": str(exc)}), 400
+        return jsonify(
+            {
+                "ok": True,
+                "groups": [
+                    {"label": group[0], "units": group[1:]}
+                    for group in saved
+                ],
+            }
+        )
 
     @app.get("/api/online-search/unit-parent")
     @login_required

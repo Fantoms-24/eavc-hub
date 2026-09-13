@@ -414,11 +414,13 @@
     const out = [];
     const units = new Map();
     const nodeIds = new Set();
+    const nodeAvatars = new Map();
     for (const n of nodes) {
       const unitName = String(n.unit_name || "").trim();
       const id = String(n.id || "");
       if (!id) continue;
       nodeIds.add(id);
+      nodeAvatars.set(id, String(n.avatar_url || ""));
       out.push({
         data: {
           id,
@@ -463,6 +465,7 @@
             norm: 0.1,
             unit: unitName,
             kind: "unit-link",
+            avatar: String(n.avatar_url || ""),
             edgeColor: "#9bb3e8",
           },
           classes: "rg-unit-link",
@@ -484,6 +487,9 @@
           norm: Number(e.normalized_weight || 0),
           unit: String(e.unit_name || ""),
           recent: String(e.recent_activity || ""),
+          avatar: String(e.avatar_url || ""),
+          sourceAvatar: String(nodeAvatars.get(s) || ""),
+          targetAvatar: String(nodeAvatars.get(t) || ""),
           kind: "edge",
           edgeColor: "#6f94d9",
         },
@@ -685,8 +691,16 @@
     }
     if (typeof target.isEdge === "function" && target.isEdge()) {
       const d = target.data();
+      const edgeAvatar = String(d.avatar || "");
+      const sourceAvatar = String(d.sourceAvatar || edgeAvatar);
+      const targetAvatar = String(d.targetAvatar || edgeAvatar);
+      const avatar = (src, fallbackIcon) => src
+        ? `<img class="rg-edge-card__avatar" src="${escapeHtml(src)}" alt="" />`
+        : `<span class="rg-edge-card__avatar rg-edge-card__avatar--empty"><i class="bi ${fallbackIcon}"></i></span>`;
       ui.selection.innerHTML = [
+        `<div class="rg-edge-card__avatars">${avatar(sourceAvatar, "bi-person") }<span class="rg-edge-card__link"><i class="bi bi-arrow-left-right"></i></span>${avatar(targetAvatar, "bi-person")}</div>`,
         `<div><strong>Связь:</strong> ${escapeHtml(d.source || "—")} ↔ ${escapeHtml(d.target || "—")}</div>`,
+        `<div><strong>Подразделение:</strong> ${escapeHtml(d.unit || "—")}</div>`,
         `<div><strong>Вес:</strong> ${Number(d.weight || 0)}</div>`,
         `<div><strong>Норм.вес:</strong> ${Number(d.norm || 0).toFixed(3)}</div>`,
         `<div><strong>Последняя активность:</strong> ${escapeHtml(d.recent || "—")}</div>`,
@@ -885,6 +899,15 @@
         },
         {
           selector: "node.rg-unit-hub[avatar != '']",
+          style: {
+            "background-image": "data(avatar)",
+            "background-fit": "cover",
+            "background-clip": "node",
+            "background-opacity": 1,
+          },
+        },
+        {
+          selector: "node[kind = 'id'][avatar != '']",
           style: {
             "background-image": "data(avatar)",
             "background-fit": "cover",

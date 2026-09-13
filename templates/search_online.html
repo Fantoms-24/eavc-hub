@@ -4,7 +4,7 @@
 {% block styles %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/analysis-group-md3.css') }}" />
 <link rel="stylesheet" href="{{ url_for('static', filename='css/search_online_md3.css') }}?v=11" />
-<link rel="stylesheet" href="{{ url_for('static', filename='css/search-online-workbench.css') }}?v=studio-20260913" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/search-online-workbench.css') }}?v=studio-20260913-scroll" />
 {% endblock %}
 
 {% block content %}
@@ -105,6 +105,7 @@
             <h2>Действия со справочником</h2>
             {% if current_user.has_perm('edit_search') %}
             <button type="button" id="add-row-btn" class="so-tool"><span class="so-tool__icon"><i class="bi bi-plus-lg" aria-hidden="true"></i></span><span>Добавить запись<small>Внести данные вручную</small></span><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
+            <button type="button" id="manage-groups-btn" class="so-tool"><span class="so-tool__icon"><i class="bi bi-collection" aria-hidden="true"></i></span><span>Группы подразделений<small>Объединить выбранные названия вручную</small></span><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
             <button type="button" id="sync-units-btn" class="so-tool"><span class="so-tool__icon"><i class="bi bi-arrow-repeat" aria-hidden="true"></i></span><span>Синхронизация<small>Обновить привязки подразделений</small></span><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
             {% endif %}
             <button type="button" id="mark-all-read-btn" class="so-tool"><span class="so-tool__icon"><i class="bi bi-check2-all" aria-hidden="true"></i></span><span>Всё прочитано<small>Убрать отметки новых записей</small></span><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
@@ -117,11 +118,12 @@
   </div>
   <input type="file" id="import-xlsx" class="d-none" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" aria-hidden="true" />
   <div class="modal fade os-unit-modal" id="os-unit-modal" tabindex="-1" aria-labelledby="os-unit-modal-title" aria-hidden="true"><div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl"><div class="modal-content os-unit-modal__content"><div class="modal-header os-unit-modal__header"><h2 class="modal-title h5 mb-0" id="os-unit-modal-title">Подразделение</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button></div><div class="modal-body p-0" id="os-unit-modal-body"></div></div></div></div>
+  <div class="modal fade" id="os-groups-modal" tabindex="-1" aria-labelledby="os-groups-modal-title" aria-hidden="true"><div class="modal-dialog modal-dialog-centered modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h2 class="modal-title h5 mb-0" id="os-groups-modal-title">Группы подразделений</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button></div><div class="modal-body"><p class="small text-muted">Совпадающие названия объединяются сами. Здесь можно вручную объединить разные подразделения в большую группу.</p><label class="form-label" for="os-group-label">Название новой группы</label><input id="os-group-label" class="form-control mb-2" maxlength="180" placeholder="Например: Северное направление" /><label class="form-label" for="os-group-units">Подразделения в группе</label><select id="os-group-units" class="form-select" multiple size="9" aria-describedby="os-group-help"></select><div id="os-group-help" class="form-text">Выберите одно или несколько подразделений, затем сохраните группу.</div><div class="d-flex justify-content-end mt-3"><button type="button" id="os-group-add-btn" class="btn btn-primary">Сохранить группу</button></div><hr /><div id="os-groups-list" class="vstack gap-2" aria-live="polite"></div></div></div></div></div>
   <div class="column-filter-popup" id="column-filter-popup" style="display: none;" role="dialog" aria-label="Фильтр столбца" aria-modal="true"><div class="column-filter-content"><div class="d-flex align-items-center justify-content-between mb-2"><div class="fw-semibold" id="filter-title">Фильтр</div><button type="button" class="btn btn-sm btn-close" id="filter-close" aria-label="Закрыть"></button></div><div id="filter-body"></div><div class="d-flex gap-2 mt-3"><button type="button" class="btn btn-sm btn-primary" id="filter-apply">Применить</button><button type="button" class="btn btn-sm btn-outline-secondary" id="filter-clear">Очистить</button></div></div></div>
 </div>
 {% endblock %}
 {% block scripts %}
 <div id="web-perms" data-edit-search="{{ '1' if current_user.has_perm('edit_search') else '0' }}" style="display:none"></div>
 <script src="{{ url_for('static', filename='js/online_search_unit_modal.js') }}?v=1"></script>
-<script src="{{ url_for('static', filename='js/search_online.js') }}?v=studio-20260913"></script>
+<script src="{{ url_for('static', filename='js/search_online.js') }}?v=studio-20260913-groups"></script>
 {% endblock %}

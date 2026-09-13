@@ -81,6 +81,8 @@ let ALL_GROUPS = []; // Все уникальные группы для филь
 let LAST_LOAD_TIME = null; // Время последней загрузки для определения новых данных
 let ROW_MAP = new Map();
 let SELECTED_ROW_ID = null;
+let MANUAL_UNIT_GROUPS = [];
+let MANUAL_GROUP_UNITS = [];
 
 function _unitKeyFromRow(r) {
   const n = String(r?.note ?? "").trim();
@@ -875,6 +877,78 @@ function applySearchOnlineMobileUi() {
   root.classList.toggle("so-mobile-ui", window.matchMedia("(max-width: 767.98px)").matches);
 }
 
+function renderManualGroups() {
+  const list = $("os-groups-list");
+  if (!list) return;
+  list.innerHTML = "";
+  if (!MANUAL_UNIT_GROUPS.length) {
+    list.innerHTML = '<p class="small text-muted mb-0">Ручных групп пока нет.</p>';
+    return;
+  }
+  MANUAL_UNIT_GROUPS.forEach((group, index) => {
+    const item = document.createElement("div");
+    item.className = "border rounded p-2 bg-light";
+    const title = document.createElement("strong");
+    title.textContent = String(group.label || "Группа");
+    const members = document.createElement("div");
+    members.className = "small text-muted mt-1";
+    members.textContent = (group.units || []).join(", ");
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.className = "btn btn-sm btn-outline-danger mt-2";
+    remove.textContent = "Удалить группу";
+    remove.addEventListener("click", async () => {
+      MANUAL_UNIT_GROUPS.splice(index, 1);
+      await saveManualGroups();
+    });
+    item.append(title, members, remove);
+    list.appendChild(item);
+  });
+}
+
+function renderManualGroupUnitOptions() {
+  const select = $("os-group-units");
+  if (!select) return;
+  const assigned = new Set(MANUAL_UNIT_GROUPS.flatMap((group) => group.units || []));
+  select.innerHTML = "";
+  for (const unit of MANUAL_GROUP_UNITS) {
+    const option = document.createElement("option");
+    option.value = unit.unit_key;
+    option.textContent = `${unit.unit_key} — ${Number(unit.row_count || 0)} записей`;
+    option.disabled = assigned.has(unit.unit_key);
+    select.appendChild(option);
+  }
+}
+
+async function saveManualGroups() {
+  try {
+    const data = await apiPost("/api/online-search/manual-groups", { groups: MANUAL_UNIT_GROUPS });
+    MANUAL_UNIT_GROUPS = Array.isArray(data.groups) ? data.groups : [];
+    renderManualGroups();
+    renderManualGroupUnitOptions();
+    await refreshUnitsList();
+    showToast("Группы подразделений сохранены", "success");
+  } catch (e) {
+    showToast(e.message || String(e), "danger");
+  }
+}
+
+async function openManualGroups() {
+  try {
+    const [groupsData, unitsData] = await Promise.all([
+      apiGet("/api/online-search/manual-groups"),
+      apiGet("/api/online-search/units"),
+    ]);
+    MANUAL_UNIT_GROUPS = Array.isArray(groupsData.groups) ? groupsData.groups : [];
+    MANUAL_GROUP_UNITS = (unitsData.units || []).filter((unit) => unit.unit_key && unit.unit_key !== "__none__");
+    renderManualGroups();
+    renderManualGroupUnitOptions();
+    if (window.bootstrap) window.bootstrap.Modal.getOrCreateInstance($("os-groups-modal")).show();
+  } catch (e) {
+    showToast(e.message || String(e), "danger");
+  }
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
   applySearchOnlineMobileUi();
   window.matchMedia("(max-width: 767.98px)").addEventListener("change", applySearchOnlineMobileUi);
@@ -893,6 +967,22 @@ document.addEventListener("DOMContentLoaded", async () => {
     await load();
   });
   if ($("add-row-btn")) $("add-row-btn").addEventListener("click", addRow);
+  if ($("manage-groups-btn")) {
+    $("manage-groups-btn").addEventListener("click", openManualGroups);
+  }
+  if ($("os-group-add-btn")) {
+    $("os-group-add-btn").addEventListener("click", async () => {
+      const label = String($("os-group-label")?.value || "").trim();
+      const selected = Array.from($("os-group-units")?.selectedOptions || []).map((option) => option.value);
+      if (!label || !selected.length) {
+        showToast("Укажите название и выберите хотя бы одно подразделение", "warning");
+        return;
+      }
+      MANUAL_UNIT_GROUPS.push({ label, units: selected });
+      if ($("os-group-label")) $("os-group-label").value = "";
+      await saveManualGroups();
+    });
+  }
   if ($("import-btn") && $("import-xlsx")) {
     $("import-btn").addEventListener("click", (e) => {
       e.preventDefault();
@@ -1022,4 +1112,3 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   await load();
 });
-

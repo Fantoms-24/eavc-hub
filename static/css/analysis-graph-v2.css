@@ -1032,6 +1032,41 @@ html[data-wp-theme="dark"] .rg2-page {
   font-size: 2rem;
 }
 
+.rg-edge-card__avatars {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  margin: 0 0 0.75rem;
+}
+
+.rg-edge-card__avatar {
+  width: 2.85rem;
+  height: 2.85rem;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--rg2-surface-strong);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.16);
+}
+
+.rg-edge-card__avatar--empty {
+  display: grid;
+  place-items: center;
+  color: var(--rg2-muted);
+}
+
+.rg-edge-card__link {
+  display: grid;
+  place-items: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  border-radius: 50%;
+  color: #dbeafe;
+  background: var(--rg2-accent);
+  font-size: 0.78rem;
+}
+
 .an-workbench-ui [data-container-body="graph"] .rg2__workspace {
   min-height: 0;
 }

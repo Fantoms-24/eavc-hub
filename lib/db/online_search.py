@@ -715,12 +715,12 @@ def _child_label_sort(t: str) -> tuple[int, int, str]:
 def merge_families_by_manual_groups(
     families: list[dict[str, Any]], groups: list[list[str]] | None
 ) -> list[dict[str, Any]]:
-    """Объединяет семьи, если parent_key относится к одной ручной группе; дети — по unit_key."""
+    """Объединяет только подразделения, явно добавленные в ручную группу."""
     if not groups:
         return families
     mkey_to_fam: dict[str, dict[str, Any]] = {}
     for f in families:
-        k = str(f.get("parent_key") or "")
+        k = str(f.get("parent_key") or "").strip()
         if k:
             mkey_to_fam[k] = f
 
@@ -730,8 +730,14 @@ def merge_families_by_manual_groups(
             continue
         if len(g) < 2:
             continue
-        canon_mkey = _parent_merge_key(canon)
-        mkeys: set[str] = {_parent_merge_key(x) for x in g if x and x.strip()}
+        # Первая строка — название группы, остальные — выбранные пользователем
+        # точные названия подразделений. Никакой эвристики по частям названия.
+        canon_mkey = f"__manual_group__:{canon}"
+        mkeys: set[str] = {str(x).strip() for x in g[1:] if str(x).strip()}
+        # Совместимость со старым файлом: если название группы одновременно было
+        # названием подразделения, включаем его в группу.
+        if canon in mkey_to_fam:
+            mkeys.add(canon)
         to_merge: list[dict[str, Any]] = []
         for mk in mkeys:
             f = mkey_to_fam.pop(mk, None)
@@ -780,83 +786,35 @@ def merge_families_by_manual_groups(
 
 def list_online_search_unit_families(conn: sqlite3.Connection) -> list[dict[str, Any]]:
     """
-    Группировка distinct note: общий «родитель» (напр. 425 ошп «Скала») и дети
-    с исходным unit_key (полный note) для детализации.
+    Каждое точное название из ``note`` — отдельное подразделение. Совпадающие
+    названия уже объединяются SQL-группировкой; любые более крупные объединения
+    возможны только через ручные группы.
     """
     init_db(conn)
     init_online_search(conn)
     flat = list_distinct_online_search_units(conn)
-    buckets: dict[str, dict[str, Any]] = {}
-
-    def bucket(merge: str) -> dict[str, Any]:
-        b = buckets.get(merge)
-        if b is None:
-            b = {
-                "parent_key": merge,
-                "parent_label": "",
-                "row_count": 0,
-                "children": [],
-                "_has_child": False,
-            }
-            buckets[merge] = b
-        return b
-
+    out: list[dict[str, Any]] = []
     for row in flat:
         uk = str(row.get("unit_key") or "__none__")
         cnt = int(row.get("row_count") or 0)
         if uk == "__none__":
-            b = bucket("__none__")
-            b["parent_label"] = "Без подразделения"
-            b["row_count"] = cnt
-            b["children"] = [
-                {
-                    "unit_key": "__none__",
-                    "label": "Без подразделения",
-                    "row_count": cnt,
-                }
-            ]
-            b["_has_child"] = True
-            continue
-
-        ptext, ctail = parse_note_unit_parent_child(uk)
-        if ctail is not None:
-            mkey = _parent_merge_key(ptext)
-            b = bucket(mkey)
-            b["_has_child"] = True
-            b["parent_label"] = _norm_unit_note(ptext)
-            b["children"].append(
-                {
-                    "unit_key": uk,
-                    "label": ctail,
-                    "row_count": cnt,
-                }
-            )
+            label = "Без подразделения"
         else:
-            mkey = _parent_merge_key(uk)
-            b = bucket(mkey)
-            if not b.get("_has_child"):
-                b["parent_label"] = _norm_unit_note(uk)
-            b["children"].append(
-                {
-                    "unit_key": uk,
-                    "label": "Записи",
-                    "row_count": cnt,
-                }
-            )
-
-    out: list[dict[str, Any]] = []
-    for mkey, b in buckets.items():
-        ch = b.get("children") or []
-        b["row_count"] = sum(int(c.get("row_count") or 0) for c in ch)
-        ch.sort(
-            key=lambda c: _child_label_sort(
-                str(c.get("label") or ""),
-            )
+            label = uk
+        out.append(
+            {
+                "parent_key": uk,
+                "parent_label": label,
+                "row_count": cnt,
+                "children": [
+                    {
+                        "unit_key": uk,
+                        "label": "Записи" if uk != "__none__" else label,
+                        "row_count": cnt,
+                    }
+                ],
+            }
         )
-        b["children"] = ch
-        b.pop("_has_child", None)
-        out.append(b)
-
     out.sort(
         key=lambda x: (
             str(x.get("parent_key") or "") == "__none__",
