@@ -2,7 +2,9 @@
   "use strict";
 
 document.addEventListener("DOMContentLoaded", async () => {
-  _ensureOnlineUnitLinkListener();
+  if (typeof window._ensureOnlineUnitLinkListener === "function") {
+    window._ensureOnlineUnitLinkListener();
+  }
   try {
     const savedViewMode = localStorage.getItem("intercept-blank-view-mode");
     if (savedViewMode === "pretty" || savedViewMode === "plain") {

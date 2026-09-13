@@ -1515,8 +1515,6 @@ function playSingleAudio(item, opts = {}) {
   return true;
 }
 
-}
-
 async function downloadCurrentAudio() {
   const { audio } = _audioEls();
   const item = _currentAudioItem();

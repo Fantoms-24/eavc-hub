@@ -140,7 +140,7 @@ def remove_watched_correspondent_id(conn, correspondent_id: str) -> bool:
 
 
 def seans_entries_not_in_database(
-    conn, entries: list[SeansEntry]
+    conn, entries: list[SeansEntry], *, client_name: str | None = None
 ) -> list[SeansEntry]:
     """Строки сеансов, которых ещё нет в seanses (до UPSERT)."""
     if not entries:
@@ -148,7 +148,8 @@ def seans_entries_not_in_database(
     from web_portal.lib.db import init_seans_tables
 
     init_seans_tables(conn)
-    unique: dict[tuple[str, str, str, str], SeansEntry] = {}
+    position = str(client_name or "").strip()
+    unique: dict[tuple[str, str, str, str, str], SeansEntry] = {}
     for entry in entries:
         unique[
             (
@@ -156,23 +157,24 @@ def seans_entries_not_in_database(
                 str(entry.frequency),
                 str(entry.group),
                 str(entry.id),
+                position,
             )
         ] = entry
     keys = list(unique.keys())
-    existing: set[tuple[str, str, str, str]] = set()
-    chunk_size = 120
+    existing: set[tuple[str, str, str, str, str]] = set()
+    chunk_size = 100
     cur = conn.cursor()
     for i in range(0, len(keys), chunk_size):
         chunk = keys[i : i + chunk_size]
-        placeholders = ",".join(["(?,?,?,?)"] * len(chunk))
+        placeholders = ",".join(["(?,?,?,?,?)"] * len(chunk))
         flat: list[str] = []
         for t in chunk:
             flat.extend(t)
         rows = cur.execute(
             f"""
-            SELECT date_time, frequency, group_, id
+            SELECT date_time, frequency, group_, id, client_name
             FROM seanses
-            WHERE (date_time, frequency, group_, id) IN ({placeholders})
+            WHERE (date_time, frequency, group_, id, client_name) IN ({placeholders})
             """,
             flat,
         ).fetchall()
@@ -183,6 +185,7 @@ def seans_entries_not_in_database(
                     str(row[1]),
                     str(row[2]),
                     str(row[3]),
+                    str(row[4] or ""),
                 )
             )
     return [unique[k] for k in keys if k not in existing]

@@ -479,6 +479,25 @@ function renderRows(rows) {
   renderDetail(null);
 }
 
+function updateInsights(rows, total) {
+  const list = Array.isArray(rows) ? rows : [];
+  const frequencies = new Set();
+  const groups = new Set();
+  const units = new Set();
+  for (const row of list) {
+    const frequency = String(row?.frequency || colVal(row, COL_MAP.freq) || "").trim();
+    const group = String(row?.group_id || colVal(row, COL_MAP.gid) || "").trim();
+    const unit = String(row?.note || "").trim();
+    if (frequency) frequencies.add(frequency);
+    if (group) groups.add(group);
+    if (unit) units.add(unit);
+  }
+  setText("os-insight-total", String(Number(total) || 0));
+  setText("os-insight-frequencies", String(frequencies.size));
+  setText("os-insight-groups", String(groups.size));
+  setText("os-insight-units", String(units.size));
+}
+
 async function load() {
   const qRaw = ($("q").value || "").trim();
   let q = qRaw;
@@ -516,6 +535,7 @@ async function load() {
     renderRows(data.rows || []);
     const total = data.total || 0;
     if ($("os-total-pill")) setText("os-total-pill", String(total));
+    updateInsights(data.rows || [], total);
     setText("pager", `Показано ${Math.min(LIMIT, (data.rows || []).length)} / всего ${total}. OFFSET=${OFFSET}`);
     setText("status", "");
     updateFilterIndicators();
@@ -882,6 +902,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       void importXlsx();
     });
   }
+  if ($("import-callout-btn") && $("import-xlsx")) {
+    $("import-callout-btn").addEventListener("click", () => $("import-xlsx").click());
+  }
   if ($("sync-units-btn")) $("sync-units-btn").addEventListener("click", syncUnitsFromOnlineSearch);
   $("export-btn").addEventListener("click", exportXlsx);
   if ($("mark-all-read-btn")) {
@@ -999,5 +1022,4 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   await load();
 });
-
 

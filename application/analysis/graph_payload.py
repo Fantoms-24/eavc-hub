@@ -147,7 +147,14 @@ def fetch_graph_groups(
     group_query: str | None = None,
     pairs_filter: list[tuple[str, str]] | None = None,
     ids_filter: list[str] | None = None,
-) -> list[tuple[str, str, str, str]]:
+) -> list[tuple[str, str, str, str, str]]:
+    """Возвращает активность, сохраняя источник (позицию) каждой строки.
+
+    Для центрального SERVER позиции не должны исчезать при агрегации: один и
+    тот же момент и канал может быть принят несколькими HUB. Дальше строки
+    объединяются в единый граф, но происхождение остаётся доступным в узлах и
+    связях.
+    """
     seans_src = seanses_union_source_sql(seans_conn)
     where = "date_time BETWEEN ? AND ?"
     params: list[object] = [start_s, end_s]
@@ -179,21 +186,22 @@ def fetch_graph_groups(
         params.extend(ids_filter)
     rows = seans_conn.execute(
         f"""
-        SELECT date_time, frequency, group_, GROUP_CONCAT(id)
+        SELECT date_time, COALESCE(client_name, ''), frequency, group_, GROUP_CONCAT(id)
         FROM ({seans_src}) s
         WHERE {where}
-        GROUP BY date_time, frequency, group_
+        GROUP BY date_time, COALESCE(client_name, ''), frequency, group_
         """,
         tuple(params),
     ).fetchall()
-    out: list[tuple[str, str, str, str]] = []
+    out: list[tuple[str, str, str, str, str]] = []
     for r in rows or []:
         out.append(
             (
                 str(r[0] or ""),
                 str(r[1] or ""),
                 str(r[2] or ""),
-                str(r[3] or "") if r[3] is not None else "",
+                str(r[3] or ""),
+                str(r[4] or "") if r[4] is not None else "",
             )
         )
     return out
@@ -209,20 +217,24 @@ def _parse_ids_csv(ids_csv: str) -> set[str]:
 
 
 def _merge_group_rows(
-    groups: dict[tuple[str, str, str], set[str]],
-    rows: list[tuple[str, str, str, str]],
+    groups: dict[tuple[str, str, str, str], set[str]],
+    rows: list[tuple[str, str, str, str, str]],
     *,
     pair_to_unit: dict[tuple[str, str], str],
     node_counts: dict[str, int],
     node_unit_counts: dict[str, dict[str, int]],
     node_group_counts: dict[str, dict[str, int]],
+    node_position_counts: dict[str, dict[str, int]],
+    group_positions: dict[tuple[str, str, str, str], set[str]],
     merge_existing: bool = False,
 ) -> None:
-    for dt, fr, gr, ids_csv in rows:
-        key = (dt, fr, gr)
+    for dt, position, fr, gr, ids_csv in rows:
+        key = (dt, position, fr, gr)
         ids = _parse_ids_csv(ids_csv)
         if not ids:
             continue
+        if position:
+            group_positions[key].add(position)
         if merge_existing and key in groups:
             groups[key] |= ids
         else:
@@ -234,6 +246,8 @@ def _merge_group_rows(
                 node_unit_counts[cid][unit] += 1
             if gr:
                 node_group_counts[cid][str(gr)] += 1
+            if position:
+                node_position_counts[cid][position] += 1
 
 
 def betweenness_unweighted(
@@ -295,7 +309,7 @@ def build_simple_analysis_graph(
     max_edges: int,
     end_dt: datetime,
 ) -> tuple[list[dict[str, object]], list[dict[str, object]], dict[str, object]]:
-    groups: dict[tuple[str, str, str], set[str]] = {}
+    groups: dict[tuple[str, str, str, str], set[str]] = {}
     node_counts: dict[str, int] = defaultdict(int)
     node_unit_counts: dict[str, dict[str, int]] = defaultdict(
         lambda: defaultdict(int)
@@ -469,6 +483,10 @@ def assemble_analysis_graph_payload(
     node_group_counts: dict[str, dict[str, int]] = defaultdict(
         lambda: defaultdict(int)
     )
+    node_position_counts: dict[str, dict[str, int]] = defaultdict(
+        lambda: defaultdict(int)
+    )
+    group_positions: dict[tuple[str, str, str, str], set[str]] = defaultdict(set)
 
     rows = fetch_graph_groups(
         seans_conn,
@@ -485,6 +503,8 @@ def assemble_analysis_graph_payload(
         node_counts=node_counts,
         node_unit_counts=node_unit_counts,
         node_group_counts=node_group_counts,
+        node_position_counts=node_position_counts,
+        group_positions=group_positions,
     )
 
     scope_ids: list[str] = []
@@ -509,6 +529,8 @@ def assemble_analysis_graph_payload(
             node_counts=node_counts,
             node_unit_counts=node_unit_counts,
             node_group_counts=node_group_counts,
+            node_position_counts=node_position_counts,
+            group_positions=group_positions,
             merge_existing=True,
         )
 
@@ -526,10 +548,10 @@ def assemble_analysis_graph_payload(
         group_query=group_query or None,
         pairs_filter=scope_pairs or None,
     )
-    prev_groups: dict[tuple[str, str, str], set[str]] = {}
+    prev_groups: dict[tuple[str, str, str, str], set[str]] = {}
     prev_scope_ids: set[str] = set()
-    for dt, fr, gr, ids_csv in prev_rows:
-        key = (dt, fr, gr)
+    for dt, position, fr, gr, ids_csv in prev_rows:
+        key = (dt, position, fr, gr)
         ids = _parse_ids_csv(ids_csv)
         if ids:
             prev_groups[key] = ids
@@ -543,8 +565,8 @@ def assemble_analysis_graph_payload(
             group_query=group_query or None,
             ids_filter=list(prev_scope_ids),
         )
-        for dt, fr, gr, ids_csv in prev_extra_rows:
-            key = (dt, fr, gr)
+        for dt, position, fr, gr, ids_csv in prev_extra_rows:
+            key = (dt, position, fr, gr)
             ids = _parse_ids_csv(ids_csv)
             if not ids:
                 continue
@@ -563,7 +585,7 @@ def assemble_analysis_graph_payload(
 
     edge_map: dict[tuple[str, str], dict[str, object]] = {}
     recent_threshold = end - timedelta(minutes=30)
-    for (dt, fr, gr), ids in groups.items():
+    for (dt, position, fr, gr), ids in groups.items():
         ids_list = [x for x in ids if x in allowed_nodes]
         if len(ids_list) < 2:
             continue
@@ -576,12 +598,15 @@ def assemble_analysis_graph_payload(
                 edge_map[key] = {
                     "weight": 0,
                     "unit_counts": defaultdict(int),
+                    "position_counts": defaultdict(int),
                     "last_dt": "",
                     "recent_activity": 0,
                 }
             edge_map[key]["weight"] = int(edge_map[key]["weight"]) + 1
             if unit:
                 edge_map[key]["unit_counts"][unit] += 1
+            for source_position in group_positions.get((dt, position, fr, gr), set()):
+                edge_map[key]["position_counts"][source_position] += 1
             last_dt = str(edge_map[key].get("last_dt") or "")
             if dt and dt > last_dt:
                 edge_map[key]["last_dt"] = dt
@@ -604,6 +629,7 @@ def assemble_analysis_graph_payload(
     for cid, cnt in ordered_nodes:
         unit_counts = node_unit_counts.get(cid) or {}
         group_counts = node_group_counts.get(cid) or {}
+        position_counts = node_position_counts.get(cid) or {}
         unit = ""
         units: list[str] = []
         group = ""
@@ -622,6 +648,12 @@ def assemble_analysis_graph_payload(
                 "unit_name": unit,
                 "units": units,
                 "group": group,
+                "positions": [
+                    {"name": name, "count": int(count)}
+                    for name, count in sorted(
+                        position_counts.items(), key=lambda x: (-x[1], x[0])
+                    )
+                ],
                 "cluster_key": cluster_key,
             }
         )
@@ -637,6 +669,7 @@ def assemble_analysis_graph_payload(
         unit = ""
         if unit_counts_meta:
             unit = sorted(unit_counts_meta.items(), key=lambda x: (-x[1], x[0]))[0][0]
+        position_counts_meta = meta.get("position_counts") or {}
         edges.append(
             {
                 "source": a,
@@ -649,6 +682,12 @@ def assemble_analysis_graph_payload(
                 "recent_activity": int(meta.get("recent_activity") or 0),
                 "last_activity": str(meta.get("last_dt") or ""),
                 "unit_name": unit,
+                "positions": [
+                    {"name": name, "count": int(count)}
+                    for name, count in sorted(
+                        position_counts_meta.items(), key=lambda x: (-x[1], x[0])
+                    )
+                ],
             }
         )
 
@@ -808,7 +847,7 @@ def assemble_analysis_graph_payload(
         if uname:
             unit_counts[uname] += 1
     group_counts = defaultdict(int)
-    for (_dt, fr, gr), ids in groups.items():
+    for (_dt, _position, fr, gr), ids in groups.items():
         if gr:
             group_counts[str(gr)] += len(ids)
 
@@ -820,6 +859,16 @@ def assemble_analysis_graph_payload(
         {"name": k, "count": int(v)}
         for k, v in sorted(group_counts.items(), key=lambda x: (-x[1], x[0]))
     ][:12]
+    position_counts_list = [
+        {"name": k, "count": int(v)}
+        for k, v in sorted(
+            (
+                (position, sum(counts.get(position, 0) for counts in node_position_counts.values()))
+                for position in {p for counts in node_position_counts.values() for p in counts}
+            ),
+            key=lambda x: (-x[1], x[0]),
+        )
+    ]
 
     return {
         "ok": True,
@@ -835,6 +884,7 @@ def assemble_analysis_graph_payload(
         "edges": edges,
         "unit_counts": unit_counts_list,
         "group_counts": group_counts_list,
+        "position_counts": position_counts_list,
         "metrics": {
             "density": round(density, 6),
             "components": int(components),

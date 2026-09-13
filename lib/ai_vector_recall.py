@@ -106,9 +106,9 @@ def _seanse_line_for_embed(
 
 
 def _seanse_ref_key(
-    date_time: str, frequency: str, group_: str, sid: str
+    date_time: str, frequency: str, group_: str, sid: str, client_name: str = ""
 ) -> str:
-    parts = (date_time, frequency, group_, str(sid))
+    parts = (date_time, frequency, group_, str(sid), str(client_name or "").strip())
     b = "\x1e".join(p.replace("\x1e", " ") for p in parts)
     return f"seanse:{_hash_text(b)}"
 
@@ -199,13 +199,14 @@ def prune_stale_vector_data(conn: sqlite3.Connection) -> dict[str, int]:
               AND s.frequency = seanse_freq
               AND s.group_ = seanse_group
               AND s.id = seanse_id
+              AND s.client_name = ai_vector_chunks.position_name
         )
         """
     )
     n_chunks_s = int(cur.rowcount or 0)
     srows = (
         conn.execute(
-            "SELECT date_time, frequency, group_, id FROM seanses"
+            "SELECT date_time, frequency, group_, id, client_name FROM seanses"
         ).fetchall()
         or []
     )
@@ -215,6 +216,7 @@ def prune_stale_vector_data(conn: sqlite3.Connection) -> dict[str, int]:
             str(s["frequency"] or ""),
             str(s["group_"] or ""),
             str(s["id"] or ""),
+            str(s["client_name"] or ""),
         )
         for s in srows
     }
@@ -345,13 +347,14 @@ def _delete_seanse_chunks(
     f: str,
     g: str,
     iid: str,
+    position_name: str,
 ) -> None:
     conn.execute(
         """
         DELETE FROM ai_vector_chunks
-        WHERE source = 'seanse' AND seanse_date = ? AND seanse_freq = ? AND seanse_group = ? AND seanse_id = ?
+        WHERE source = 'seanse' AND seanse_date = ? AND seanse_freq = ? AND seanse_group = ? AND seanse_id = ? AND position_name = ?
         """,
-        (d, f, g, str(iid)),
+        (d, f, g, str(iid), str(position_name or "").strip()),
     )
 
 
@@ -501,6 +504,7 @@ def index_seanse_row(
         str(frequency or ""),
         str(group_ or ""),
         str(sid or ""),
+        str(client_name or ""),
     )
     fp = _seanse_source_fingerprint(
         str(date_time or ""),
@@ -518,7 +522,14 @@ def index_seanse_row(
         vec = embed_text(text=line[:10000])
     except (AIClientError, OSError, ValueError, TypeError):
         return "failed"
-    _delete_seanse_chunks(conn, d=date_time, f=frequency, g=group_, iid=sid)
+    _delete_seanse_chunks(
+        conn,
+        d=date_time,
+        f=frequency,
+        g=group_,
+        iid=sid,
+        position_name=pos,
+    )
     _insert_chunk(
         conn,
         source="seanse",

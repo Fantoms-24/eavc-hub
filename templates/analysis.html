@@ -8,8 +8,8 @@
 {% if mod == 'callsigns' %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/analysis-callsigns-tg.css') }}?v=3" />
 {% endif %}
-{% if mod == 'graph' %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/analysis-graph-v2.css') }}?v=3" />
+{% if mod == 'graph' and graph_server_available %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/analysis-graph-v2.css') }}?v=graph-ui-20260913" />
 {% endif %}
 {% if mod == 'keys' %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/analysis-keys-v2.css') }}?v=2" />
@@ -56,6 +56,7 @@
               <i class="bi bi-check2 analysis-container-check{% if mod != 'network' %} d-none{% endif %}"></i>
             </div>
           </a>
+          {% if graph_server_available %}
           <a href="{{ url_for('analysis', module='graph') }}" class="list-group-item list-group-item-action{% if mod == 'graph' %} active{% endif %}" data-container="graph">
             <div class="analysis-container-btn">
               <i class="bi bi-graph-up text-secondary me-2 analysis-container-icon"></i>
@@ -63,6 +64,7 @@
               <i class="bi bi-check2 analysis-container-check{% if mod != 'graph' %} d-none{% endif %}"></i>
             </div>
           </a>
+          {% endif %}
           <a href="{{ url_for('analysis', module='keys') }}" class="list-group-item list-group-item-action{% if mod == 'keys' %} active{% endif %}" data-container="keys">
             <div class="analysis-container-btn">
               <i class="bi bi-key text-secondary me-2 analysis-container-icon"></i>
@@ -404,18 +406,29 @@
   </div>
   {% endif %}
 
-  {% if mod == 'graph' %}
+  {% if mod == 'graph' and not graph_server_available %}
+    <div class="sessions-main an-graph-server-only" data-container-body="graph">
+      <div class="an-graph-server-only__card">
+        <i class="bi bi-server"></i>
+        <h2>Граф работает на центральном SERVER</h2>
+        <p>HUB передаёт сеансы на сервер и не расходует ресурсы на построение графов.</p>
+      </div>
+    </div>
+  {% endif %}
+
+  {% if mod == 'graph' and graph_server_available %}
   <!-- Контент контейнера "Граф радиосети" -->
   <div class="sessions-main rg2-page" data-container-body="graph">
     <div class="rg2 rg-dashboard rg-md3-dashboard" id="rg-dashboard">
       <header class="rg2__bar">
         <div class="rg2__title min-w-0">
+          <div class="rg2__eyebrow"><i class="bi bi-broadcast-pin"></i><span>{{ "Все позиции" if graph_all_positions else "Текущая позиция" }}</span></div>
           <h2>Граф радиосети</h2>
           <p class="rg2__status-line" role="status">
             <span id="rg-status-msg">—</span>
             <span class="wp-subtle" id="rg-status-range"></span>
           </p>
-          <div class="rg2__stats" id="rg-metrics" aria-label="Метрики графа">
+          <div class="rg2__stats" id="rg-metrics" aria-label="Состояние графа">
             <span class="rg2__stat"><span id="rg-m-nodes">0</span> узл</span>
             <span class="rg2__stat"><span id="rg-m-edges">0</span> св</span>
             <span class="rg2__stat"><span id="rg-m-density">0</span> плотн</span>
@@ -455,9 +468,6 @@
         <div class="rg2__bar-actions">
           <button type="button" class="btn btn-outline-secondary btn-sm rg2__icon-btn" id="rg-refresh" title="Обновить">
             <i class="bi bi-arrow-clockwise"></i>
-          </button>
-          <button type="button" class="btn btn-outline-primary btn-sm" id="rg-full-report" title="Сформировать полный DOCX-отчёт за календарный месяц">
-            <i class="bi bi-file-earmark-word"></i><span class="d-none d-xl-inline ms-1">Полный отчёт</span>
           </button>
           <button type="button" class="btn btn-outline-secondary btn-sm rg2__icon-btn" id="rg-export-png" title="Экспорт PNG">
             <i class="bi bi-image"></i>
@@ -519,17 +529,10 @@
                 <label class="form-check-label" for="rg-live">LIVE</label>
               </div>
               <div class="form-check form-switch form-switch-sm mb-0">
-                <input class="form-check-input" type="checkbox" id="rg-show-labels" checked />
-                <label class="form-check-label" for="rg-show-labels">Подписи</label>
+                <input class="form-check-input" type="checkbox" id="rg-show-labels" />
+                <label class="form-check-label" for="rg-show-labels">Все подписи</label>
               </div>
               <span class="badge rounded-pill" id="rg-live-state">STATIC</span>
-            </div>
-            <div class="rg2__presets" id="rg-quick-chips">
-              <button type="button" class="btn btn-outline-secondary btn-sm" data-preset="hubs">Хабы</button>
-              <button type="button" class="btn btn-outline-secondary btn-sm" data-preset="bridges">Мосты</button>
-              <button type="button" class="btn btn-outline-secondary btn-sm" data-preset="cross-unit">Межподр.</button>
-              <button type="button" class="btn btn-outline-primary btn-sm" id="rg-ml-dataset">ML данные</button>
-              <button type="button" class="btn btn-outline-primary btn-sm" id="rg-ml-train">ML train</button>
             </div>
           </div>
         </section>
@@ -610,16 +613,25 @@
                 <div class="rg-stage-tools">
                   <div class="rg-stage-zoom" role="group" aria-label="Масштаб">
                     <button type="button" id="rg-zoom-out" title="Уменьшить" aria-label="Уменьшить">−</button>
-                    <button type="button" id="rg-fit" title="Вписать в экран" aria-label="Вписать">Fit</button>
+                    <button type="button" id="rg-fit" title="Вернуться к обзору сети" aria-label="Обзор сети"><i class="bi bi-bounding-box-circles" aria-hidden="true"></i><span>Обзор</span></button>
                     <button type="button" id="rg-zoom-in" title="Увеличить" aria-label="Увеличить">+</button>
                   </div>
-                  <button type="button" class="rg-stage-tool-btn" id="rg-open-inspector" title="Детали и аналитика" aria-label="Панель аналитики">
+                  <button type="button" class="rg-stage-tool-btn" id="rg-open-inspector" title="Карточка выбранного узла" aria-label="Карточка выбранного узла">
                     <i class="bi bi-layout-sidebar-inset-reverse" aria-hidden="true"></i>
                   </button>
                 </div>
               </div>
               <div class="rg-stage-body">
               <div class="rg-canvas" id="rg-canvas" aria-label="Граф радиосети"></div>
+              <div class="rg-map-guide" aria-hidden="true">
+                <span><i class="bi bi-cursor" aria-hidden="true"></i> Нажмите на узел — останутся его прямые связи</span>
+                <span><i class="bi bi-mouse" aria-hidden="true"></i> Колесо — масштаб · фон — общий обзор</span>
+              </div>
+              <div class="rg-map-legend" aria-label="Обозначения графа">
+                <span><i class="rg-map-legend__node rg-map-legend__node--unit"></i> подразделение</span>
+                <span><i class="rg-map-legend__node"></i> ID</span>
+                <span><i class="rg-map-legend__line"></i> совместный выход</span>
+              </div>
               <div class="rg-fs-panels" id="rg-fs-panels" aria-hidden="true">
                 <aside class="rg-fs-panel rg-fs-left">
                   <div class="fw-semibold">Детали выделения</div>
@@ -744,7 +756,7 @@
             <div class="rg2__backdrop" id="rg-inspector-backdrop" hidden aria-hidden="true"></div>
             <aside class="rg-side-panel" id="rg-side-panel" aria-label="Детали графа">
               <div class="rg2__inspector-head">
-                <span class="fw-semibold">Аналитика</span>
+                <span class="fw-semibold">Карточка узла</span>
                 <button type="button" class="btn btn-sm btn-link rg2__icon-btn ms-auto" id="rg-close-inspector" title="Закрыть">
                   <i class="bi bi-x-lg"></i>
                 </button>
@@ -839,7 +851,7 @@
         </div>
       </div>
 
-      <details class="rg2__timeline">
+      <details class="rg2__timeline" open>
         <summary><i class="bi bi-clock-history me-1"></i>Динамика и сравнение периодов</summary>
         <div class="rg2__timeline-body">
           <div class="rg-bottom">
@@ -1420,9 +1432,9 @@
 {% if mod == 'arm-task' %}
 <script defer src="{{ url_for('static', filename='js/analysis-arm-task.js') }}"></script>
 {% endif %}
-{% if mod == 'graph' %}
+{% if mod == 'graph' and graph_server_available %}
 <script defer src="{{ url_for('static', filename='js/vendor/cytoscape.min.js') }}?v=3.30.2"></script>
-<script defer src="{{ url_for('static', filename='js/analysis-graph.js') }}?v=seans-graph-v2-1"></script>
+<script defer src="{{ url_for('static', filename='js/analysis-graph.js') }}?v=server-20260913"></script>
 {% endif %}
 {% if mod == 'crypto' %}
 <script defer src="{{ url_for('static', filename='js/crypto.js') }}"></script>

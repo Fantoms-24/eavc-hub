@@ -46,7 +46,7 @@ def _delete_conflicting_tt_seans_rows(
         cur.executemany(
             """
             DELETE FROM seanses
-            WHERE date_time=? AND frequency=? AND id=? AND group_!='T-T'
+            WHERE date_time=? AND frequency=? AND id=? AND group_!='T-T' AND client_name=''
             """,
             list(tt_keys),
         )
@@ -70,6 +70,7 @@ def _save_seans_batch(rows: list[SeansEntry], cur: sqlite3.Cursor) -> int:
             entry.aes_key if entry.aes_key != "" else None,
             getattr(entry, "color_voice", None),
             getattr(entry, "time_seconds", None),
+            "",
         )
         for entry in rows
     ]
@@ -77,9 +78,9 @@ def _save_seans_batch(rows: list[SeansEntry], cur: sqlite3.Cursor) -> int:
         # избегаем перезаписи существующего aes_key значением None/NULL
         # ВАЖНО: НЕ обновляем created_at при конфликте, чтобы старые записи не становились "новыми"
         cur.executemany(
-            """INSERT INTO seanses (date_time, frequency, group_, id, aes_key, color_voice, time_seconds)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-            ON CONFLICT (date_time, frequency, group_, id)
+            """INSERT INTO seanses (date_time, frequency, group_, id, aes_key, color_voice, time_seconds, client_name)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT (date_time, frequency, group_, id, client_name)
             DO UPDATE SET
             aes_key=COALESCE(excluded.aes_key, aes_key),
             color_voice=COALESCE(excluded.color_voice, color_voice),
@@ -130,12 +131,11 @@ def _save_seans_batch_with_client(
         """
         INSERT INTO seanses (date_time, frequency, group_, id, aes_key, color_voice, time_seconds, client_name)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ON CONFLICT (date_time, frequency, group_, id)
+        ON CONFLICT (date_time, frequency, group_, id, client_name)
         DO UPDATE SET
           aes_key=COALESCE(excluded.aes_key, aes_key),
           color_voice=COALESCE(excluded.color_voice, color_voice),
-          time_seconds=COALESCE(excluded.time_seconds, time_seconds),
-          client_name=COALESCE(seanses.client_name, excluded.client_name);
+          time_seconds=COALESCE(excluded.time_seconds, time_seconds);
         """,
         values,
     )
@@ -155,11 +155,14 @@ def save_seans_entries(
     """
     if not entries:
         return 0
+    normalized_client_name = str(client_name or "").strip()
     new_for_watch: list[SeansEntry] = []
     try:
         from web_portal.lib.sessions_id_watch import seans_entries_not_in_database
 
-        new_for_watch = seans_entries_not_in_database(conn, entries)
+        new_for_watch = seans_entries_not_in_database(
+            conn, entries, client_name=normalized_client_name
+        )
     except Exception:
         new_for_watch = []
     init_seans_tables(conn)
@@ -169,13 +172,13 @@ def save_seans_entries(
     if len(entries) > BATCH_SIZE:
         for i in range(0, len(entries), BATCH_SIZE):
             batch = entries[i : i + BATCH_SIZE]
-            if client_name:
-                processed += _save_seans_batch_with_client(batch, cur, client_name)
+            if normalized_client_name:
+                processed += _save_seans_batch_with_client(batch, cur, normalized_client_name)
             else:
                 processed += _save_seans_batch(batch, cur)
     else:
-        if client_name:
-            processed += _save_seans_batch_with_client(entries, cur, client_name)
+        if normalized_client_name:
+            processed += _save_seans_batch_with_client(entries, cur, normalized_client_name)
         else:
             processed += _save_seans_batch(entries, cur)
     if new_for_watch:
@@ -193,7 +196,9 @@ def save_seans_entries(
             )
     if commit:
         conn.commit()
-        refresh_seanses_daily_aggregates_for_entries(conn, entries, client_name=client_name)
+        refresh_seanses_daily_aggregates_for_entries(
+            conn, entries, client_name=normalized_client_name
+        )
     return processed
 
 
@@ -261,11 +266,11 @@ def mark_processed(
 
 
 def seans_entries_fully_in_database(
-    conn: sqlite3.Connection, entries: list[SeansEntry]
+    conn: sqlite3.Connection, entries: list[SeansEntry], *, client_name: str | None = None
 ) -> bool:
     """
     True, если для каждой уникальной строки из result0 уже есть строка в seanses
-    с тем же PK (date_time, frequency, group_, id).
+    с тем же PK (date_time, frequency, group_, id, client_name).
 
     Нужна автопоиску: после «Обработать папку» в processed_files может не быть записи,
     но дублировать UPSERT не нужно — пропускаем файл и помечаем processed_files.
@@ -273,26 +278,27 @@ def seans_entries_fully_in_database(
     if not entries:
         return True
     init_seans_tables(conn)
-    unique_keys: set[tuple[str, str, str, str]] = set()
+    position = str(client_name or "").strip()
+    unique_keys: set[tuple[str, str, str, str, str]] = set()
     for e in entries:
         unique_keys.add(
-            (str(e.date_time), str(e.frequency), str(e.group), str(e.id))
+            (str(e.date_time), str(e.frequency), str(e.group), str(e.id), position)
         )
     keys = list(unique_keys)
     cur = conn.cursor()
     need = len(keys)
     total = 0
-    chunk_size = 120  # 4 * 120 = 480 переменных < лимита SQLite
+    chunk_size = 100  # 5 * 100 = 500 переменных < лимита SQLite
     for i in range(0, len(keys), chunk_size):
         chunk = keys[i : i + chunk_size]
-        placeholders = ",".join(["(?,?,?,?)"] * len(chunk))
+        placeholders = ",".join(["(?,?,?,?,?)"] * len(chunk))
         flat: list[str] = []
         for t in chunk:
             flat.extend(t)
         row = cur.execute(
             f"""
             SELECT COUNT(*) FROM seanses
-            WHERE (date_time, frequency, group_, id) IN ({placeholders})
+            WHERE (date_time, frequency, group_, id, client_name) IN ({placeholders})
             """,
             flat,
         ).fetchone()

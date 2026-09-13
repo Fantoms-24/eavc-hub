@@ -3,7 +3,8 @@
 
 from pathlib import Path
 
-project_dir = Path(globals().get("specpath", ".")).resolve().parent
+# ``specpath`` может быть рабочей директорией; ``SPEC`` — путь к spec-файлу.
+project_dir = Path(globals().get("SPEC") or Path.cwd()).resolve().parent.parent
 
 a = Analysis(
     [str(project_dir / "hub_updater_main.py")],

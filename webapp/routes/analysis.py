@@ -31,7 +31,7 @@ from web_portal.app_runtime_caches import (
     units_tree_cache_key as _units_tree_cache_key,
     units_tree_cache_set as _units_tree_cache_set,
 )
-from web_portal.config import DEFAULT_DB_NAME, db_path
+from web_portal.config import DEFAULT_DB_NAME, db_path, search_online_db_path
 from web_portal.lib.ai_reports import run_period_report, run_shift_summary
 from web_portal.lib.db import (
     connect,
@@ -41,6 +41,7 @@ from web_portal.lib.db import (
     get_ai_job,
     get_intercept_session,
     list_intercept_callsigns,
+    list_online_search_unit_avatar_files,
     list_units_tree,
     update_ai_job,
 )
@@ -113,6 +114,21 @@ def register_analysis_routes(app, ctx: AppContext):
     """Регистрирует маршруты анализа через AppContext. Код перенесён из create_app дословно."""
     logger = _log
 
+    @app.before_request
+    def reject_graph_rendering_on_hub():
+        """HUB не строит графы и не тратит ресурсы на тяжёлые запросы графа."""
+        if ctx.is_sync_hub() and request.path.startswith("/api/analysis/graph"):
+            return (
+                jsonify(
+                    {
+                        "ok": False,
+                        "error": "Граф радиосети доступен только на центральном SERVER.",
+                        "server_only": True,
+                    }
+                ),
+                409,
+            )
+
     @app.get("/analysis")
     @app.get("/analysis/<module>")
     @login_required
@@ -134,6 +150,8 @@ def register_analysis_routes(app, ctx: AppContext):
         return render_template(
             "analysis.html",
             analysis_module=analysis_module,
+            graph_server_available=not ctx.is_sync_hub(),
+            graph_all_positions=(current_user.role == "admin"),
         )
 
     @app.post("/api/analysis/callsigns/export")
@@ -864,8 +882,11 @@ def register_analysis_routes(app, ctx: AppContext):
     def api_analysis_graph():
         import datetime as _dt
 
-        pos = get_selected_position()
-        all_positions = current_user.role == "admin" and not pos
+        # Граф — единый серверный обзор. Администратор всегда видит все
+        # источники, даже если в шапке интерфейса выбрана одна позиция.
+        is_admin = current_user.role == "admin"
+        pos = None if is_admin else get_selected_position()
+        all_positions = is_admin
         if not pos and not all_positions:
             return jsonify({"ok": False, "error": "Не выбрана позиция"}), 400
         if pos and not require_position_role(pos, "view"):
@@ -966,6 +987,28 @@ def register_analysis_routes(app, ctx: AppContext):
                 max_nodes_mode=max_nodes_mode,
                 max_unit_rows=max_unit_rows,
             )
+            unit_keys = sorted(
+                {
+                    str(node.get("unit_name") or "").strip()
+                    for node in payload.get("nodes", [])
+                    if str(node.get("unit_name") or "").strip()
+                }
+            )
+            search_p = search_online_db_path()
+            ensure_db(search_p)
+            search_conn = connect(search_p)
+            try:
+                avatar_files = list_online_search_unit_avatar_files(search_conn, unit_keys)
+            finally:
+                search_conn.close()
+            for node in payload.get("nodes", []):
+                unit_key = str(node.get("unit_name") or "").strip()
+                avatar_file = avatar_files.get(unit_key)
+                node["avatar_url"] = (
+                    url_for("api_online_search_unit_avatar_file", filename=avatar_file)
+                    if avatar_file
+                    else ""
+                )
         finally:
             conn.close()
 

@@ -33,6 +33,28 @@ def _root_dir() -> Path:
     return Path(__file__).resolve().parent
 
 
+def _ensure_import_path_for_web_portal() -> None:
+    """Регистрирует текущий каталог как ``web_portal`` при запуске исходников.
+
+    Рабочая папка может называться как угодно (например, ``Copy``), поэтому
+    одного добавления родительского пути в ``sys.path`` недостаточно.
+    """
+    root = Path(__file__).resolve().parent
+    parent = root.parent
+    if str(parent) not in sys.path:
+        sys.path.insert(0, str(parent))
+    bootstrap = root / "_pkg_bootstrap.py"
+    if getattr(sys, "frozen", False) or not bootstrap.exists():
+        return
+    import importlib.util as importlib_util
+
+    spec = importlib_util.spec_from_file_location("_pkg_bootstrap", bootstrap)
+    if spec is not None and spec.loader is not None:
+        module = importlib_util.module_from_spec(spec)
+        sys.modules.setdefault("_pkg_bootstrap", module)
+        spec.loader.exec_module(module)
+
+
 def _load_or_create_config(cfg_path: Path) -> dict:
     default_cfg = {
         # Куда биндим сервер. Можно указать конкретный IP адаптера (например "192.168.1.10")
@@ -91,6 +113,7 @@ def main() -> None:
     Entrypoint для сборки центрального сервера в EXE.
     На сервере можно просто запустить SERVER.exe — данные будут храниться рядом, в папке data-central/.
     """
+    _ensure_import_path_for_web_portal()
     root = _root_dir()
     cfg_path = (root / "server_config.json").resolve()
     cfg = _load_or_create_config(cfg_path)

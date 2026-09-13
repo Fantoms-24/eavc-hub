@@ -533,7 +533,7 @@ def run_seans_watch_loop(
                                     continue
 
                                 if seans_entries_fully_in_database(
-                                    worker_conn, seans_list
+                                    worker_conn, seans_list, client_name=position_name
                                 ):
                                     mark_processed(
                                         worker_conn,

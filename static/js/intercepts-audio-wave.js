@@ -23,6 +23,8 @@ async function buildWaveformForSingle(item) {
   if (item) item._duration = buf.duration;
   drawWaveform(buf);
   try { ctx.close(); } catch (_) { }
+}
+
 function _ensureWaveBaseCanvas(w, h) {
   if (!AUDIO_WAVE_BASE_CANVAS) {
     AUDIO_WAVE_BASE_CANVAS = document.createElement("canvas");

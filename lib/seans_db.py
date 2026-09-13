@@ -153,12 +153,14 @@ def connection_path_is_seans_storage(conn: sqlite3.Connection) -> bool:
 
 
 def _seans_core_tables_ok(conn: sqlite3.Connection) -> bool:
+    from web_portal.lib.db.seans_schema import seanses_position_key_is_current
+
     try:
         return bool(
             conn.execute(
                 "SELECT 1 FROM sqlite_master WHERE type='table' AND name='seanses'"
             ).fetchone()
-        )
+        ) and seanses_position_key_is_current(conn)
     except Exception:
         return False
 
@@ -178,6 +180,7 @@ def init_seans_storage(conn: sqlite3.Connection, *, force: bool = False) -> None
         _conn_schema_key,
         init_sync,
     )
+    from web_portal.lib.db.seans_schema import ensure_seanses_position_primary_keys
 
     conn_id = id(conn)
     if not force:
@@ -197,7 +200,8 @@ def init_seans_storage(conn: sqlite3.Connection, *, force: bool = False) -> None
             group_ TEXT NOT NULL,
             id TEXT NOT NULL,
             aes_key TEXT,
-            CONSTRAINT pk PRIMARY KEY (date_time, frequency, group_, id)
+            client_name TEXT NOT NULL DEFAULT '',
+            CONSTRAINT pk PRIMARY KEY (date_time, frequency, group_, id, client_name)
         );
         """
     )
@@ -210,9 +214,9 @@ def init_seans_storage(conn: sqlite3.Connection, *, force: bool = False) -> None
             group_ TEXT NOT NULL,
             id TEXT NOT NULL,
             aes_key TEXT,
-            client_name TEXT,
+            client_name TEXT NOT NULL DEFAULT '',
             archived_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            CONSTRAINT pk_seanses_archive PRIMARY KEY (date_time, frequency, group_, id)
+            CONSTRAINT pk_seanses_archive PRIMARY KEY (date_time, frequency, group_, id, client_name)
         );
         """
     )
@@ -235,6 +239,7 @@ def init_seans_storage(conn: sqlite3.Connection, *, force: bool = False) -> None
         cur.execute("ALTER TABLE seanses_archive ADD COLUMN time_seconds REAL;")
     except sqlite3.OperationalError:
         pass
+    ensure_seanses_position_primary_keys(conn)
 
     cur.execute(
         """

@@ -16,6 +16,154 @@ def _table_exists(conn: sqlite3.Connection, table: str) -> bool:
         return False
 
 
+_SEANSES_POSITION_KEY = ("date_time", "frequency", "group_", "id", "client_name")
+
+
+def seanses_position_key_is_current(
+    conn: sqlite3.Connection, table: str = "seanses"
+) -> bool:
+    """Проверяет, что источник является обязательной частью идентичности строки."""
+    if table not in {"seanses", "seanses_archive"} or not _table_exists(conn, table):
+        return False
+    try:
+        info = conn.execute(f"PRAGMA table_info({table})").fetchall()
+    except sqlite3.Error:
+        return False
+    by_name = {str(row[1]): row for row in info}
+    client = by_name.get("client_name")
+    if client is None or int(client[3] or 0) != 1:
+        return False
+    primary_key = tuple(
+        str(row[1])
+        for row in sorted(
+            (row for row in info if int(row[5] or 0) > 0),
+            key=lambda row: int(row[5]),
+        )
+    )
+    return primary_key == _SEANSES_POSITION_KEY
+
+
+def ensure_seanses_position_primary_keys(
+    conn: sqlite3.Connection, *, tables: tuple[str, ...] = ("seanses", "seanses_archive")
+) -> bool:
+    """Идемпотентно меняет legacy PK сеансов на ключ с именем позиции.
+
+    SQLite не умеет добавлять колонку к PRIMARY KEY через ALTER TABLE. Поэтому
+    таблица пересобирается внутри одного SAVEPOINT: число строк сверяется до и
+    после копирования, а ``client_name`` канонизируется в непустое SQL-значение
+    (пустая строка для исторического источника, который уже неизвестен).
+    """
+    wanted = tuple(table for table in tables if table in {"seanses", "seanses_archive"})
+    outdated = [
+        table
+        for table in wanted
+        if _table_exists(conn, table) and not seanses_position_key_is_current(conn, table)
+    ]
+    if not outdated:
+        return False
+
+    definitions = {
+        "seanses": """
+            CREATE TABLE __seanses_position_key_v2 (
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                date_time TEXT NOT NULL,
+                frequency TEXT NOT NULL,
+                group_ TEXT NOT NULL,
+                id TEXT NOT NULL,
+                aes_key TEXT,
+                client_name TEXT NOT NULL DEFAULT '',
+                color_voice TEXT,
+                time_seconds REAL,
+                PRIMARY KEY (date_time, frequency, group_, id, client_name)
+            )
+        """,
+        "seanses_archive": """
+            CREATE TABLE __seanses_archive_position_key_v2 (
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                date_time TEXT NOT NULL,
+                frequency TEXT NOT NULL,
+                group_ TEXT NOT NULL,
+                id TEXT NOT NULL,
+                aes_key TEXT,
+                client_name TEXT NOT NULL DEFAULT '',
+                color_voice TEXT,
+                time_seconds REAL,
+                archived_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (date_time, frequency, group_, id, client_name)
+            )
+        """,
+    }
+    temp_names = {
+        "seanses": "__seanses_position_key_v2",
+        "seanses_archive": "__seanses_archive_position_key_v2",
+    }
+    base_columns = [
+        "created_at",
+        "date_time",
+        "frequency",
+        "group_",
+        "id",
+        "aes_key",
+        "client_name",
+        "color_voice",
+        "time_seconds",
+    ]
+
+    conn.execute("SAVEPOINT seanses_position_key_migration")
+    try:
+        for table in outdated:
+            temp = temp_names[table]
+            source_columns = {
+                str(row[1]) for row in conn.execute(f"PRAGMA table_info({table})").fetchall()
+            }
+            columns = list(base_columns)
+            if table == "seanses_archive":
+                columns.append("archived_at")
+            expressions: list[str] = []
+            for column in columns:
+                if column == "client_name":
+                    expressions.append(
+                        "TRIM(COALESCE(client_name, ''))"
+                        if column in source_columns
+                        else "''"
+                    )
+                elif column in {"created_at", "archived_at"}:
+                    expressions.append(
+                        f"COALESCE({column}, CURRENT_TIMESTAMP)"
+                        if column in source_columns
+                        else "CURRENT_TIMESTAMP"
+                    )
+                elif column in source_columns:
+                    expressions.append(column)
+                else:
+                    expressions.append("NULL")
+
+            before = int(conn.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0])
+            conn.execute(f"DROP TABLE IF EXISTS {temp}")
+            conn.execute(definitions[table])
+            conn.execute(
+                f"INSERT INTO {temp} ({', '.join(columns)}) "
+                f"SELECT {', '.join(expressions)} FROM {table}"
+            )
+            after = int(conn.execute(f"SELECT COUNT(*) FROM {temp}").fetchone()[0])
+            if after != before:
+                raise RuntimeError(
+                    f"Миграция {table}: ожидалось строк {before}, скопировано {after}"
+                )
+            conn.execute(f"DROP TABLE {table}")
+            conn.execute(f"ALTER TABLE {temp} RENAME TO {table}")
+
+        check_rows = conn.execute("PRAGMA integrity_check").fetchall()
+        if any(str(row[0] or "").lower() != "ok" for row in check_rows):
+            raise RuntimeError("Миграция seanses: SQLite integrity_check не прошёл")
+        conn.execute("RELEASE SAVEPOINT seanses_position_key_migration")
+    except Exception:
+        conn.execute("ROLLBACK TO SAVEPOINT seanses_position_key_migration")
+        conn.execute("RELEASE SAVEPOINT seanses_position_key_migration")
+        raise
+    return True
+
+
 def seanses_union_source_sql(conn: sqlite3.Connection) -> str:
     """Подзапрос seanses + seanses_archive (для сверки ключей, крипто и т.п.)."""
     if _table_exists(conn, "seanses_archive"):
@@ -139,6 +287,8 @@ def init_seans_tables(conn: sqlite3.Connection) -> None:
 
 __all__ = [
     "_table_exists",
+    "seanses_position_key_is_current",
+    "ensure_seanses_position_primary_keys",
     "seanses_union_source_sql",
     "init_daily_aggregates",
     "refresh_seanses_daily_aggregates",

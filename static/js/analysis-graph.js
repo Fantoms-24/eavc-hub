@@ -86,6 +86,8 @@
     dynamicSinceTs: "",
     forecast: null,
     dynamicErrorStreak: 0,
+    focusedElementId: "",
+    hoveredNodeId: "",
   };
 
   const ui = {};
@@ -430,6 +432,7 @@
           weighted_degree: Number(n.weighted_degree || 0),
           betweenness: Number(n.betweenness_approx || 0),
           cluster: String(n.cluster_key || n.unit_name || ""),
+          avatar: String(n.avatar_url || ""),
           kind: "id",
           nodeColor: "#5b88cc",
         },
@@ -444,6 +447,7 @@
               displayLabel: unitName,
               renderLabel: unitName,
               unit: unitName,
+              avatar: String(n.avatar_url || ""),
               kind: "unit",
               nodeColor: "#f2a93b",
             },
@@ -488,6 +492,104 @@
     return out;
   }
 
+  function packDisconnectedComponents() {
+    if (!state.cy) return;
+    const components = state.cy.elements().components()
+      .map((component) => component.nodes())
+      .filter((nodes) => nodes.length > 0);
+    if (components.length < 2) return;
+
+    const gap = 54;
+    const items = components.map((nodes) => {
+      const bb = nodes.boundingBox({ includeLabels: false, includeOverlays: false });
+      return {
+        nodes,
+        bb,
+        width: Math.max(44, bb.w) + gap,
+        height: Math.max(44, bb.h) + gap,
+      };
+    }).sort((a, b) => (b.width * b.height) - (a.width * a.height));
+    const totalArea = items.reduce((sum, item) => sum + item.width * item.height, 0);
+    const canvasRatio = Math.max(1.2, (ui.canvas?.clientWidth || 1200) / Math.max(1, ui.canvas?.clientHeight || 700));
+    const targetWidth = Math.max(items[0].width, Math.sqrt(totalArea * canvasRatio) * 1.12);
+    let cursorX = 0;
+    let cursorY = 0;
+    let rowHeight = 0;
+
+    state.cy.batch(() => {
+      for (const item of items) {
+        if (cursorX > 0 && cursorX + item.width > targetWidth) {
+          cursorX = 0;
+          cursorY += rowHeight;
+          rowHeight = 0;
+        }
+        const dx = cursorX + gap / 2 - item.bb.x1;
+        const dy = cursorY + gap / 2 - item.bb.y1;
+        item.nodes.forEach((node) => {
+          if (node.locked()) return;
+          const pos = node.position();
+          node.position({ x: pos.x + dx, y: pos.y + dy });
+        });
+        cursorX += item.width;
+        rowHeight = Math.max(rowHeight, item.height);
+      }
+    });
+  }
+
+  function updateNodeLabels() {
+    if (!state.cy) return;
+    const showAll = !!(ui.showLabels && ui.showLabels.checked);
+    const zoom = Number(state.cy.zoom() || 1);
+    const weighted = state.cy.nodes("[kind = 'id']").map((node) => Number(node.data("weighted_degree") || 0)).sort((a, b) => b - a);
+    const hubCutoff = weighted.length ? weighted[Math.min(weighted.length - 1, Math.floor(weighted.length * 0.16))] : 0;
+    state.cy.batch(() => {
+      state.cy.nodes("[kind = 'id']").forEach((node) => {
+        const isFocused = node.selected() || node.id() === state.focusedElementId || node.id() === state.hoveredNodeId || node.hasClass("rg-related");
+        const isHub = Number(node.data("weighted_degree") || 0) >= hubCutoff && Number(node.data("weighted_degree") || 0) > 0;
+        const visible = isFocused || (showAll && (zoom >= 1.08 || (zoom >= 0.62 && isHub)));
+        if (!visible) {
+          node.data("renderLabel", "");
+          return;
+        }
+        const idLabel = String(node.data("displayLabel") || "");
+        const groupLabel = zoom >= 0.82 || isFocused ? formatGroupLabel(String(node.data("group") || "").trim()) : "";
+        node.data("renderLabel", groupLabel ? `${idLabel}\n${groupLabel}` : idLabel);
+      });
+      state.cy.nodes("[kind = 'unit']").forEach((node) => {
+        node.data("renderLabel", String(node.data("label") || ""));
+      });
+    });
+    state.cy.style().update();
+  }
+
+  function clearGraphFocus(shouldFit = false) {
+    if (!state.cy) return;
+    state.focusedElementId = "";
+    state.cy.elements().removeClass("rg-dimmed rg-related rg-focused");
+    state.cy.elements().unselect();
+    updateNodeLabels();
+    if (shouldFit) state.cy.animate({ fit: { eles: state.cy.elements(), padding: 42 }, duration: 260 });
+  }
+
+  function focusGraphElement(target, shouldFit = true) {
+    if (!state.cy || !target) return;
+    state.cy.elements().removeClass("rg-dimmed rg-related rg-focused");
+    let keep = target;
+    if (typeof target.isNode === "function" && target.isNode()) {
+      const nodes = target.closedNeighborhood().nodes();
+      const edges = state.cy.edges().filter((edge) => nodes.contains(edge.source()) && nodes.contains(edge.target()));
+      keep = nodes.union(edges);
+    } else if (typeof target.isEdge === "function" && target.isEdge()) {
+      keep = target.union(target.connectedNodes());
+    }
+    state.cy.elements().difference(keep).addClass("rg-dimmed");
+    keep.addClass("rg-related");
+    target.addClass("rg-focused");
+    state.focusedElementId = String(target.id() || "");
+    updateNodeLabels();
+    if (shouldFit) state.cy.animate({ fit: { eles: keep, padding: 92 }, duration: 320 });
+  }
+
   function runLayout() {
     if (!state.cy) return;
     const name = ui.layout ? String(ui.layout.value || "cose") : "cose";
@@ -507,10 +609,10 @@
     if (name === "cose") {
       cfg.randomize = false;
       cfg.numIter = dense ? 1200 : 1800;
-      cfg.idealEdgeLength = dense ? 108 : nodeCount > 60 ? 122 : 136;
-      cfg.nodeRepulsion = dense ? 12000 : 16500;
+      cfg.idealEdgeLength = dense ? 82 : nodeCount > 60 ? 96 : 112;
+      cfg.nodeRepulsion = dense ? 9200 : 12800;
       cfg.gravity = dense ? 0.3 : 0.22;
-      cfg.componentSpacing = dense ? 170 : 225;
+      cfg.componentSpacing = dense ? 74 : 96;
       cfg.nestingFactor = 0.95;
       cfg.edgeElasticity = dense ? 68 : 90;
     } else if (name === "concentric") {
@@ -539,14 +641,24 @@
       cfg.avoidOverlapPadding = dense ? 5 : 8;
       cfg.spacingFactor = dense ? 0.75 : 0.9;
     }
-    state.cy.layout(cfg).run();
+    const layout = state.cy.layout(cfg);
+    layout.one("layoutstop", () => {
+      packDisconnectedComponents();
+      clearGraphFocus(false);
+      state.cy.fit(undefined, 42);
+    });
+    layout.run();
   }
 
   function applySearchFilter() {
     if (!state.cy || !ui.search) return;
     const q = String(ui.search.value || "").trim().toLowerCase();
     state.cy.elements().removeClass("rg-dimmed");
-    if (!q) return;
+    state.focusedElementId = "";
+    if (!q) {
+      updateNodeLabels();
+      return;
+    }
     const matches = state.cy.nodes().filter((n) => {
       const d = n.data();
       return (
@@ -557,6 +669,9 @@
     });
     const keep = matches.union(matches.neighborhood());
     state.cy.elements().difference(keep).addClass("rg-dimmed");
+    keep.addClass("rg-related");
+    updateNodeLabels();
+    if (matches.length) state.cy.animate({ fit: { eles: keep, padding: 92 }, duration: 260 });
   }
 
   function renderSelection(target) {
@@ -581,11 +696,11 @@
     }
     const d = target.data();
     if (String(d.kind || "") === "unit") {
+      const avatar = String(d.avatar || "");
       ui.selection.innerHTML = [
+        avatar ? `<img class="rg-unit-card__avatar" src="${escapeHtml(avatar)}" alt="" />` : `<div class="rg-unit-card__avatar rg-unit-card__avatar--empty"><i class="bi bi-building"></i></div>`,
         `<div><strong>Подразделение:</strong> ${escapeHtml(d.unit || d.label || "—")}</div>`,
-        `<div><strong>Тип узла:</strong> кластер подразделения</div>`,
-        `<div><strong>Группа:</strong> —</div>`,
-        `<div class="small wp-subtle mt-1">Это служебный узел для читаемой структуры графа.</div>`,
+        `<div class="small wp-subtle mt-1">Изображение загружается в разделе «Поиск онлайн».</div>`,
         `<div class="mt-2 d-flex gap-2">
           <button class="btn btn-outline-secondary btn-sm" id="rg-focus-neigh">Соседи</button>
           <button class="btn btn-outline-secondary btn-sm" id="rg-reset-filter">Сброс</button>
@@ -754,17 +869,27 @@
             color: "#0f172a",
             "font-size": 12,
             "font-weight": 700,
-            width: 48,
-            height: 48,
-            "border-width": 2.4,
-            "border-color": "rgba(15, 23, 42, 0.28)",
+            width: 64,
+            height: 64,
+            "border-width": 3,
+            "border-color": "#ffffff",
+            "border-opacity": 0.92,
             "text-wrap": "wrap",
-            "text-max-width": 160,
+            "text-max-width": 180,
             "text-background-color": "rgba(241, 245, 249, 0.9)",
             "text-background-opacity": 1,
             "text-background-shape": "roundrectangle",
             "text-background-padding": 2,
             "text-outline-width": 0,
+          },
+        },
+        {
+          selector: "node.rg-unit-hub[avatar != '']",
+          style: {
+            "background-image": "data(avatar)",
+            "background-fit": "cover",
+            "background-clip": "node",
+            "background-opacity": 1,
           },
         },
         {
@@ -791,7 +916,35 @@
         {
           selector: ".rg-dimmed",
           style: {
-            opacity: 0.12,
+            opacity: 0.035,
+          },
+        },
+        {
+          selector: "node.rg-related",
+          style: {
+            "border-width": 3,
+            "border-color": "#dbeafe",
+            "underlay-color": "#60a5fa",
+            "underlay-opacity": 0.12,
+            "underlay-padding": 7,
+          },
+        },
+        {
+          selector: "edge.rg-related",
+          style: {
+            opacity: 1,
+            "line-opacity": 0.95,
+            "z-index": 999,
+          },
+        },
+        {
+          selector: "node.rg-focused",
+          style: {
+            "border-width": 4,
+            "border-color": "#f8fafc",
+            "underlay-color": "#f59e0b",
+            "underlay-opacity": 0.34,
+            "underlay-padding": 11,
           },
         },
         {
@@ -807,10 +960,28 @@
     runLayout();
     applyTheme();
     scheduleCyResize();
-    state.cy.on("tap", "node, edge", (ev) => renderSelection(ev.target));
+    state.cy.on("tap", "node, edge", (ev) => {
+      renderSelection(ev.target);
+      focusGraphElement(ev.target, true);
+    });
     state.cy.on("tap", (ev) => {
       hideContextMenu();
-      if (ev.target === state.cy) renderSelection(null);
+      if (ev.target === state.cy) {
+        renderSelection(null);
+        clearGraphFocus(true);
+      }
+    });
+    state.cy.on("mouseover", "node", (ev) => {
+      state.hoveredNodeId = String(ev.target.id() || "");
+      updateNodeLabels();
+    });
+    state.cy.on("mouseout", "node", () => {
+      state.hoveredNodeId = "";
+      updateNodeLabels();
+    });
+    state.cy.on("zoom", () => {
+      clearTimeout(state.labelZoomTimer);
+      state.labelZoomTimer = setTimeout(updateNodeLabels, 90);
     });
     state.cy.on("cxttap", "node", (ev) => {
       const target = ev.target;
@@ -1805,6 +1976,7 @@
       await loadMlModelStatus();
       updateLiveBadge();
     } catch (e) {
+      console.error("Radio graph refresh failed", e);
       showStatus(`Ошибка: ${e.message || e}`, true);
     } finally {
       if (ui.loading) ui.loading.style.display = "none";
@@ -1979,9 +2151,9 @@
       if (ui.contextMenu.contains(ev.target)) return;
       hideContextMenu();
     });
-    if (ui.zoomIn) ui.zoomIn.addEventListener("click", () => state.cy && state.cy.zoom(state.cy.zoom() * 1.1));
-    if (ui.zoomOut) ui.zoomOut.addEventListener("click", () => state.cy && state.cy.zoom(state.cy.zoom() * 0.9));
-    if (ui.fit) ui.fit.addEventListener("click", () => state.cy && state.cy.fit(undefined, 20));
+    if (ui.zoomIn) ui.zoomIn.addEventListener("click", () => state.cy && state.cy.zoom(state.cy.zoom() * 1.14));
+    if (ui.zoomOut) ui.zoomOut.addEventListener("click", () => state.cy && state.cy.zoom(state.cy.zoom() / 1.14));
+    if (ui.fit) ui.fit.addEventListener("click", () => clearGraphFocus(true));
     if (ui.playSpeed) {
       ui.playSpeed.addEventListener("change", () => {
         state.playbackSpeed = Math.max(0.25, Number(ui.playSpeed.value || 1));
@@ -2014,22 +2186,7 @@
     if (ui.fsPlayNext) ui.fsPlayNext.addEventListener("click", () => stepTimeline(1));
     if (ui.showLabels) {
       ui.showLabels.addEventListener("change", () => {
-        if (!state.cy) return;
-        state.cy.batch(() => {
-          state.cy.nodes("[kind = 'id']").forEach((n) => {
-            if (!ui.showLabels.checked) {
-              n.data("renderLabel", "");
-              return;
-            }
-            const idLabel = String(n.data("displayLabel") || "");
-            const groupLabel = String(n.data("group") || "").trim();
-            n.data("renderLabel", `${idLabel}\n${formatGroupLabel(groupLabel)}`);
-          });
-          state.cy.nodes("[kind = 'unit']").forEach((n) => {
-            n.data("renderLabel", String(n.data("label") || ""));
-          });
-        });
-        state.cy.style().update();
+        updateNodeLabels();
       });
     }
     if (ui.timeSlider) {
@@ -2334,4 +2491,3 @@
     refresh,
   };
 })();
-

@@ -1696,4 +1696,5 @@ function stopPolling() {
   window.ixExpandGroupsDrawer = ixExpandGroupsDrawer;
   window._stateSig = _stateSig;
   window._unitKey = _unitKey;
+  window._ensureOnlineUnitLinkListener = _ensureOnlineUnitLinkListener;
 })();

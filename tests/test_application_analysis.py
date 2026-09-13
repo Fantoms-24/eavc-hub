@@ -59,6 +59,8 @@ from web_portal.application.analysis.graph_timeline import (
 )
 from web_portal.application.analysis.assignments import execute_analysis_assign
 from web_portal.lib.db import get_analysis_assignments, init_db, init_seans_tables
+from web_portal.lib.db.seans_archive import init_seanses_archive_file_schema
+from web_portal.lib.db.seans_schema import seanses_position_key_is_current
 
 
 def test_parse_network_summary_range() -> None:
@@ -208,6 +210,149 @@ def test_assemble_analysis_graph_payload_empty_scope() -> None:
     assert payload["frequency"] == "149.9750"
     assert isinstance(payload["nodes"], list)
     assert "metrics" in payload
+
+
+def test_graph_payload_keeps_positions_when_server_joins_hub_data() -> None:
+    main = sqlite3.connect(":memory:")
+    main.row_factory = sqlite3.Row
+    init_db(main)
+    main.execute(
+        "INSERT INTO unit (frequency, group_, name) VALUES (?, ?, ?)",
+        ("149.9750", "2047519", "Общая сеть"),
+    )
+    main.commit()
+    seans = sqlite3.connect(":memory:")
+    seans.row_factory = sqlite3.Row
+    init_seans_tables(seans)
+    seans.executemany(
+        """
+        INSERT INTO seanses (date_time, frequency, group_, id, client_name)
+        VALUES (?, ?, ?, ?, ?)
+        """,
+        [
+            ("2030-06-01 10:00:00", "149.9750", "2047519", "1001", "Позиция Север"),
+            ("2030-06-01 10:00:00", "149.9750", "2047519", "1002", "Позиция Север"),
+            ("2030-06-01 10:00:00", "149.9750", "2047519", "1003", "Позиция Юг"),
+            ("2030-06-01 10:00:00", "149.9750", "2047519", "1004", "Позиция Юг"),
+            ("2030-06-01 10:05:00", "149.9750", "2047519", "1001", "Позиция Север"),
+            ("2030-06-01 10:05:00", "149.9750", "2047519", "1005", "Позиция Север"),
+            ("2030-06-01 10:05:00", "149.9750", "2047519", "1001", "Позиция Юг"),
+            ("2030-06-01 10:05:00", "149.9750", "2047519", "1006", "Позиция Юг"),
+        ],
+    )
+    seans.commit()
+    payload = assemble_analysis_graph_payload(
+        main,
+        seans,
+        pos=None,
+        all_positions=True,
+        unit_name="",
+        frequency="",
+        group_code="",
+        unit_query="",
+        group_query="",
+        include_other=False,
+        minutes=60,
+        start=datetime(2030, 6, 1, 9, 0),
+        end=datetime(2030, 6, 1, 11, 0),
+        start_s="2030-06-01 09:00:00",
+        end_s="2030-06-01 11:00:00",
+        max_nodes=50,
+        max_edges=50,
+        min_weight=1,
+        cluster_by="unit",
+        layout_hint="cose",
+        focus_id="",
+        max_nodes_mode="balanced",
+    )
+    node_1001 = next(node for node in payload["nodes"] if node["id"] == "1001")
+    assert {item["name"] for item in node_1001["positions"]} == {
+        "Позиция Север",
+        "Позиция Юг",
+    }
+    assert {item["name"] for item in payload["position_counts"]} == {
+        "Позиция Север",
+        "Позиция Юг",
+    }
+    assert any({edge["source"], edge["target"]} == {"1001", "1002"} for edge in payload["edges"])
+    assert any({edge["source"], edge["target"]} == {"1003", "1004"} for edge in payload["edges"])
+    assert not any(
+        {edge["source"], edge["target"]} == {"1001", "1003"}
+        for edge in payload["edges"]
+    )
+
+
+def test_init_db_migrates_legacy_seanses_and_archive_keys_without_losing_rows() -> None:
+    conn = sqlite3.connect(":memory:")
+    conn.row_factory = sqlite3.Row
+    for table in ("seanses", "seanses_archive"):
+        conn.execute(
+            f"""
+            CREATE TABLE {table} (
+                date_time TEXT NOT NULL,
+                frequency TEXT NOT NULL,
+                group_ TEXT NOT NULL,
+                id TEXT NOT NULL,
+                aes_key TEXT,
+                client_name TEXT,
+                PRIMARY KEY (date_time, frequency, group_, id)
+            )
+            """
+        )
+        conn.execute(
+            f"""
+            INSERT INTO {table} (date_time, frequency, group_, id, client_name)
+            VALUES ('2030-06-01 10:00:00', '149.9750', '2047519', '1001', NULL)
+            """
+        )
+    conn.commit()
+
+    init_db(conn)
+
+    assert seanses_position_key_is_current(conn)
+    assert seanses_position_key_is_current(conn, "seanses_archive")
+    assert conn.execute("SELECT client_name FROM seanses").fetchone()[0] == ""
+    conn.execute(
+        """
+        INSERT INTO seanses (date_time, frequency, group_, id, client_name)
+        VALUES ('2030-06-01 10:00:00', '149.9750', '2047519', '1001', 'Позиция Север')
+        """
+    )
+    assert conn.execute("SELECT COUNT(*) FROM seanses").fetchone()[0] == 2
+
+
+def test_external_archive_schema_migrates_legacy_position_key() -> None:
+    conn = sqlite3.connect(":memory:")
+    conn.execute(
+        """
+        CREATE TABLE seanses (
+            date_time TEXT NOT NULL,
+            frequency TEXT NOT NULL,
+            group_ TEXT NOT NULL,
+            id TEXT NOT NULL,
+            client_name TEXT,
+            PRIMARY KEY (date_time, frequency, group_, id)
+        )
+        """
+    )
+    conn.execute(
+        """
+        INSERT INTO seanses (date_time, frequency, group_, id, client_name)
+        VALUES ('2030-06-01 10:00:00', '149.9750', '2047519', '1001', NULL)
+        """
+    )
+    conn.commit()
+
+    init_seanses_archive_file_schema(conn)
+
+    assert seanses_position_key_is_current(conn)
+    conn.execute(
+        """
+        INSERT INTO seanses (date_time, frequency, group_, id, client_name)
+        VALUES ('2030-06-01 10:00:00', '149.9750', '2047519', '1001', 'Позиция Юг')
+        """
+    )
+    assert conn.execute("SELECT COUNT(*) FROM seanses").fetchone()[0] == 2
 
 
 def test_build_analysis_period_bounds_rolling() -> None:

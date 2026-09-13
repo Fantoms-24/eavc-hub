@@ -467,7 +467,7 @@ def upsert_seanses_rows_from_sync(
                 gr,
                 cid,
                 str(r.get("aes_key") or "") or None,
-                str(r.get("client_name") or "") or None,
+                str(r.get("client_name") or "").strip(),
             )
         )
     if not params:
@@ -476,9 +476,8 @@ def upsert_seanses_rows_from_sync(
         """
         INSERT INTO seanses (created_at, date_time, frequency, group_, id, aes_key, client_name)
         VALUES (?, ?, ?, ?, ?, ?, ?)
-        ON CONFLICT(date_time, frequency, group_, id) DO UPDATE SET
+        ON CONFLICT(date_time, frequency, group_, id, client_name) DO UPDATE SET
           aes_key=COALESCE(NULLIF(excluded.aes_key,''), seanses.aes_key),
-          client_name=COALESCE(NULLIF(excluded.client_name,''), seanses.client_name),
           created_at=COALESCE(NULLIF(excluded.created_at,''), seanses.created_at)
         """,
         params,

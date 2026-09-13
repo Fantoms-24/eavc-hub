@@ -75,7 +75,7 @@ def test_id_watch_alert_on_new_seans(tmp_path: Path, monkeypatch: pytest.MonkeyP
     assert alerts[0]["group_"] == "G1687326"
     assert alerts[0]["date_time"] == "2026-06-15 12:49:00"
 
-    assert seans_entries_not_in_database(conn, [entry]) == []
+    assert seans_entries_not_in_database(conn, [entry], client_name="hub") == []
     save_seans_entries(conn, [entry], client_name="hub", commit=True)
     assert list_id_watch_alerts_since(1)["alerts"] == []
 

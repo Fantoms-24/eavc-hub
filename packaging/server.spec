@@ -1,10 +1,38 @@
 # -*- mode: python ; coding: utf-8 -*-
 
 import os
+import atexit
+import shutil
+import sys
+import tempfile
 from pathlib import Path
 from PyInstaller.utils.hooks import collect_submodules, copy_metadata, collect_all
 
 block_cipher = None
+
+# The repository folder may have any name (for example ``Copy``), while the
+# application imports itself as ``web_portal``.  Give PyInstaller an explicit
+# package alias so it never picks up a stale sibling folder named web_portal.
+project_dir = Path(globals().get("SPEC") or os.getcwd()).resolve().parent.parent
+_alias_root = Path(tempfile.mkdtemp(prefix="eavc-pyi-"))
+_alias_pkg = _alias_root / "web_portal"
+_alias_pkg.mkdir()
+for _source in project_dir.glob("*.py"):
+    shutil.copy2(_source, _alias_pkg / _source.name)
+for _package_name in ("application", "lib", "webapp"):
+    shutil.copytree(
+        project_dir / _package_name,
+        _alias_pkg / _package_name,
+        ignore=shutil.ignore_patterns("__pycache__", "*.pyc"),
+    )
+_entry_script = _alias_root / "server_main.py"
+shutil.copy2(project_dir / "server_main.py", _entry_script)
+sys.path.insert(0, str(_alias_root))
+
+def _cleanup_alias():
+    shutil.rmtree(_alias_root, ignore_errors=True)
+
+atexit.register(_cleanup_alias)
 
 hiddenimports = []
 hiddenimports += collect_submodules("flask_login")
@@ -21,13 +49,9 @@ hiddenimports += [
 ]
 hiddenimports += collect_submodules("web_portal.webapp")
 
-# PyInstaller передаёт в spec переменную specpath (директория spec-файла).
-# Spec лежит в packaging/, корень проекта — на уровень выше.
-project_dir = Path(globals().get("specpath", os.getcwd())).resolve().parent
-
 a = Analysis(
-    [str(project_dir / "server_main.py")],
-    pathex=[str(project_dir)],
+    [str(_entry_script)],
+    pathex=[str(_alias_root)],
     binaries=_numpy_binaries,
     datas=[
         (str(project_dir / "templates"), "templates"),
@@ -76,4 +100,3 @@ coll = COLLECT(
     upx_exclude=[],
     name="EAVC - SERVER",
 )
-

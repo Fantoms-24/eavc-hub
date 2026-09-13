@@ -4,7 +4,11 @@ from __future__ import annotations
 import sqlite3
 from typing import Any
 
-from web_portal.lib.db.seans_schema import _table_exists, init_seans_tables
+from web_portal.lib.db.seans_schema import (
+    _table_exists,
+    ensure_seanses_position_primary_keys,
+    init_seans_tables,
+)
 
 
 def clear_seanses_by_client_name(conn: sqlite3.Connection, client_name: str) -> int:
@@ -73,7 +77,7 @@ def archive_seanses_outside_current_day(
                 str(r["aes_key"] or "") or None,
                 (str(r["color_voice"] or "").strip() or None) if "color_voice" in r else None,
                 r["time_seconds"] if "time_seconds" in r and r["time_seconds"] is not None else None,
-                str(r["client_name"] or "") or None,
+                str(r["client_name"] or ""),
             )
             for r in rows
         ]
@@ -153,7 +157,7 @@ def archive_all_seanses_to_archive(
                 str(r["aes_key"] or "") or None,
                 (str(r["color_voice"] or "").strip() or None) if "color_voice" in r else None,
                 r["time_seconds"] if "time_seconds" in r and r["time_seconds"] is not None else None,
-                str(r["client_name"] or "") or None,
+                str(r["client_name"] or ""),
             )
             for r in rows
         ]
@@ -201,7 +205,8 @@ def init_seanses_archive_file_schema(conn: sqlite3.Connection) -> None:
             group_ TEXT NOT NULL,
             id TEXT NOT NULL,
             aes_key TEXT,
-            CONSTRAINT pk PRIMARY KEY (date_time, frequency, group_, id)
+            client_name TEXT NOT NULL DEFAULT '',
+            CONSTRAINT pk PRIMARY KEY (date_time, frequency, group_, id, client_name)
         );
         """
     )
@@ -217,6 +222,7 @@ def init_seanses_archive_file_schema(conn: sqlite3.Connection) -> None:
         cur.execute("ALTER TABLE seanses ADD COLUMN time_seconds REAL;")
     except sqlite3.OperationalError:
         pass
+    ensure_seanses_position_primary_keys(conn, tables=("seanses",))
     cur.execute("CREATE INDEX IF NOT EXISTS idx_date_time on seanses (date_time);")
     cur.execute(
         "CREATE INDEX IF NOT EXISTS idx_freq_group on seanses (frequency, group_);"

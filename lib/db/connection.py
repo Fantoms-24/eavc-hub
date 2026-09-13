@@ -144,12 +144,15 @@ def _conn_has_table(conn: sqlite3.Connection, table: str) -> bool:
 
 
 def _conn_has_core_schema(conn: sqlite3.Connection) -> bool:
-    return _conn_has_table(conn, "intercept_sessions")
+    from web_portal.lib.db.seans_schema import seanses_position_key_is_current
+
+    return _conn_has_table(conn, "intercept_sessions") and seanses_position_key_is_current(conn)
 
 
 def init_db(conn: sqlite3.Connection) -> None:
     from web_portal.lib.db.online_search import init_online_search
     from web_portal.lib.db.intercepts import init_intercepts, _migrate_intercepts_sync_fields
+    from web_portal.lib.db.seans_schema import ensure_seanses_position_primary_keys
     from web_portal.lib.db.sync import init_sync
     conn_id = id(conn)
     if (
@@ -173,7 +176,8 @@ def init_db(conn: sqlite3.Connection) -> None:
             group_ TEXT NOT NULL,
             id TEXT NOT NULL,
             aes_key TEXT,
-            CONSTRAINT pk PRIMARY KEY (date_time, frequency, group_, id)
+            client_name TEXT NOT NULL DEFAULT '',
+            CONSTRAINT pk PRIMARY KEY (date_time, frequency, group_, id, client_name)
         );
         """
     )
@@ -186,9 +190,9 @@ def init_db(conn: sqlite3.Connection) -> None:
             group_ TEXT NOT NULL,
             id TEXT NOT NULL,
             aes_key TEXT,
-            client_name TEXT,
+            client_name TEXT NOT NULL DEFAULT '',
             archived_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            CONSTRAINT pk_seanses_archive PRIMARY KEY (date_time, frequency, group_, id)
+            CONSTRAINT pk_seanses_archive PRIMARY KEY (date_time, frequency, group_, id, client_name)
         );
         """
     )
@@ -214,6 +218,7 @@ def init_db(conn: sqlite3.Connection) -> None:
         cur.execute("ALTER TABLE seanses_archive ADD COLUMN time_seconds REAL;")
     except sqlite3.OperationalError:
         pass
+    ensure_seanses_position_primary_keys(conn)
     cur.execute(
         """
         CREATE TABLE IF NOT EXISTS unit (
