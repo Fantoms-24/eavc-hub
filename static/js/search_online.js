@@ -1,0 +1,1003 @@
+async function apiGet(url) {
+  const res = await fetch(url, { method: "GET" });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || data.ok === false) throw new Error(data.error || `HTTP ${res.status}`);
+  return data;
+}
+
+async function apiPost(url, body) {
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body || {}),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || data.ok === false) throw new Error(data.error || `HTTP ${res.status}`);
+  return data;
+}
+
+async function apiUpload(url, formData) {
+  const res = await fetch(url, { method: "POST", body: formData });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || data.ok === false) throw new Error(data.error || `HTTP ${res.status}`);
+  return data;
+}
+
+function $(id) {
+  return document.getElementById(id);
+}
+
+function setText(id, text) {
+  const el = $(id);
+  if (el) el.textContent = text || "";
+}
+
+function debounce(fn, wait = 250) {
+  let t = null;
+  return (...args) => {
+    if (t) clearTimeout(t);
+    t = setTimeout(() => fn(...args), wait);
+  };
+}
+
+function showToast(message, variant) {
+  const toastEl = $("app-toast");
+  const bodyEl = $("app-toast-body");
+  if (!toastEl || !bodyEl || !window.bootstrap) return;
+  bodyEl.textContent = message || "";
+  toastEl.classList.remove(
+    "text-bg-success",
+    "text-bg-danger",
+    "text-bg-warning",
+    "text-bg-info"
+  );
+  if (variant) toastEl.classList.add(`text-bg-${variant}`);
+  const toast = window.bootstrap.Toast.getOrCreateInstance(toastEl, {
+    delay: 2500,
+  });
+  toast.show();
+}
+
+// БД выбирается автоматически сервером (DEFAULT_DB_NAME), UI выбора БД убран.
+
+let OFFSET = 0;
+const LIMIT = 200;
+let HEADERS = ["col1", "col2", "col3", "col4", "col5", "col6", "col7", "col8", "col9"];
+let META = { freq_col: 1, gid_col: 2, note_col: 9 };
+let SORT_BY = "frequency"; // default: frequency
+let SORT_DIR = "desc"; // default: big -> small
+let COL_MAP = {
+  freq: 1,
+  gid: 2,
+  id: 3,
+  corr: 4,
+  confirm: 0,
+  discovery: 0,
+  coords: 0,
+  key_db: 0,
+};
+let FILTERS = {}; // Активные фильтры {column: value}
+let ALL_GROUPS = []; // Все уникальные группы для фильтра
+let LAST_LOAD_TIME = null; // Время последней загрузки для определения новых данных
+let ROW_MAP = new Map();
+let SELECTED_ROW_ID = null;
+
+function _unitKeyFromRow(r) {
+  const n = String(r?.note ?? "").trim();
+  return n ? n : "__none__";
+}
+
+function _unitLabelFromKey(k) {
+  return k === "__none__" ? "Без подразделения" : k;
+}
+
+function _groupRowsByUnit(list) {
+  const m = new Map();
+  for (const r of list || []) {
+    const k = _unitKeyFromRow(r);
+    if (!m.has(k)) m.set(k, []);
+    m.get(k).push(r);
+  }
+  return m;
+}
+
+function _orderedUnitKeys(map) {
+  const keys = Array.from(map.keys());
+  const named = keys.filter((k) => k !== "__none__").sort((a, b) => a.localeCompare(b, "ru"));
+  if (keys.includes("__none__")) {
+    named.push("__none__");
+  }
+  return named;
+}
+
+
+function escapeHtml(s) {
+  return String(s ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
+}
+
+function fmtMskTs(s) {
+  const str = String(s || "").trim();
+  if (!str) return "";
+  // ожидаем "YYYY-MM-DD HH:MM:SS" в UTC (SQLite CURRENT_TIMESTAMP) -> МСК (UTC+3)
+  const m = str.match(/^(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2})(?::(\d{2}))?/);
+  if (!m) return str.includes("МСК") ? str : `${str} МСК`;
+  const y = Number(m[1]);
+  const mo = Number(m[2]);
+  const d = Number(m[3]);
+  const hh = Number(m[4]);
+  const mm = Number(m[5]);
+  const ss = Number(m[6] || 0);
+  const utcMs = Date.UTC(y, mo - 1, d, hh, mm, ss);
+  const msk = new Date(utcMs + 3 * 60 * 60 * 1000);
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${pad(msk.getUTCDate())}.${pad(msk.getUTCMonth() + 1)}.${msk.getUTCFullYear()} ${pad(
+    msk.getUTCHours()
+  )}:${pad(msk.getUTCMinutes())} МСК`;
+}
+
+function sortIndicator() {
+  const arrow = SORT_DIR === "asc" ? "↑" : "↓";
+  if (SORT_BY === "id") return ` ${arrow}`;
+  if (SORT_BY === "frequency") return ` ${arrow}`;
+  return "";
+}
+
+function setHeadLabel(id, text) {
+  const el = $(id);
+  if (!el) return;
+  const label = el.querySelector(".os-h-label");
+  if (label) {
+    label.textContent = text;
+  } else {
+    const span = el.querySelector(".th-content span");
+    if (span) span.textContent = text;
+    else el.textContent = text;
+  }
+}
+
+function normHeader(s) {
+  return String(s || "").trim().toLowerCase();
+}
+
+function findHeaderIdx(pred) {
+  for (let i = 0; i < (HEADERS || []).length; i++) {
+    const h = normHeader(HEADERS[i]);
+    if (pred(h)) return i + 1; // col index 1..9
+  }
+  return 0;
+}
+
+function rebuildColMap() {
+  // из meta (если есть) + из заголовков (если meta не заполнен / старые данные)
+  const freq = META && META.freq_col ? META.freq_col : 1;
+  const gid = META && META.gid_col ? META.gid_col : 2;
+  const note = META && META.note_col ? META.note_col : 9;
+
+  COL_MAP.freq = freq;
+  COL_MAP.gid = gid;
+  COL_MAP.id =
+    findHeaderIdx((h) => h === "id" || (h.includes("id") && !h.includes("груп"))) || 3;
+  COL_MAP.corr = findHeaderIdx((h) => h.includes("корр")) || 4;
+  COL_MAP.confirm =
+    findHeaderIdx((h) => h.includes("дата") || h.includes("подтверж")) || 6;
+  COL_MAP.discovery =
+    findHeaderIdx(
+      (h) =>
+        h.includes("обнаруж") ||
+        h.includes("discovery") ||
+        h.includes("обнар")
+    ) || 7;
+  COL_MAP.coords = 0;
+  COL_MAP.key_db = findHeaderIdx((h) => h.includes("ключ")) || 0;
+
+  // note_col используется только для синхронизации обратно в excel-колонку,
+  // в UI примечание всегда показываем из r.note
+  COL_MAP.note = note;
+}
+
+function colVal(r, idx1) {
+  if (!idx1 || idx1 < 1) return "";
+  return r[`col${idx1}`] ?? "";
+}
+
+function updateGroupFilterOptions() {
+  const select = $("os-filter-group");
+  if (!select) return;
+  const current = FILTERS.group_id || "";
+  select.innerHTML = '<option value="">Все группы</option>';
+  for (const group of ALL_GROUPS) {
+    const selected = current === group ? "selected" : "";
+    select.innerHTML += `<option value="${escapeHtml(group)}" ${selected}>${escapeHtml(group)}</option>`;
+  }
+}
+
+function syncFilterUiFromState() {
+  const c = $("os-filter-confirm");
+  if (c) c.value = FILTERS.confirm || "";
+  const updated = $("os-filter-updated");
+  if (updated) updated.checked = FILTERS.updated_at === "today";
+}
+
+/**
+ * Синхронизирует в FILTERS только дату и «24 ч» — не затирает фильтры по столбцам (шапка таблицы).
+ */
+function readFiltersFromUi() {
+  const confirm = String($("os-filter-confirm")?.value || "").trim();
+  const updatedOnly = $("os-filter-updated")?.checked;
+  if (confirm) FILTERS.confirm = confirm;
+  else delete FILTERS.confirm;
+  if (updatedOnly) FILTERS.updated_at = "today";
+  else delete FILTERS.updated_at;
+}
+
+function renderDetail(row) {
+  const body = $("os-detail-body");
+  const noteBlock = $("os-detail-note-edit");
+  const noteInput = $("os-detail-note");
+  if (!body) return;
+  if (!row) {
+    body.innerHTML = `<div class="wp-subtle">Запись не выбрана.</div>`;
+    if (noteBlock) noteBlock.style.display = "none";
+    return;
+  }
+  const freqVal = row.frequency || colVal(row, COL_MAP.freq);
+  const groupVal = row.group_id || colVal(row, COL_MAP.gid);
+  const idVal = colVal(row, COL_MAP.id);
+  const corrVal = colVal(row, COL_MAP.corr);
+  const noteVal = row.note ?? "";
+  const confirmVal = colVal(row, COL_MAP.confirm);
+  const updatedVal = row.updated_at ? fmtMskTs(row.updated_at) : "";
+  const isNew = isNewData(row.updated_at);
+
+  body.innerHTML = `
+    <div class="d-flex align-items-center gap-2">
+      <div class="fw-semibold">${escapeHtml(String(freqVal || "—"))}</div>
+      <span class="badge text-bg-light border">${escapeHtml(String(groupVal || "—"))}</span>
+      ${isNew ? '<span class="badge bg-success">NEW</span>' : ""}
+    </div>
+    <div class="small wp-subtle mt-1">ID: ${escapeHtml(String(idVal || "—"))}</div>
+    <div class="mt-2"><strong>Корреспонденты:</strong> ${escapeHtml(String(corrVal || "—"))}</div>
+    <div class="mt-2"><strong>Подразделение:</strong> ${escapeHtml(String(noteVal || "—"))}</div>
+    <div class="mt-2"><strong>Дата:</strong> ${escapeHtml(String(confirmVal || "—"))}</div>
+    <div class="mt-2"><strong>Обновлено:</strong> ${escapeHtml(String(updatedVal || "—"))}</div>
+  `;
+
+  if (noteBlock) noteBlock.style.display = "";
+  if (noteInput) noteInput.value = String(noteVal || "");
+}
+
+function selectRow(row, cardEl) {
+  SELECTED_ROW_ID = row ? Number(row.id || 0) : null;
+  document.querySelectorAll("#os-units-list .os-wb-card, #os-units-list .os-search-card").forEach((el) => {
+    el.classList.toggle("os-row-selected", cardEl && el === cardEl);
+  });
+  renderDetail(row);
+}
+
+function renderHead(headers) {
+  HEADERS = headers && headers.length === 9 ? headers : HEADERS;
+  rebuildColMap();
+
+  setHeadLabel("th-freq", `Частота${SORT_BY === "frequency" ? sortIndicator() : ""}`);
+  setHeadLabel("th-num", `№${SORT_BY === "id" ? sortIndicator() : ""}`);
+  setHeadLabel("th-gid", HEADERS[COL_MAP.gid - 1] || "Группа");
+  setHeadLabel("th-id", HEADERS[COL_MAP.id - 1] || "ID");
+  setHeadLabel("th-corr", HEADERS[COL_MAP.corr - 1] || "Корр.");
+  setHeadLabel("th-note", HEADERS[COL_MAP.note - 1] || "Подразд.");
+  setHeadLabel("th-confirm", COL_MAP.confirm ? (HEADERS[COL_MAP.confirm - 1] || "Дата") : "Дата");
+}
+
+function isNewData(updatedAt) {
+  if (!updatedAt || !LAST_LOAD_TIME) return false;
+  // Считаем новыми данные, обновленные за последние 24 часа
+  try {
+    const updated = new Date(updatedAt);
+    if (isNaN(updated.getTime())) return false;
+    const now = new Date();
+    const diffHours = (now - updated) / (1000 * 60 * 60);
+    return diffHours <= 24;
+  } catch {
+    return false;
+  }
+}
+
+
+function _osWbBuildCardMedia(avatarUrl) {
+  const media = document.createElement("div");
+  media.className = "os-wb-card__media";
+  if (avatarUrl) {
+    const im = document.createElement("img");
+    im.src = String(avatarUrl);
+    im.alt = "";
+    im.loading = "lazy";
+    im.decoding = "async";
+    im.addEventListener("error", () => {
+      im.remove();
+      media.innerHTML = '<div class="os-wb-card__ph" aria-hidden="true"><i class="bi bi-image"></i></div>';
+    });
+    media.appendChild(im);
+  } else {
+    media.innerHTML = '<div class="os-wb-card__ph" aria-hidden="true"><i class="bi bi-shield"></i></div>';
+  }
+  return media;
+}
+
+function _osWbAppendChips(wrap, children, plab) {
+  const bar = document.createElement("div");
+  bar.className = "os-wb-card__chips";
+  bar.setAttribute("role", "group");
+  bar.setAttribute("aria-label", `Состав: ${plab}`);
+  const tilesWrap = document.createElement("div");
+  tilesWrap.className = "os-wb-card__chips-tiles";
+  if (children && children.length > 1) {
+    const sub = document.createElement("div");
+    sub.className = "os-wb-card__chips-h";
+    sub.textContent = "Состав / варианты";
+    bar.appendChild(sub);
+  }
+  for (const ch of children) {
+    const uk = ch.unit_key;
+    const cLab = String(ch.label || "Записи");
+    const cCnt = Number(ch.row_count || 0);
+    const tile = document.createElement("a");
+    tile.className = "os-unit-tile";
+    tile.href = `/search-online/battalion?k=${encodeURIComponent(uk)}`;
+    const aria = `${cLab} — ${cCnt} зн.`;
+    tile.setAttribute("aria-label", `Страница варианта: ${aria}`);
+    if (_unitLabelFromKey(uk) !== cLab) {
+      tile.setAttribute("title", _unitLabelFromKey(uk));
+    }
+    tile.innerHTML = `<span class="os-unit-tile__name">${escapeHtml(cLab)}</span>
+            <span class="os-unit-tile__n">${cCnt}</span>`;
+    tilesWrap.appendChild(tile);
+  }
+  bar.appendChild(tilesWrap);
+  wrap.appendChild(bar);
+}
+
+async function refreshUnitsList() {
+  const listEl = $("os-units-list");
+  if (!listEl) return;
+  try {
+    const qRaw = ($("q") && $("q").value) || "";
+    const q = String(qRaw).trim();
+    const qParam = q ? `?q=${encodeURIComponent(q)}` : "";
+    const data = await apiGet(`/api/online-search/units${qParam}`);
+    const families = data.families || [];
+    const units = data.units || [];
+    listEl.innerHTML = "";
+    listEl.classList.remove("os-units-grid--ready");
+    const hasFam = families && families.length > 0;
+    const hasUnits = units.length > 0;
+    if (!hasFam && !hasUnits) {
+      if (q) {
+        listEl.innerHTML = `<div class="os-units-list__empty text-muted small py-3 px-1 w-100">По запросу «${escapeHtml(
+          q
+        )}» подразделений нет. Очистите поиск или измените строку — карточки фильтруются по тому же полю, что и таблица.</div>`;
+      } else {
+        listEl.innerHTML =
+          '<div class="os-units-list__empty text-muted small py-3 px-1 w-100">В таблице online_search нет записей — подразделения не сформированы.</div>';
+      }
+      return;
+    }
+    listEl.classList.add("os-units-grid--ready");
+
+    if (hasFam) {
+      for (const fam of families) {
+        const pkey = String(fam.parent_key || "");
+        const plab = String(fam.parent_label || pkey);
+        const total = Number(fam.row_count || 0);
+        const children = fam.children || [];
+        const avatarUrl = fam.avatar_url || "";
+
+        const card = document.createElement("article");
+        card.className = "os-wb-card";
+        card.setAttribute("role", "listitem");
+        if (pkey === "__none__") {
+          card.classList.add("os-wb-card--fallback");
+        }
+
+        const mainL = document.createElement("a");
+        mainL.className = "os-wb-card__mainlink";
+        mainL.href = `/search-online/unit?p=${encodeURIComponent(pkey)}`;
+        mainL.setAttribute("aria-label", `Страница подразделения: ${plab}`);
+
+        mainL.appendChild(_osWbBuildCardMedia(avatarUrl));
+
+        const body = document.createElement("div");
+        body.className = "os-wb-card__body";
+        body.innerHTML = `<h3 class="os-wb-card__title mb-0">${escapeHtml(plab)}</h3>
+          <div class="os-wb-card__meta">
+            <span class="os-wb-card__total">${total} в базе</span>
+          </div>`;
+        mainL.appendChild(body);
+        card.appendChild(mainL);
+
+        _osWbAppendChips(card, children, plab);
+        listEl.appendChild(card);
+      }
+      return;
+    }
+
+    for (const u of units) {
+      const uk = u.unit_key;
+      const cnt = Number(u.row_count || 0);
+      const label = _unitLabelFromKey(uk);
+      const card = document.createElement("article");
+      card.className = "os-wb-card";
+      card.setAttribute("role", "listitem");
+      if (uk === "__none__") {
+        card.classList.add("os-wb-card--fallback");
+      }
+      const mainL = document.createElement("a");
+      mainL.className = "os-wb-card__mainlink";
+      mainL.href = `/search-online/battalion?k=${encodeURIComponent(uk)}`;
+      mainL.setAttribute("aria-label", `Открыть: ${label}`);
+      mainL.appendChild(_osWbBuildCardMedia(""));
+      const body = document.createElement("div");
+      body.className = "os-wb-card__body";
+      body.innerHTML = `<h3 class="os-wb-card__title mb-0">${escapeHtml(label)}</h3>
+        <div class="os-wb-card__meta"><span class="os-wb-card__total">${cnt} в базе</span></div>`;
+      mainL.appendChild(body);
+      card.appendChild(mainL);
+      listEl.appendChild(card);
+    }
+  } catch (e) {
+    listEl.innerHTML = `<div class="text-danger small p-2">Список подразделений: ${escapeHtml(e.message || e)}</div>`;
+  }
+}
+
+function renderRows(rows) {
+  const emptyEl = $("os-empty-state");
+  ROW_MAP = new Map();
+  for (const r of rows || []) {
+    if (r && r.id) ROW_MAP.set(Number(r.id), r);
+  }
+
+  const groupsSet = new Set();
+  for (const r of rows || []) {
+    const gid = r.group_id || colVal(r, COL_MAP.gid);
+    if (gid) groupsSet.add(String(gid));
+  }
+  ALL_GROUPS = Array.from(groupsSet).sort();
+  updateGroupFilterOptions();
+
+  const list = rows || [];
+  if (!list.length) {
+    if (emptyEl) {
+      emptyEl.classList.remove("d-none");
+    }
+  } else if (emptyEl) {
+    emptyEl.classList.add("d-none");
+  }
+
+  SELECTED_ROW_ID = null;
+  renderDetail(null);
+}
+
+async function load() {
+  const qRaw = ($("q").value || "").trim();
+  let q = qRaw;
+  let groupOnly = "";
+  const gMatch = qRaw.match(/^g\s*0*(\d+)$/i);
+  if (gMatch && gMatch[1]) {
+    groupOnly = gMatch[1];
+    q = "";
+  }
+  setText("status", "Загрузка…");
+  const unitsP = refreshUnitsList();
+  try {
+    // Формируем параметры запроса с фильтрами
+    const params = new URLSearchParams();
+    if (q) params.append("q", q);
+    params.append("limit", String(LIMIT));
+    params.append("offset", String(OFFSET));
+    params.append("sort_by", SORT_BY);
+    params.append("sort_dir", SORT_DIR);
+
+    // Добавляем фильтры
+    for (const [col, value] of Object.entries(FILTERS)) {
+      if (value) {
+        params.append(`filter_${col}`, String(value));
+      }
+    }
+    if (groupOnly && !FILTERS.group_id) {
+      params.append("filter_group_id", groupOnly);
+    }
+
+    const data = await apiGet(`/api/online-search?${params.toString()}`);
+    META = data.meta || META;
+    LAST_LOAD_TIME = new Date(); // Сохраняем время загрузки
+    renderHead(data.headers || HEADERS);
+    renderRows(data.rows || []);
+    const total = data.total || 0;
+    if ($("os-total-pill")) setText("os-total-pill", String(total));
+    setText("pager", `Показано ${Math.min(LIMIT, (data.rows || []).length)} / всего ${total}. OFFSET=${OFFSET}`);
+    setText("status", "");
+    updateFilterIndicators();
+    syncFilterUiFromState();
+    await unitsP;
+  } catch (e) {
+    setText("status", `Ошибка: ${e.message || e}`);
+    try {
+      await unitsP;
+    } catch (_) {
+      /* список подразделений мог отобразить свою ошибку */
+    }
+  }
+}
+
+function toggleSort(by) {
+  if (SORT_BY === by) {
+    SORT_DIR = SORT_DIR === "asc" ? "desc" : "asc";
+  } else {
+    SORT_BY = by;
+    SORT_DIR = by === "frequency" ? "desc" : "asc";
+  }
+  OFFSET = 0;
+  load();
+}
+
+async function saveNoteInline(rowId, note) {
+  setText("status", "Сохранение…");
+  try {
+    const data = await apiPost("/api/online-search/note", { id: rowId, note });
+    const u = data.unit_sync || null;
+    setText(
+      "status",
+      u ? `Сохранено. unit: inserted=${u.inserted}, updated=${u.updated}, matched=${u.matched_pairs}` : "Сохранено."
+    );
+    // обновим только видимую страницу
+    await load();
+  } catch (e) {
+    setText("status", `Ошибка: ${e.message || e}`);
+  }
+}
+
+async function saveDetailNote() {
+  if (!SELECTED_ROW_ID) return;
+  const noteInput = $("os-detail-note");
+  if (!noteInput) return;
+  const note = String(noteInput.value || "").trim();
+  await saveNoteInline(SELECTED_ROW_ID, note);
+}
+
+function startInlineEdit(cell, row) {
+  const rowId = Number(row.id || 0);
+  if (!rowId) return;
+  const prev = cell.textContent || "";
+  cell.innerHTML = `<input class="form-control form-control-sm" data-inline="1" value="${escapeHtml(prev)}" />`;
+  const inp = cell.querySelector('input[data-inline="1"]');
+  inp.focus();
+  inp.select();
+  const finish = async (mode) => {
+    const val = (inp.value || "").trim();
+    if (mode === "cancel") {
+      cell.textContent = prev;
+      return;
+    }
+    if (val === prev) {
+      cell.textContent = prev;
+      return;
+    }
+    cell.textContent = val;
+    await saveNoteInline(rowId, val);
+  };
+  inp.addEventListener("keydown", (ev) => {
+    if (ev.key === "Enter") finish("save");
+    if (ev.key === "Escape") finish("cancel");
+  });
+  inp.addEventListener("blur", () => finish("save"));
+}
+
+async function deleteRow(id) {
+  if (!confirm(`Удалить строку #${id}?`)) return;
+  setText("status", "Удаление…");
+  try {
+    await apiPost("/api/online-search/delete", { id });
+    setText("status", "Удалено.");
+    await load();
+  } catch (e) {
+    setText("status", `Ошибка: ${e.message || e}`);
+  }
+}
+
+async function addRow() {
+  const freq = prompt("Частота (col1):");
+  if (!freq) return;
+  const gid = prompt("Групповой ID (col2):");
+  if (!gid) return;
+  const note = prompt("Примечание:");
+  const payload = {
+    col1: freq,
+    col2: gid,
+    col9: note || "",
+    frequency: freq,
+    group_id: gid,
+    note: note || "",
+  };
+  setText("status", "Добавление…");
+  try {
+    await apiPost("/api/online-search", { row: payload });
+    setText("status", "Добавлено.");
+    OFFSET = 0;
+    await load();
+  } catch (e) {
+    setText("status", `Ошибка: ${e.message || e}`);
+  }
+}
+
+async function importXlsx() {
+  const input = $("import-xlsx");
+  if (!input.files || !input.files.length) return;
+  const importId = `imp-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const fd = new FormData();
+  // note → unit применяется автоматически
+  fd.append("file", input.files[0]);
+  fd.append("apply_to_unit", "1");
+  fd.append("import_id", importId);
+  let stopPolling = false;
+  let pollTimer = null;
+  const pollProgress = async () => {
+    if (stopPolling) return;
+    try {
+      const data = await apiGet(`/api/online-search/import-progress?import_id=${encodeURIComponent(importId)}`);
+      const p = data.progress || {};
+      const percent = Number(p.percent || 0);
+      const done = !!p.done;
+      const total = Number(p.total_rows || 0);
+      const processed = Number(p.processed_rows || 0);
+      const message = String(p.message || "");
+      const suffix = total > 0 ? ` (${processed}/${total})` : "";
+      if (!done) {
+        setText("status", `Импорт: ${percent}%${suffix}${message ? ` — ${message}` : ""}`);
+      }
+    } catch (_) {
+      // игнорируем сбои polling
+    } finally {
+      if (!stopPolling) {
+        pollTimer = setTimeout(pollProgress, 450);
+      }
+    }
+  };
+  setText("status", "Импорт: 0% — подготовка...");
+  pollProgress();
+  try {
+    const data = await apiUpload("/api/online-search/import-xlsx", fd);
+    stopPolling = true;
+    if (pollTimer) clearTimeout(pollTimer);
+    const syncNote = data.unit_sync ? ` | unit updated=${data.unit_sync.updated || 0}` : "";
+    setText("status", `Импортировано строк: ${data.imported || 0}${syncNote}`);
+    OFFSET = 0;
+    await load();
+  } catch (e) {
+    stopPolling = true;
+    if (pollTimer) clearTimeout(pollTimer);
+    setText("status", `Ошибка: ${e.message || e}`);
+  }
+}
+
+async function syncUnitsFromOnlineSearch() {
+  const btn = $("sync-units-btn");
+  if (btn) {
+    btn.disabled = true;
+    btn.dataset.origText = btn.innerHTML;
+    btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>Синхронизация...`;
+  }
+  setText("status", "Синхронизация unit...");
+  try {
+    const data = await apiPost("/api/online-search/sync-units", {});
+    const info = data.stats
+      ? `inserted=${data.stats.inserted || 0}, updated=${data.stats.updated || 0}, matched=${data.stats.matched_pairs || 0}`
+      : "";
+    setText("status", `Синхронизация завершена. ${info}`);
+    showToast("Синхронизация unit завершена", "success");
+  } catch (e) {
+    setText("status", `Ошибка: ${e.message || e}`);
+    showToast(`Ошибка: ${e.message || e}`, "danger");
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = btn.dataset.origText || 'Синхронизировать unit';
+    }
+  }
+}
+
+async function exportXlsx() {
+  const q = ($("q").value || "").trim();
+  const url = `/api/online-search/export-xlsx?q=${encodeURIComponent(q)}`;
+  window.location.href = url;
+}
+
+function showColumnFilter(th) {
+  const filterType = th.dataset.filterType || "none";
+  const filterCol = th.dataset.filterCol || "";
+  const popup = $("column-filter-popup");
+  const filterBody = $("filter-body");
+  const filterTitle = $("filter-title");
+
+  if (!popup || !filterBody || filterType === "none") return;
+
+  // Позиционируем popup относительно заголовка
+  const rect = th.getBoundingClientRect();
+  popup.style.left = `${rect.left}px`;
+  popup.style.top = `${rect.bottom + 5}px`;
+  popup.style.display = "block";
+
+  // Устанавливаем заголовок
+  const colName = th.querySelector(".th-content span")?.textContent || filterCol;
+  filterTitle.textContent = `Фильтр: ${colName}`;
+
+  // Очищаем тело фильтра
+  filterBody.innerHTML = "";
+
+  const currentFilter = FILTERS[filterCol] || "";
+
+  if (filterType === "select" && filterCol === "group_id") {
+    // Фильтр по группам
+    const select = document.createElement("select");
+    select.className = "form-select form-select-sm";
+    select.id = "filter-select";
+    select.innerHTML = '<option value="">Все группы</option>';
+    for (const group of ALL_GROUPS) {
+      const selected = currentFilter === group ? "selected" : "";
+      select.innerHTML += `<option value="${escapeHtml(group)}" ${selected}>${escapeHtml(group)}</option>`;
+    }
+    filterBody.appendChild(select);
+  } else if (filterType === "time" && filterCol === "updated_at") {
+    // Фильтр по времени (новые данные сегодня)
+    const div = document.createElement("div");
+    div.innerHTML = `
+      <div class="form-check mb-2">
+        <input class="form-check-input" type="checkbox" id="filter-today" ${currentFilter === "today" ? "checked" : ""}>
+        <label class="form-check-label" for="filter-today">
+          Только новые данные (за последние 24 часа)
+        </label>
+      </div>
+    `;
+    filterBody.appendChild(div);
+  } else if (filterType === "text") {
+    // Текстовый фильтр
+    const input = document.createElement("input");
+    input.type = "text";
+    input.className = "form-control form-control-sm";
+    input.id = "filter-text";
+    input.placeholder = `Введите значение для ${colName}`;
+    input.value = currentFilter;
+    filterBody.appendChild(input);
+  } else if (filterType === "date") {
+    // Фильтр по дате
+    const input = document.createElement("input");
+    input.type = "date";
+    input.className = "form-control form-control-sm";
+    input.id = "filter-date";
+    input.value = currentFilter;
+    filterBody.appendChild(input);
+  }
+
+  // Сохраняем текущий столбец для применения фильтра
+  popup.dataset.filterCol = filterCol;
+}
+
+function hideColumnFilter() {
+  const popup = $("column-filter-popup");
+  if (popup) popup.style.display = "none";
+}
+
+function applyFilter() {
+  const popup = $("column-filter-popup");
+  const filterCol = popup.dataset.filterCol;
+  if (!filterCol) return;
+
+  const filterBody = $("filter-body");
+  let value = "";
+
+  const select = filterBody.querySelector("#filter-select");
+  if (select) {
+    value = select.value || "";
+  } else {
+    const checkbox = filterBody.querySelector("#filter-today");
+    if (checkbox) {
+      value = checkbox.checked ? "today" : "";
+    } else {
+      const input = filterBody.querySelector("#filter-text, #filter-date");
+      if (input) {
+        value = input.value || "";
+      }
+    }
+  }
+
+  if (value) {
+    FILTERS[filterCol] = value;
+  } else {
+    delete FILTERS[filterCol];
+  }
+
+  hideColumnFilter();
+  OFFSET = 0;
+  load();
+}
+
+function clearFilter() {
+  const popup = $("column-filter-popup");
+  const filterCol = popup.dataset.filterCol;
+  if (filterCol) {
+    delete FILTERS[filterCol];
+  }
+  hideColumnFilter();
+  OFFSET = 0;
+  load();
+}
+
+function updateFilterIndicators() {
+  // Обновляем индикаторы активных фильтров на заголовках
+  const filterableThs = document.querySelectorAll("#os-head .th-filterable");
+  for (const th of filterableThs) {
+    const filterCol = th.dataset.filterCol;
+    const icon = th.querySelector(".th-filter-icon");
+    if (icon && filterCol && FILTERS[filterCol]) {
+      icon.classList.add("filter-active");
+      icon.style.color = "var(--wp-accent)";
+    } else if (icon) {
+      icon.classList.remove("filter-active");
+      icon.style.color = "";
+    }
+  }
+}
+
+function applySearchOnlineMobileUi() {
+  const root = document.querySelector(".md3-search-online");
+  if (!root) return;
+  root.classList.toggle("so-mobile-ui", window.matchMedia("(max-width: 767.98px)").matches);
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+  applySearchOnlineMobileUi();
+  window.matchMedia("(max-width: 767.98px)").addEventListener("change", applySearchOnlineMobileUi);
+
+  $("load-btn").addEventListener("click", async () => {
+    readFiltersFromUi();
+    OFFSET = 0;
+    await load();
+  });
+  $("prev-btn").addEventListener("click", async () => {
+    OFFSET = Math.max(0, OFFSET - LIMIT);
+    await load();
+  });
+  $("next-btn").addEventListener("click", async () => {
+    OFFSET = OFFSET + LIMIT;
+    await load();
+  });
+  if ($("add-row-btn")) $("add-row-btn").addEventListener("click", addRow);
+  if ($("import-btn") && $("import-xlsx")) {
+    $("import-btn").addEventListener("click", (e) => {
+      e.preventDefault();
+      $("import-xlsx").click();
+    });
+    $("import-xlsx").addEventListener("change", () => {
+      void importXlsx();
+    });
+  }
+  if ($("sync-units-btn")) $("sync-units-btn").addEventListener("click", syncUnitsFromOnlineSearch);
+  $("export-btn").addEventListener("click", exportXlsx);
+  if ($("mark-all-read-btn")) {
+    $("mark-all-read-btn").addEventListener("click", async () => {
+      if (!confirm("Отметить все записи как прочитанные? Тег 'новое' будет убран для всех записей.")) return;
+      setText("status", "Отмечаю все как прочитанные…");
+      try {
+        const data = await apiPost("/api/online-search/mark-all-read", {});
+        setText("status", `Готово. Отмечено записей: ${data.marked || 0}`);
+        await load();
+      } catch (e) {
+        setText("status", `Ошибка: ${e.message || e}`);
+      }
+    });
+  }
+
+  if ($("os-search-clear")) {
+    $("os-search-clear").addEventListener("click", async () => {
+      FILTERS = {};
+      if ($("q")) $("q").value = "";
+      if ($("os-filter-confirm")) $("os-filter-confirm").value = "";
+      if ($("os-filter-updated")) $("os-filter-updated").checked = false;
+      updateGroupFilterOptions();
+      syncFilterUiFromState();
+      OFFSET = 0;
+      await load();
+    });
+  }
+  const qInput = $("q");
+  if (qInput) {
+    const debouncedLoad = debounce(async () => {
+      readFiltersFromUi();
+      OFFSET = 0;
+      await load();
+    }, 260);
+    qInput.addEventListener("input", debouncedLoad);
+    qInput.addEventListener("keydown", async (ev) => {
+      if (ev.key !== "Enter") return;
+      readFiltersFromUi();
+      OFFSET = 0;
+      await load();
+    });
+  }
+  const dConfirm = $("os-filter-confirm");
+  if (dConfirm) {
+    dConfirm.addEventListener("change", async () => {
+      readFiltersFromUi();
+      OFFSET = 0;
+      await load();
+    });
+  }
+  const dUpdated = $("os-filter-updated");
+  if (dUpdated) {
+    dUpdated.addEventListener("change", async () => {
+      readFiltersFromUi();
+      OFFSET = 0;
+      await load();
+    });
+  }
+
+  if ($("os-detail-note-save")) {
+    $("os-detail-note-save").addEventListener("click", saveDetailNote);
+  }
+  if ($("os-detail-note-cancel")) {
+    $("os-detail-note-cancel").addEventListener("click", () => {
+      if (SELECTED_ROW_ID && ROW_MAP.has(SELECTED_ROW_ID)) {
+        renderDetail(ROW_MAP.get(SELECTED_ROW_ID));
+      }
+    });
+  }
+
+  // Обработчики фильтров
+  if ($("filter-apply")) {
+    $("filter-apply").addEventListener("click", applyFilter);
+  }
+  if ($("filter-clear")) {
+    $("filter-clear").addEventListener("click", clearFilter);
+  }
+  if ($("filter-close")) {
+    $("filter-close").addEventListener("click", hideColumnFilter);
+  }
+
+  // Клики по заголовкам для фильтрации
+  const head = $("os-head");
+  if (head) {
+    head.addEventListener("click", (ev) => {
+      const th = ev.target.closest(".os-filter-head-item, th");
+      if (!th) return;
+
+      const isFilterClick =
+        ev.target.closest(".th-filter-icon") ||
+        (ev.target.closest(".th-content") && !ev.target.closest(".os-h-label"));
+
+      if (isFilterClick && th.classList.contains("th-filterable")) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        showColumnFilter(th);
+        return;
+      }
+
+      const by = th.dataset.sort;
+      if (by) {
+        toggleSort(by);
+      }
+    });
+  }
+
+  // Закрытие фильтра при клике вне его
+  document.addEventListener("click", (ev) => {
+    const popup = $("column-filter-popup");
+    if (popup && !popup.contains(ev.target) && !ev.target.closest(".os-filter-head-item, .th-filterable, th")) {
+      hideColumnFilter();
+    }
+  });
+
+  await load();
+});
+
+

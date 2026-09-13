@@ -1,0 +1,361 @@
+/* ==========================================================================
+   EAVC — мобильная вёрстка (только max-width; десктоп не затрагивается)
+   ========================================================================== */
+
+/* --- База: safe area, без горизонтального «дрожания» --- */
+@media (max-width: 991.98px) {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    overflow-x: clip;
+  }
+
+  main.container-fluid {
+    padding-left: max(0.65rem, env(safe-area-inset-left, 0px));
+    padding-right: max(0.65rem, env(safe-area-inset-right, 0px));
+  }
+
+  .toast-container {
+    left: max(0.5rem, env(safe-area-inset-left, 0px));
+    right: max(0.5rem, env(safe-area-inset-right, 0px));
+    bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
+  }
+
+  /* iOS: не зумить при фокусе в поле */
+  .form-control,
+  .form-select,
+  textarea.form-control {
+    font-size: max(16px, 1rem);
+  }
+
+  .form-control-sm,
+  .form-select-sm {
+    font-size: max(16px, 0.875rem);
+  }
+}
+
+/* --- Шапка / навбар --- */
+@media (max-width: 991.98px) {
+  .navbar.wp-nav .navbar-collapse {
+    padding-left: 0 !important;
+    padding-top: 0.5rem;
+    padding-bottom: 0.35rem;
+    max-height: min(78vh, calc(100dvh - var(--wp-nav-h) - 1rem));
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .navbar.wp-nav .wp-navbar-tabs-shell {
+    position: static !important;
+    left: auto !important;
+    top: auto !important;
+    transform: none !important;
+    max-width: none !important;
+    width: 100%;
+    display: block !important;
+    padding: 0 !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    pointer-events: auto !important;
+  }
+
+  .navbar.wp-nav .navbar-nav.wp-navbar-primary {
+    width: 100%;
+    margin-bottom: 0.35rem !important;
+  }
+
+  .navbar.wp-nav .navbar-nav.wp-navbar-primary .nav-item {
+    width: 100%;
+  }
+
+  .navbar.wp-nav .navbar-nav.wp-navbar-primary .nav-link {
+    width: 100%;
+    min-height: 44px;
+    border-radius: 12px;
+    padding: 0.55rem 0.75rem;
+  }
+
+  .navbar.wp-nav .navbar-nav.wp-navbar-primary .dropdown-menu {
+    position: static !important;
+    transform: none !important;
+    width: 100%;
+    margin-top: 0.25rem;
+    box-shadow: none;
+    border: 1px solid var(--wp-md3-outline);
+  }
+
+  .navbar.wp-nav .wp-navbar-tools {
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: flex-start !important;
+    margin-left: 0 !important;
+    margin-right: 0;
+    padding: 0.55rem 0.65rem;
+    gap: 0.5rem;
+  }
+
+  .navbar.wp-nav .wp-navbar-position {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+
+  .navbar.wp-nav .wp-navbar-position .form-select,
+  .navbar.wp-nav .wp-toolbar-select {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .navbar.wp-nav .wp-navbar-tools > .wp-nav-icon-btn,
+  .navbar.wp-nav .wp-navbar-tools > .dropdown {
+    flex-shrink: 0;
+  }
+
+  .navbar.wp-nav .wp-user-menu-btn {
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .navbar.wp-nav.md3-top-app-bar .container-fluid {
+    padding-left: max(0.5rem, env(safe-area-inset-left, 0px));
+    padding-right: max(0.5rem, env(safe-area-inset-right, 0px));
+  }
+
+  .navbar.wp-nav .navbar-brand {
+    font-size: 1rem;
+  }
+}
+
+/* --- Заголовки разделов и тулбары --- */
+@media (max-width: 767.98px) {
+  .wp-page-header {
+    margin-bottom: 0.65rem;
+  }
+
+  .wp-page-title {
+    font-size: 1.05rem;
+    line-height: 1.3;
+  }
+
+  .wp-page-lead {
+    font-size: 0.8125rem;
+    line-height: 1.4;
+  }
+
+}
+
+/* --- Таблицы: удобная прокрутка --- */
+@media (max-width: 991.98px) {
+  .table-responsive {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    margin-left: -0.15rem;
+    margin-right: -0.15rem;
+    padding-left: 0.15rem;
+    padding-right: 0.15rem;
+  }
+
+  .wp-workbench--sessions .table-responsive,
+  .md3-sessions .table-responsive {
+    max-height: min(65vh, 520px);
+  }
+}
+
+/* --- Модалки на телефоне --- */
+@media (max-width: 575.98px) {
+  .modal-dialog {
+    margin: 0;
+    max-width: 100%;
+    min-height: 100dvh;
+  }
+
+  .modal-dialog-centered {
+    min-height: 100dvh;
+    align-items: flex-end;
+  }
+
+  .modal-dialog .modal-content {
+    border-radius: 1rem 1rem 0 0;
+    max-height: 96dvh;
+  }
+
+  .modal-dialog-scrollable .modal-body {
+    max-height: calc(96dvh - 7rem);
+  }
+
+  #callsignTagModal .modal-dialog.callsign-tag-modal-dialog {
+    margin: 0.5rem;
+    min-height: 0;
+    max-width: calc(100% - 1rem);
+  }
+
+  #callsignTagModal .modal-dialog.callsign-tag-modal-dialog .modal-content {
+    border-radius: 14px;
+  }
+
+  #targetingModal .modal-dialog {
+    min-height: 0;
+    margin: 0.35rem;
+    max-width: calc(100% - 0.7rem);
+  }
+
+  #targetingModal .modal-dialog .modal-content {
+    border-radius: 14px;
+    max-height: 92dvh;
+  }
+}
+
+/* --- Чат: колонка вместо узкой боковой панели --- */
+@media (max-width: 767.98px) {
+  #chatModal .modal-dialog.chat-modal-dialog {
+    margin: 0;
+    max-width: 100%;
+    height: 100dvh;
+  }
+
+  #chatModal .chat-modal-content {
+    border-radius: 0;
+    min-height: 100dvh;
+  }
+
+  #chatModal .chat-modal-body {
+    height: calc(100dvh - 3.5rem) !important;
+    min-height: 0 !important;
+  }
+
+  #chatModal .chat-modal-body > .d-flex {
+    flex-direction: column !important;
+  }
+
+  #chatModal .chat-sidebar {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-height: 38vh;
+    flex-shrink: 0;
+    border-right: none !important;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+  }
+
+  #chatModal .chat-sidebar-hero {
+    display: block;
+    margin: 0.65rem;
+    padding: 0.75rem;
+  }
+
+  #chatModal .chat-sidebar-title-main {
+    font-size: 0.95rem;
+  }
+
+  #chatModal .chat-main {
+    min-height: 0;
+    flex: 1 1 auto;
+  }
+
+  #chatModal .chat-quick-prompts {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 0.35rem;
+    gap: 0.35rem;
+  }
+
+  #chatModal .chat-prompt-chip {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+}
+
+/* --- Анализ / сеансы: боковые панели не липнут на телефоне --- */
+@media (max-width: 991.98px) {
+  .wp-sidebar {
+    position: static !important;
+    top: auto !important;
+  }
+
+  .analysis-layout .wp-sidebar .card,
+  .search-online-layout .search-online-panel:first-child {
+    position: static !important;
+    top: auto !important;
+  }
+
+  .analysis-scroll {
+    max-height: none;
+  }
+
+  .search-online-panel .table-responsive {
+    max-height: min(55vh, 480px);
+  }
+}
+
+/* --- Карта: колонки в столбик --- */
+@media (max-width: 991.98px) {
+  .map-content-row {
+    flex-direction: column;
+  }
+
+  .map-groups-col,
+  .map-editor-col {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 0 0 auto !important;
+  }
+
+  .map-map-col {
+    min-height: 50vh;
+    order: -1;
+  }
+
+  .map-page-card,
+  .map-page-body {
+    min-height: 0;
+  }
+}
+
+/* --- Компактные кнопки — зона нажатия --- */
+@media (max-width: 575.98px) {
+  .btn-sm {
+    min-height: 36px;
+    padding-top: 0.35rem;
+    padding-bottom: 0.35rem;
+  }
+
+  .btn-group-sm > .btn {
+    min-height: 36px;
+  }
+}
+
+/* --- Вход --- */
+@media (max-width: 575.98px) {
+  main.login-page {
+    align-items: flex-start;
+    padding-top: 1rem;
+    padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px));
+  }
+
+  main.login-page .card {
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
+
+/* --- Тёмная тема (мобильные оверлеи) --- */
+@media (max-width: 767.98px) {
+  html[data-wp-theme="dark"] body.groups-drawer-mode:not(.groups-drawer-collapsed)::before {
+    background: rgba(0, 0, 0, 0.62);
+  }
+
+  html[data-wp-theme="dark"] body.groups-drawer-mode.groups-drawer-collapsed .groups-drawer-toggle {
+    background: var(--wp-surface-2, #1a2230) !important;
+    color: #93c5fd;
+    border-color: rgba(147, 197, 253, 0.35) !important;
+  }
+}

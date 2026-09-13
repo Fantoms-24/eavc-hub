@@ -1,0 +1,23 @@
+{
+  "bind_host": "0.0.0.0",
+  "port": 5000,
+  "debug": false,
+  "wsgi_threads": 8,
+  "sync_interval_sec": 5.0,
+  "data_dir": "data-hub",
+  "tiles_dir": "tiles",
+  "sync_upstream": "",
+  "sync_key": "",
+  "sync_positions": "",
+  "sync_seanses": true,
+  "arm_task_xml_dir": "",
+  "ai": {
+    "provider": "ollama",
+    "base_url": "http://127.0.0.1:11434",
+    "model": "qwen2.5:7b-instruct-q3_k_m",
+    "embed_model": "nomic-embed-text",
+    "timeout_sec": 240,
+    "enabled": true
+  },
+  "_comment_telegram": "Telegram (личный аккаунт) настраивается в Админ → Telegram. Файл data-hub/telegram_user_config.json создаётся автоматически."
+}

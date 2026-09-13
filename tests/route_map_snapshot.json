@@ -1,0 +1,1712 @@
+{
+ "/ [index]": {
+  "endpoint": "index",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/"
+ },
+ "/admin/users [admin_users]": {
+  "endpoint": "admin_users",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/admin/users"
+ },
+ "/analysis [analysis]": {
+  "endpoint": "analysis",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/analysis"
+ },
+ "/analysis/<module> [analysis]": {
+  "endpoint": "analysis",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/analysis/<module>"
+ },
+ "/api/admin/ai-agent/actions [api_admin_ai_agent_actions]": {
+  "endpoint": "api_admin_ai_agent_actions",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/admin/ai-agent/actions"
+ },
+ "/api/admin/ai-agent/chat-feedback [api_admin_ai_agent_chat_feedback]": {
+  "endpoint": "api_admin_ai_agent_chat_feedback",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/admin/ai-agent/chat-feedback"
+ },
+ "/api/admin/ai-agent/llm-preference-hints-export [api_admin_ai_agent_llm_preference_hints_export]": {
+  "endpoint": "api_admin_ai_agent_llm_preference_hints_export",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/admin/ai-agent/llm-preference-hints-export"
+ },
+ "/api/admin/ai-agent/llm-training-export [api_admin_ai_agent_llm_training_export]": {
+  "endpoint": "api_admin_ai_agent_llm_training_export",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/admin/ai-agent/llm-training-export"
+ },
+ "/api/admin/ai-agent/llm-training-stats [api_admin_ai_agent_llm_training_stats]": {
+  "endpoint": "api_admin_ai_agent_llm_training_stats",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/admin/ai-agent/llm-training-stats"
+ },
+ "/api/admin/ai-agent/watch-run [api_admin_ai_agent_watch_run]": {
+  "endpoint": "api_admin_ai_agent_watch_run",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/admin/ai-agent/watch-run"
+ },
+ "/api/admin/ai-agent/watch-status [api_admin_ai_agent_watch_status]": {
+  "endpoint": "api_admin_ai_agent_watch_status",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/admin/ai-agent/watch-status"
+ },
+ "/api/admin/ai-vector-index [api_admin_ai_vector_index]": {
+  "endpoint": "api_admin_ai_vector_index",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/admin/ai-vector-index"
+ },
+ "/api/admin/archive-seanses [api_admin_archive_seanses]": {
+  "endpoint": "api_admin_archive_seanses",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/admin/archive-seanses"
+ },
+ "/api/admin/archive-seanses-to-file [api_admin_archive_seanses_to_file]": {
+  "endpoint": "api_admin_archive_seanses_to_file",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/admin/archive-seanses-to-file"
+ },
+ "/api/admin/asr-training [api_admin_get_asr_training]": {
+  "endpoint": "api_admin_get_asr_training",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/admin/asr-training"
+ },
+ "/api/admin/asr-training [api_admin_set_asr_training]": {
+  "endpoint": "api_admin_set_asr_training",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/admin/asr-training"
+ },
+ "/api/admin/caches-clear [api_admin_caches_clear]": {
+  "endpoint": "api_admin_caches_clear",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/admin/caches-clear"
+ },
+ "/api/admin/chat-access [api_admin_get_chat_access]": {
+  "endpoint": "api_admin_get_chat_access",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/admin/chat-access"
+ },
+ "/api/admin/chat-access [api_admin_set_chat_access]": {
+  "endpoint": "api_admin_set_chat_access",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/admin/chat-access"
+ },
+ "/api/admin/clear-client-name [api_admin_clear_client_name]": {
+  "endpoint": "api_admin_clear_client_name",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/admin/clear-client-name"
+ },
+ "/api/admin/db-health [api_admin_db_health]": {
+  "endpoint": "api_admin_db_health",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/admin/db-health"
+ },
+ "/api/admin/deploy-announce [api_admin_deploy_announce_post]": {
+  "endpoint": "api_admin_deploy_announce_post",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/admin/deploy-announce"
+ },
+ "/api/admin/event-log [api_admin_event_log]": {
+  "endpoint": "api_admin_event_log",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/admin/event-log"
+ },
+ "/api/admin/event-log/file-tail [api_admin_event_log_file_tail]": {
+  "endpoint": "api_admin_event_log_file_tail",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/admin/event-log/file-tail"
+ },
+ "/api/admin/event-log/purge [api_admin_event_log_purge]": {
+  "endpoint": "api_admin_event_log_purge",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/admin/event-log/purge"
+ },
+ "/api/admin/event-log/status [api_admin_event_log_status]": {
+  "endpoint": "api_admin_event_log_status",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/admin/event-log/status"
+ },
+ "/api/admin/export-sessions-excel [api_admin_export_sessions_excel]": {
+  "endpoint": "api_admin_export_sessions_excel",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/admin/export-sessions-excel"
+ },
+ "/api/admin/export-sessions-excel/download/<token> [api_admin_export_sessions_excel_download]": {
+  "endpoint": "api_admin_export_sessions_excel_download",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/admin/export-sessions-excel/download/<token>"
+ },
+ "/api/admin/hubs [api_admin_list_hubs]": {
+  "endpoint": "api_admin_list_hubs",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/admin/hubs"
+ },
+ "/api/admin/perf-metrics [api_admin_perf_metrics]": {
+  "endpoint": "api_admin_perf_metrics",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/admin/perf-metrics"
+ },
+ "/api/admin/positions [api_admin_create_position]": {
+  "endpoint": "api_admin_create_position",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/admin/positions"
+ },
+ "/api/admin/positions [api_admin_list_positions]": {
+  "endpoint": "api_admin_list_positions",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/admin/positions"
+ },
+ "/api/admin/roles [api_admin_create_custom_role]": {
+  "endpoint": "api_admin_create_custom_role",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/admin/roles"
+ },
+ "/api/admin/roles [api_admin_list_roles]": {
+  "endpoint": "api_admin_list_roles",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/admin/roles"
+ },
+ "/api/admin/roles/<int:role_id> [api_admin_delete_custom_role]": {
+  "endpoint": "api_admin_delete_custom_role",
+  "methods": [
+   "DELETE"
+  ],
+  "rule": "/api/admin/roles/<int:role_id>"
+ },
+ "/api/admin/roles/<int:role_id> [api_admin_update_custom_role]": {
+  "endpoint": "api_admin_update_custom_role",
+  "methods": [
+   "PUT"
+  ],
+  "rule": "/api/admin/roles/<int:role_id>"
+ },
+ "/api/admin/seans-db/migrate [api_admin_seans_db_migrate]": {
+  "endpoint": "api_admin_seans_db_migrate",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/admin/seans-db/migrate"
+ },
+ "/api/admin/seans-db/purge-main [api_admin_seans_db_purge_main]": {
+  "endpoint": "api_admin_seans_db_purge_main",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/admin/seans-db/purge-main"
+ },
+ "/api/admin/seans-db/status [api_admin_seans_db_status]": {
+  "endpoint": "api_admin_seans_db_status",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/admin/seans-db/status"
+ },
+ "/api/admin/seans-db/vacuum-main [api_admin_seans_db_vacuum_main]": {
+  "endpoint": "api_admin_seans_db_vacuum_main",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/admin/seans-db/vacuum-main"
+ },
+ "/api/admin/seanses-multi-channel-day [api_admin_seanses_multi_channel_day]": {
+  "endpoint": "api_admin_seanses_multi_channel_day",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/admin/seanses-multi-channel-day"
+ },
+ "/api/admin/sync/status [api_admin_sync_status]": {
+  "endpoint": "api_admin_sync_status",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/admin/sync/status"
+ },
+ "/api/admin/targeting [api_admin_create_targeting]": {
+  "endpoint": "api_admin_create_targeting",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/admin/targeting"
+ },
+ "/api/admin/targeting [api_admin_list_targeting]": {
+  "endpoint": "api_admin_list_targeting",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/admin/targeting"
+ },
+ "/api/admin/targeting/delete [api_admin_delete_targeting]": {
+  "endpoint": "api_admin_delete_targeting",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/admin/targeting/delete"
+ },
+ "/api/admin/users [api_admin_create_user]": {
+  "endpoint": "api_admin_create_user",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/admin/users"
+ },
+ "/api/admin/users [api_admin_list_users]": {
+  "endpoint": "api_admin_list_users",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/admin/users"
+ },
+ "/api/admin/users/password [api_admin_update_password]": {
+  "endpoint": "api_admin_update_password",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/admin/users/password"
+ },
+ "/api/admin/users/positions [api_admin_update_user_positions]": {
+  "endpoint": "api_admin_update_user_positions",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/admin/users/positions"
+ },
+ "/api/admin/users/positions-map [api_admin_get_user_positions_map]": {
+  "endpoint": "api_admin_get_user_positions_map",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/admin/users/positions-map"
+ },
+ "/api/admin/users/positions-map [api_admin_update_user_positions_map]": {
+  "endpoint": "api_admin_update_user_positions_map",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/admin/users/positions-map"
+ },
+ "/api/admin/users/role [api_admin_update_role]": {
+  "endpoint": "api_admin_update_role",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/admin/users/role"
+ },
+ "/api/analysis/ai/feedback [api_analysis_ai_feedback]": {
+  "endpoint": "api_analysis_ai_feedback",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/analysis/ai/feedback"
+ },
+ "/api/analysis/ai/jobs/<int:job_id> [api_analysis_ai_job]": {
+  "endpoint": "api_analysis_ai_job",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/analysis/ai/jobs/<int:job_id>"
+ },
+ "/api/analysis/ai/period-report [api_analysis_ai_period_report]": {
+  "endpoint": "api_analysis_ai_period_report",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/analysis/ai/period-report"
+ },
+ "/api/analysis/ai/reports [api_analysis_ai_reports]": {
+  "endpoint": "api_analysis_ai_reports",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/analysis/ai/reports"
+ },
+ "/api/analysis/ai/shift-summary [api_analysis_ai_shift_summary]": {
+  "endpoint": "api_analysis_ai_shift_summary",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/analysis/ai/shift-summary"
+ },
+ "/api/analysis/arm-task [api_analysis_arm_task]": {
+  "endpoint": "api_analysis_arm_task",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/analysis/arm-task"
+ },
+ "/api/analysis/arm-task/apply-audio-tasks [api_analysis_arm_task_apply_audio_tasks]": {
+  "endpoint": "api_analysis_arm_task_apply_audio_tasks",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/analysis/arm-task/apply-audio-tasks"
+ },
+ "/api/analysis/arm-task/settings [api_analysis_arm_task_settings]": {
+  "endpoint": "api_analysis_arm_task_settings",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/analysis/arm-task/settings"
+ },
+ "/api/analysis/arm-task/settings [api_analysis_arm_task_settings_post]": {
+  "endpoint": "api_analysis_arm_task_settings_post",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/analysis/arm-task/settings"
+ },
+ "/api/analysis/assign [api_analysis_assign]": {
+  "endpoint": "api_analysis_assign",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/analysis/assign"
+ },
+ "/api/analysis/callsign-tag [api_analysis_callsign_tag]": {
+  "endpoint": "api_analysis_callsign_tag",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/analysis/callsign-tag"
+ },
+ "/api/analysis/callsigns/export [api_analysis_callsigns_export]": {
+  "endpoint": "api_analysis_callsigns_export",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/analysis/callsigns/export"
+ },
+ "/api/analysis/callsigns/export-job [api_analysis_callsigns_export_job]": {
+  "endpoint": "api_analysis_callsigns_export_job",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/analysis/callsigns/export-job"
+ },
+ "/api/analysis/full-report/export-job [api_analysis_full_report_export_job]": {
+  "endpoint": "api_analysis_full_report_export_job",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/analysis/full-report/export-job"
+ },
+ "/api/analysis/graph [api_analysis_graph]": {
+  "endpoint": "api_analysis_graph",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/analysis/graph"
+ },
+ "/api/analysis/graph-compare [api_analysis_graph_compare]": {
+  "endpoint": "api_analysis_graph_compare",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/analysis/graph-compare"
+ },
+ "/api/analysis/graph-dynamic/live [api_analysis_graph_dynamic_live]": {
+  "endpoint": "api_analysis_graph_dynamic_live",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/analysis/graph-dynamic/live"
+ },
+ "/api/analysis/graph-dynamic/timeline [api_analysis_graph_dynamic_timeline]": {
+  "endpoint": "api_analysis_graph_dynamic_timeline",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/analysis/graph-dynamic/timeline"
+ },
+ "/api/analysis/graph-dynamic/window [api_analysis_graph_dynamic_window]": {
+  "endpoint": "api_analysis_graph_dynamic_window",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/analysis/graph-dynamic/window"
+ },
+ "/api/analysis/graph-timeline [api_analysis_graph_timeline]": {
+  "endpoint": "api_analysis_graph_timeline",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/analysis/graph-timeline"
+ },
+ "/api/analysis/intercepts-search [api_analysis_intercepts_search]": {
+  "endpoint": "api_analysis_intercepts_search",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/analysis/intercepts-search"
+ },
+ "/api/analysis/keys/check [api_analysis_keys_check]": {
+  "endpoint": "api_analysis_keys_check",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/analysis/keys/check"
+ },
+ "/api/analysis/keys/import [api_analysis_keys_import]": {
+  "endpoint": "api_analysis_keys_import",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/analysis/keys/import"
+ },
+ "/api/analysis/ml/dataset-build [api_analysis_ml_dataset_build]": {
+  "endpoint": "api_analysis_ml_dataset_build",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/analysis/ml/dataset-build"
+ },
+ "/api/analysis/ml/dataset-build-forecast [api_analysis_ml_dataset_build_forecast]": {
+  "endpoint": "api_analysis_ml_dataset_build_forecast",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/analysis/ml/dataset-build-forecast"
+ },
+ "/api/analysis/ml/event-tag [api_analysis_ml_event_tag]": {
+  "endpoint": "api_analysis_ml_event_tag",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/analysis/ml/event-tag"
+ },
+ "/api/analysis/ml/event-tag/update [api_analysis_ml_event_tag_update]": {
+  "endpoint": "api_analysis_ml_event_tag_update",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/analysis/ml/event-tag/update"
+ },
+ "/api/analysis/ml/event-tags [api_analysis_ml_event_tags]": {
+  "endpoint": "api_analysis_ml_event_tags",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/analysis/ml/event-tags"
+ },
+ "/api/analysis/ml/explain [api_analysis_ml_explain]": {
+  "endpoint": "api_analysis_ml_explain",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/analysis/ml/explain"
+ },
+ "/api/analysis/ml/feedback [api_analysis_ml_feedback]": {
+  "endpoint": "api_analysis_ml_feedback",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/analysis/ml/feedback"
+ },
+ "/api/analysis/ml/model-activate [api_analysis_ml_model_activate]": {
+  "endpoint": "api_analysis_ml_model_activate",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/analysis/ml/model-activate"
+ },
+ "/api/analysis/ml/model-status [api_analysis_ml_model_status]": {
+  "endpoint": "api_analysis_ml_model_status",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/analysis/ml/model-status"
+ },
+ "/api/analysis/ml/predict [api_analysis_ml_predict]": {
+  "endpoint": "api_analysis_ml_predict",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/analysis/ml/predict"
+ },
+ "/api/analysis/ml/predict-forecast [api_analysis_ml_predict_forecast]": {
+  "endpoint": "api_analysis_ml_predict_forecast",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/analysis/ml/predict-forecast"
+ },
+ "/api/analysis/ml/settings [api_analysis_ml_settings_get]": {
+  "endpoint": "api_analysis_ml_settings_get",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/analysis/ml/settings"
+ },
+ "/api/analysis/ml/settings [api_analysis_ml_settings_set]": {
+  "endpoint": "api_analysis_ml_settings_set",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/analysis/ml/settings"
+ },
+ "/api/analysis/ml/train [api_analysis_ml_train]": {
+  "endpoint": "api_analysis_ml_train",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/analysis/ml/train"
+ },
+ "/api/analysis/ml/train-forecast [api_analysis_ml_train_forecast]": {
+  "endpoint": "api_analysis_ml_train_forecast",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/analysis/ml/train-forecast"
+ },
+ "/api/analysis/network-order/save [api_analysis_network_order_save]": {
+  "endpoint": "api_analysis_network_order_save",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/analysis/network-order/save"
+ },
+ "/api/analysis/network-order/shared [api_analysis_network_order_shared]": {
+  "endpoint": "api_analysis_network_order_shared",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/analysis/network-order/shared"
+ },
+ "/api/analysis/network-summary [api_analysis_network_summary]": {
+  "endpoint": "api_analysis_network_summary",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/analysis/network-summary"
+ },
+ "/api/analysis/network-summary/export [api_analysis_network_summary_export]": {
+  "endpoint": "api_analysis_network_summary_export",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/analysis/network-summary/export"
+ },
+ "/api/analysis/network-summary/export-job [api_analysis_network_summary_export_job]": {
+  "endpoint": "api_analysis_network_summary_export_job",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/analysis/network-summary/export-job"
+ },
+ "/api/analysis/state [api_analysis_state]": {
+  "endpoint": "api_analysis_state",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/analysis/state"
+ },
+ "/api/analysis/stats [api_analysis_stats]": {
+  "endpoint": "api_analysis_stats",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/analysis/stats"
+ },
+ "/api/analysis/unit-stats [api_analysis_unit_stats]": {
+  "endpoint": "api_analysis_unit_stats",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/analysis/unit-stats"
+ },
+ "/api/aviation/callsign/create [api_aviation_callsign_create]": {
+  "endpoint": "api_aviation_callsign_create",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/aviation/callsign/create"
+ },
+ "/api/aviation/callsign/delete [api_aviation_callsign_delete]": {
+  "endpoint": "api_aviation_callsign_delete",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/aviation/callsign/delete"
+ },
+ "/api/aviation/callsign/history [api_aviation_callsign_history]": {
+  "endpoint": "api_aviation_callsign_history",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/aviation/callsign/history"
+ },
+ "/api/aviation/callsign/stats [api_aviation_callsign_stats]": {
+  "endpoint": "api_aviation_callsign_stats",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/aviation/callsign/stats"
+ },
+ "/api/aviation/callsigns [api_aviation_callsigns]": {
+  "endpoint": "api_aviation_callsigns",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/aviation/callsigns"
+ },
+ "/api/aviation/export-word [api_aviation_export_word]": {
+  "endpoint": "api_aviation_export_word",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/aviation/export-word"
+ },
+ "/api/aviation/export-word-job [api_aviation_export_word_job]": {
+  "endpoint": "api_aviation_export_word_job",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/aviation/export-word-job"
+ },
+ "/api/aviation/frequencies [api_aviation_frequencies]": {
+  "endpoint": "api_aviation_frequencies",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/aviation/frequencies"
+ },
+ "/api/aviation/frequency/create [api_aviation_frequency_create]": {
+  "endpoint": "api_aviation_frequency_create",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/aviation/frequency/create"
+ },
+ "/api/aviation/frequency/delete [api_aviation_frequency_delete]": {
+  "endpoint": "api_aviation_frequency_delete",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/aviation/frequency/delete"
+ },
+ "/api/aviation/frequency/update [api_aviation_frequency_update]": {
+  "endpoint": "api_aviation_frequency_update",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/aviation/frequency/update"
+ },
+ "/api/aviation/intercept [api_aviation_intercept]": {
+  "endpoint": "api_aviation_intercept",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/aviation/intercept"
+ },
+ "/api/aviation/intercept/by-date [api_aviation_intercept_by_date]": {
+  "endpoint": "api_aviation_intercept_by_date",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/aviation/intercept/by-date"
+ },
+ "/api/aviation/intercept/update [api_aviation_intercept_update]": {
+  "endpoint": "api_aviation_intercept_update",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/aviation/intercept/update"
+ },
+ "/api/aviation/parse-content [api_aviation_parse_content]": {
+  "endpoint": "api_aviation_parse_content",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/aviation/parse-content"
+ },
+ "/api/aviation/reset [api_aviation_reset]": {
+  "endpoint": "api_aviation_reset",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/aviation/reset"
+ },
+ "/api/aviation/stats [api_aviation_stats]": {
+  "endpoint": "api_aviation_stats",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/aviation/stats"
+ },
+ "/api/chat/ai-feedback [api_chat_ai_feedback]": {
+  "endpoint": "api_chat_ai_feedback",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/chat/ai-feedback"
+ },
+ "/api/chat/channels [api_chat_channels]": {
+  "endpoint": "api_chat_channels",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/chat/channels"
+ },
+ "/api/chat/clear-history [api_chat_clear_history]": {
+  "endpoint": "api_chat_clear_history",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/chat/clear-history"
+ },
+ "/api/chat/files [api_chat_upload_file]": {
+  "endpoint": "api_chat_upload_file",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/chat/files"
+ },
+ "/api/chat/files/<int:file_id> [api_chat_download_file]": {
+  "endpoint": "api_chat_download_file",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/chat/files/<int:file_id>"
+ },
+ "/api/chat/messages [api_chat_messages]": {
+  "endpoint": "api_chat_messages",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/chat/messages"
+ },
+ "/api/chat/messages [api_chat_send_message]": {
+  "endpoint": "api_chat_send_message",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/chat/messages"
+ },
+ "/api/client/deploy-announce [api_client_deploy_announce]": {
+  "endpoint": "api_client_deploy_announce",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/client/deploy-announce"
+ },
+ "/api/crypto/check [api_crypto_check]": {
+  "endpoint": "api_crypto_check",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/crypto/check"
+ },
+ "/api/crypto/config [api_crypto_config]": {
+  "endpoint": "api_crypto_config",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/crypto/config"
+ },
+ "/api/crypto/config [api_crypto_config_save]": {
+  "endpoint": "api_crypto_config_save",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/crypto/config"
+ },
+ "/api/crypto/delete [api_crypto_delete]": {
+  "endpoint": "api_crypto_delete",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/crypto/delete"
+ },
+ "/api/crypto/keys/append [api_crypto_keys_append]": {
+  "endpoint": "api_crypto_keys_append",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/crypto/keys/append"
+ },
+ "/api/databases [api_create_database]": {
+  "endpoint": "api_create_database",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/databases"
+ },
+ "/api/databases [api_list_databases]": {
+  "endpoint": "api_list_databases",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/databases"
+ },
+ "/api/db-stats [api_db_stats]": {
+  "endpoint": "api_db_stats",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/db-stats"
+ },
+ "/api/export-jobs/<int:job_id> [api_export_job_status]": {
+  "endpoint": "api_export_job_status",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/export-jobs/<int:job_id>"
+ },
+ "/api/export-jobs/<int:job_id>/download [api_export_job_download]": {
+  "endpoint": "api_export_job_download",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/export-jobs/<int:job_id>/download"
+ },
+ "/api/intercepts/ai/proofread [api_intercepts_ai_proofread]": {
+  "endpoint": "api_intercepts_ai_proofread",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/intercepts/ai/proofread"
+ },
+ "/api/intercepts/asr/bootstrap [api_intercepts_asr_bootstrap]": {
+  "endpoint": "api_intercepts_asr_bootstrap",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/intercepts/asr/bootstrap"
+ },
+ "/api/intercepts/asr/dataset-build [api_intercepts_asr_dataset_build]": {
+  "endpoint": "api_intercepts_asr_dataset_build",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/intercepts/asr/dataset-build"
+ },
+ "/api/intercepts/asr/feedback [api_intercepts_asr_feedback]": {
+  "endpoint": "api_intercepts_asr_feedback",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/intercepts/asr/feedback"
+ },
+ "/api/intercepts/asr/learn-from-blank [api_intercepts_asr_learn_from_blank]": {
+  "endpoint": "api_intercepts_asr_learn_from_blank",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/intercepts/asr/learn-from-blank"
+ },
+ "/api/intercepts/asr/model-activate [api_intercepts_asr_model_activate]": {
+  "endpoint": "api_intercepts_asr_model_activate",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/intercepts/asr/model-activate"
+ },
+ "/api/intercepts/asr/model-status [api_intercepts_asr_model_status]": {
+  "endpoint": "api_intercepts_asr_model_status",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/intercepts/asr/model-status"
+ },
+ "/api/intercepts/asr/settings [api_intercepts_asr_settings_get]": {
+  "endpoint": "api_intercepts_asr_settings_get",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/intercepts/asr/settings"
+ },
+ "/api/intercepts/asr/settings [api_intercepts_asr_settings_set]": {
+  "endpoint": "api_intercepts_asr_settings_set",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/intercepts/asr/settings"
+ },
+ "/api/intercepts/asr/train [api_intercepts_asr_train]": {
+  "endpoint": "api_intercepts_asr_train",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/intercepts/asr/train"
+ },
+ "/api/intercepts/asr/training-policy [api_intercepts_asr_training_policy]": {
+  "endpoint": "api_intercepts_asr_training_policy",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/intercepts/asr/training-policy"
+ },
+ "/api/intercepts/asr/transcribe [api_intercepts_asr_transcribe]": {
+  "endpoint": "api_intercepts_asr_transcribe",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/intercepts/asr/transcribe"
+ },
+ "/api/intercepts/asr/transcript [api_intercepts_asr_transcript]": {
+  "endpoint": "api_intercepts_asr_transcript",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/intercepts/asr/transcript"
+ },
+ "/api/intercepts/audio/check-path [api_intercepts_audio_check_path]": {
+  "endpoint": "api_intercepts_audio_check_path",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/intercepts/audio/check-path"
+ },
+ "/api/intercepts/audio/file [api_intercepts_audio_file]": {
+  "endpoint": "api_intercepts_audio_file",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/intercepts/audio/file"
+ },
+ "/api/intercepts/audio/list [api_intercepts_audio_list]": {
+  "endpoint": "api_intercepts_audio_list",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/intercepts/audio/list"
+ },
+ "/api/intercepts/audio/listening [api_intercepts_audio_listening]": {
+  "endpoint": "api_intercepts_audio_listening",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/intercepts/audio/listening"
+ },
+ "/api/intercepts/audio/listening/start [api_intercepts_audio_listening_start]": {
+  "endpoint": "api_intercepts_audio_listening_start",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/intercepts/audio/listening/start"
+ },
+ "/api/intercepts/audio/listening/stop [api_intercepts_audio_listening_stop]": {
+  "endpoint": "api_intercepts_audio_listening_stop",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/intercepts/audio/listening/stop"
+ },
+ "/api/intercepts/audio/mark-listened [api_intercepts_audio_mark_listened]": {
+  "endpoint": "api_intercepts_audio_mark_listened",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/intercepts/audio/mark-listened"
+ },
+ "/api/intercepts/audio/state [api_intercepts_audio_state_get]": {
+  "endpoint": "api_intercepts_audio_state_get",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/intercepts/audio/state"
+ },
+ "/api/intercepts/audio/state [api_intercepts_audio_state_set]": {
+  "endpoint": "api_intercepts_audio_state_set",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/intercepts/audio/state"
+ },
+ "/api/intercepts/audio/tasks [api_intercepts_audio_tasks]": {
+  "endpoint": "api_intercepts_audio_tasks",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/intercepts/audio/tasks"
+ },
+ "/api/intercepts/audio/tasks [api_intercepts_audio_tasks_add]": {
+  "endpoint": "api_intercepts_audio_tasks_add",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/intercepts/audio/tasks"
+ },
+ "/api/intercepts/audio/tasks/active [api_intercepts_audio_tasks_active]": {
+  "endpoint": "api_intercepts_audio_tasks_active",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/intercepts/audio/tasks/active"
+ },
+ "/api/intercepts/audio/tasks/delete [api_intercepts_audio_tasks_delete]": {
+  "endpoint": "api_intercepts_audio_tasks_delete",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/intercepts/audio/tasks/delete"
+ },
+ "/api/intercepts/callsigns [api_intercepts_callsigns_upsert]": {
+  "endpoint": "api_intercepts_callsigns_upsert",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/intercepts/callsigns"
+ },
+ "/api/intercepts/callsigns/delete [api_intercepts_callsigns_delete]": {
+  "endpoint": "api_intercepts_callsigns_delete",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/intercepts/callsigns/delete"
+ },
+ "/api/intercepts/callsigns/last-seen [api_intercepts_callsigns_last_seen]": {
+  "endpoint": "api_intercepts_callsigns_last_seen",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/intercepts/callsigns/last-seen"
+ },
+ "/api/intercepts/callsigns/update [api_intercepts_callsigns_update]": {
+  "endpoint": "api_intercepts_callsigns_update",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/intercepts/callsigns/update"
+ },
+ "/api/intercepts/catalog [api_intercepts_catalog]": {
+  "endpoint": "api_intercepts_catalog",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/intercepts/catalog"
+ },
+ "/api/intercepts/catalog [api_intercepts_catalog_upsert]": {
+  "endpoint": "api_intercepts_catalog_upsert",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/intercepts/catalog"
+ },
+ "/api/intercepts/catalog/archive [api_intercepts_catalog_archive]": {
+  "endpoint": "api_intercepts_catalog_archive",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/intercepts/catalog/archive"
+ },
+ "/api/intercepts/catalog/delete [api_intercepts_catalog_delete]": {
+  "endpoint": "api_intercepts_catalog_delete",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/intercepts/catalog/delete"
+ },
+ "/api/intercepts/catalog/delete-unit [api_intercepts_catalog_delete_unit]": {
+  "endpoint": "api_intercepts_catalog_delete_unit",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/intercepts/catalog/delete-unit"
+ },
+ "/api/intercepts/catalog/favorite [api_intercepts_catalog_favorite]": {
+  "endpoint": "api_intercepts_catalog_favorite",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/intercepts/catalog/favorite"
+ },
+ "/api/intercepts/catalog/rename-unit [api_intercepts_catalog_rename_unit]": {
+  "endpoint": "api_intercepts_catalog_rename_unit",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/intercepts/catalog/rename-unit"
+ },
+ "/api/intercepts/catalog/update-location [api_intercepts_catalog_update_location]": {
+  "endpoint": "api_intercepts_catalog_update_location",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/intercepts/catalog/update-location"
+ },
+ "/api/intercepts/day-blank [api_intercepts_day_blank]": {
+  "endpoint": "api_intercepts_day_blank",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/intercepts/day-blank"
+ },
+ "/api/intercepts/export-docx [api_intercepts_export_docx]": {
+  "endpoint": "api_intercepts_export_docx",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/intercepts/export-docx"
+ },
+ "/api/intercepts/export-docx-job [api_intercepts_export_docx_job]": {
+  "endpoint": "api_intercepts_export_docx_job",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/intercepts/export-docx-job"
+ },
+ "/api/intercepts/item [api_intercepts_get_item]": {
+  "endpoint": "api_intercepts_get_item",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/intercepts/item"
+ },
+ "/api/intercepts/item/update [api_intercepts_update_item]": {
+  "endpoint": "api_intercepts_update_item",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/intercepts/item/update"
+ },
+ "/api/intercepts/item/wait [api_intercepts_item_wait]": {
+  "endpoint": "api_intercepts_item_wait",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/intercepts/item/wait"
+ },
+ "/api/intercepts/session/start-new [api_intercepts_start_new]": {
+  "endpoint": "api_intercepts_start_new",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/intercepts/session/start-new"
+ },
+ "/api/intercepts/state [api_intercepts_state]": {
+  "endpoint": "api_intercepts_state",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/intercepts/state"
+ },
+ "/api/intercepts/typing [api_intercepts_typing]": {
+  "endpoint": "api_intercepts_typing",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/intercepts/typing"
+ },
+ "/api/intercepts/unit-order [api_intercepts_unit_order]": {
+  "endpoint": "api_intercepts_unit_order",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/intercepts/unit-order"
+ },
+ "/api/intercepts/view-mode [api_intercepts_set_view_mode]": {
+  "endpoint": "api_intercepts_set_view_mode",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/intercepts/view-mode"
+ },
+ "/api/legacy-db/upload [api_upload_legacy_db]": {
+  "endpoint": "api_upload_legacy_db",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/legacy-db/upload"
+ },
+ "/api/online-search [api_online_search_list]": {
+  "endpoint": "api_online_search_list",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/online-search"
+ },
+ "/api/online-search [api_online_search_upsert]": {
+  "endpoint": "api_online_search_upsert",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/online-search"
+ },
+ "/api/online-search/battalion-freq-detail [api_online_search_battalion_freq_detail]": {
+  "endpoint": "api_online_search_battalion_freq_detail",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/online-search/battalion-freq-detail"
+ },
+ "/api/online-search/battalion-spectrum [api_online_search_battalion_spectrum]": {
+  "endpoint": "api_online_search_battalion_spectrum",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/online-search/battalion-spectrum"
+ },
+ "/api/online-search/delete [api_online_search_delete]": {
+  "endpoint": "api_online_search_delete",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/online-search/delete"
+ },
+ "/api/online-search/export-xlsx [api_online_search_export_xlsx]": {
+  "endpoint": "api_online_search_export_xlsx",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/online-search/export-xlsx"
+ },
+ "/api/online-search/import-progress [api_online_search_import_progress]": {
+  "endpoint": "api_online_search_import_progress",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/online-search/import-progress"
+ },
+ "/api/online-search/import-xlsx [api_online_search_import_xlsx]": {
+  "endpoint": "api_online_search_import_xlsx",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/online-search/import-xlsx"
+ },
+ "/api/online-search/mark-all-read [api_online_search_mark_all_read]": {
+  "endpoint": "api_online_search_mark_all_read",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/online-search/mark-all-read"
+ },
+ "/api/online-search/note [api_online_search_update_note]": {
+  "endpoint": "api_online_search_update_note",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/online-search/note"
+ },
+ "/api/online-search/sync-units [api_online_search_sync_units]": {
+  "endpoint": "api_online_search_sync_units",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/online-search/sync-units"
+ },
+ "/api/online-search/unit-avatar [api_online_search_unit_avatar_upload]": {
+  "endpoint": "api_online_search_unit_avatar_upload",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/online-search/unit-avatar"
+ },
+ "/api/online-search/unit-avatar/<path:filename> [api_online_search_unit_avatar_file]": {
+  "endpoint": "api_online_search_unit_avatar_file",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/online-search/unit-avatar/<path:filename>"
+ },
+ "/api/online-search/unit-detail [api_online_search_unit_detail]": {
+  "endpoint": "api_online_search_unit_detail",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/online-search/unit-detail"
+ },
+ "/api/online-search/unit-hero-banner [api_online_search_unit_hero_banner_upload]": {
+  "endpoint": "api_online_search_unit_hero_banner_upload",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/online-search/unit-hero-banner"
+ },
+ "/api/online-search/unit-hero/<path:filename> [api_online_search_unit_hero_file]": {
+  "endpoint": "api_online_search_unit_hero_file",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/online-search/unit-hero/<path:filename>"
+ },
+ "/api/online-search/unit-parent [api_online_search_unit_parent]": {
+  "endpoint": "api_online_search_unit_parent",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/online-search/unit-parent"
+ },
+ "/api/online-search/unit-profile [api_online_search_unit_profile_save]": {
+  "endpoint": "api_online_search_unit_profile_save",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/online-search/unit-profile"
+ },
+ "/api/online-search/units [api_online_search_units_list]": {
+  "endpoint": "api_online_search_units_list",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/online-search/units"
+ },
+ "/api/pick-folder [api_pick_folder]": {
+  "endpoint": "api_pick_folder",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/pick-folder"
+ },
+ "/api/sessions/ai/analyze [api_sessions_ai_analyze]": {
+  "endpoint": "api_sessions_ai_analyze",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/sessions/ai/analyze"
+ },
+ "/api/sessions/export-excel [api_sessions_export_excel]": {
+  "endpoint": "api_sessions_export_excel",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/sessions/export-excel"
+ },
+ "/api/sessions/export-excel-job [api_sessions_export_excel_job]": {
+  "endpoint": "api_sessions_export_excel_job",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/sessions/export-excel-job"
+ },
+ "/api/sessions/export-word [api_sessions_export_word]": {
+  "endpoint": "api_sessions_export_word",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/sessions/export-word"
+ },
+ "/api/sessions/export-word-job [api_sessions_export_word_job]": {
+  "endpoint": "api_sessions_export_word_job",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/sessions/export-word-job"
+ },
+ "/api/sessions/favorites [api_sessions_get_favorites]": {
+  "endpoint": "api_sessions_get_favorites",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/sessions/favorites"
+ },
+ "/api/sessions/favorites/add [api_sessions_add_favorite]": {
+  "endpoint": "api_sessions_add_favorite",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/sessions/favorites/add"
+ },
+ "/api/sessions/favorites/remove [api_sessions_remove_favorite]": {
+  "endpoint": "api_sessions_remove_favorite",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/sessions/favorites/remove"
+ },
+ "/api/sessions/id-watch [api_sessions_id_watch_list]": {
+  "endpoint": "api_sessions_id_watch_list",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/sessions/id-watch"
+ },
+ "/api/sessions/id-watch/add [api_sessions_id_watch_add]": {
+  "endpoint": "api_sessions_id_watch_add",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/sessions/id-watch/add"
+ },
+ "/api/sessions/id-watch/alerts [api_sessions_id_watch_alerts]": {
+  "endpoint": "api_sessions_id_watch_alerts",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/sessions/id-watch/alerts"
+ },
+ "/api/sessions/id-watch/remove [api_sessions_id_watch_remove]": {
+  "endpoint": "api_sessions_id_watch_remove",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/sessions/id-watch/remove"
+ },
+ "/api/sessions/process-folder [api_sessions_process_folder]": {
+  "endpoint": "api_sessions_process_folder",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/sessions/process-folder"
+ },
+ "/api/sessions/process-folder/progress [api_sessions_process_folder_progress]": {
+  "endpoint": "api_sessions_process_folder_progress",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/sessions/process-folder/progress"
+ },
+ "/api/sessions/start-watch [api_sessions_start_watch]": {
+  "endpoint": "api_sessions_start_watch",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/sessions/start-watch"
+ },
+ "/api/sessions/stats [api_sessions_stats]": {
+  "endpoint": "api_sessions_stats",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/sessions/stats"
+ },
+ "/api/sessions/stop-watch [api_sessions_stop_watch]": {
+  "endpoint": "api_sessions_stop_watch",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/sessions/stop-watch"
+ },
+ "/api/sessions/table-data [api_sessions_table_data]": {
+  "endpoint": "api_sessions_table_data",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/sessions/table-data"
+ },
+ "/api/sessions/unit-debug [api_sessions_unit_debug]": {
+  "endpoint": "api_sessions_unit_debug",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/sessions/unit-debug"
+ },
+ "/api/sessions/update-unit-name [api_sessions_update_unit_name]": {
+  "endpoint": "api_sessions_update_unit_name",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/sessions/update-unit-name"
+ },
+ "/api/sessions/watch-status [api_sessions_watch_status]": {
+  "endpoint": "api_sessions_watch_status",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/sessions/watch-status"
+ },
+ "/api/sync/pull [api_sync_pull]": {
+  "endpoint": "api_sync_pull",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/sync/pull"
+ },
+ "/api/sync/push [api_sync_push]": {
+  "endpoint": "api_sync_push",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/sync/push"
+ },
+ "/api/sync/status [api_sync_status]": {
+  "endpoint": "api_sync_status",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/sync/status"
+ },
+ "/api/targeting [api_targeting_list]": {
+  "endpoint": "api_targeting_list",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/targeting"
+ },
+ "/api/targeting/all [api_targeting_list_all]": {
+  "endpoint": "api_targeting_list_all",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/targeting/all"
+ },
+ "/api/targeting/read [api_targeting_mark_read]": {
+  "endpoint": "api_targeting_mark_read",
+  "methods": [
+   "POST"
+  ],
+  "rule": "/api/targeting/read"
+ },
+ "/audio-intercepts [audio_intercepts]": {
+  "endpoint": "audio_intercepts",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/audio-intercepts"
+ },
+ "/aviation [aviation]": {
+  "endpoint": "aviation",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/aviation"
+ },
+ "/force-password-change [force_password_change]": {
+  "endpoint": "force_password_change",
+  "methods": [
+   "GET",
+   "POST"
+  ],
+  "rule": "/force-password-change"
+ },
+ "/health [health]": {
+  "endpoint": "health",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/health"
+ },
+ "/instruction [instruction]": {
+  "endpoint": "instruction",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/instruction"
+ },
+ "/intercepts [intercepts]": {
+  "endpoint": "intercepts",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/intercepts"
+ },
+ "/login [login]": {
+  "endpoint": "login",
+  "methods": [
+   "GET",
+   "POST"
+  ],
+  "rule": "/login"
+ },
+ "/logout [logout]": {
+  "endpoint": "logout",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/logout"
+ },
+ "/search-online [search_online]": {
+  "endpoint": "search_online",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/search-online"
+ },
+ "/search-online/battalion [search_online_battalion_page]": {
+  "endpoint": "search_online_battalion_page",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/search-online/battalion"
+ },
+ "/search-online/unit [search_online_unit_parent_page]": {
+  "endpoint": "search_online_unit_parent_page",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/search-online/unit"
+ },
+ "/sessions [sessions]": {
+  "endpoint": "sessions",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/sessions"
+ },
+ "/set-position/<pos> [set_position]": {
+  "endpoint": "set_position",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/set-position/<pos>"
+ },
+ "/static/<path:filename> [static]": {
+  "endpoint": "static",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/static/<path:filename>"
+ }
+}

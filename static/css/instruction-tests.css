@@ -1,0 +1,822 @@
+/**
+ * Instruction Labs — современные интерактивные тренажёры.
+ */
+
+/* ─── Lab shell ─── */
+.instr-lab {
+  --lab-accent: var(--instr-accent, #2563eb);
+  --lab-accent-soft: var(--instr-accent-soft, rgba(37, 99, 235, 0.12));
+  --lab-surface: var(--instr-surface, #fff);
+  --lab-surface-2: var(--instr-surface-2, #f8fafc);
+  --lab-border: var(--instr-border, rgba(15, 23, 42, 0.1));
+  --lab-text: var(--instr-text, #0f172a);
+  --lab-muted: var(--instr-muted, #64748b);
+  --lab-radius: 18px;
+  --lab-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --lab-spot: 0 0 0 2px var(--lab-accent), 0 0 0 6px color-mix(in srgb, var(--lab-accent) 22%, transparent),
+    0 12px 32px color-mix(in srgb, var(--lab-accent) 18%, transparent);
+  border-radius: var(--lab-radius);
+  border: 1px solid var(--lab-border);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--lab-surface) 94%, var(--lab-accent) 6%), var(--lab-surface));
+  box-shadow: 0 14px 40px rgba(15, 23, 42, 0.07);
+  overflow: hidden;
+}
+
+/* Intro / start */
+.instr-lab__intro {
+  display: grid;
+  place-items: center;
+  text-align: center;
+  gap: 0.65rem;
+  padding: 2rem 1.25rem 2.15rem;
+  background:
+    radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--lab-accent) 12%, transparent), transparent 58%),
+    var(--lab-surface);
+}
+
+.instr-lab__intro-icon {
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  background: linear-gradient(145deg, var(--lab-accent-soft), color-mix(in srgb, var(--lab-accent) 8%, transparent));
+  color: var(--lab-accent);
+  font-size: 1.45rem;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+.instr-lab__intro-title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.instr-lab__intro-text {
+  margin: 0;
+  max-width: 42ch;
+  color: var(--lab-muted);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+.instr-lab__start-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: 46px;
+  margin-top: 0.35rem;
+  padding: 0.65rem 1.35rem;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(145deg, var(--lab-accent), color-mix(in srgb, var(--lab-accent) 78%, #1d4ed8));
+  color: #fff;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  box-shadow: 0 8px 22px color-mix(in srgb, var(--lab-accent) 32%, transparent);
+  transition: transform 0.15s var(--lab-ease), box-shadow 0.15s var(--lab-ease);
+}
+
+.instr-lab__start-btn:hover {
+  transform: translateY(-1px);
+  color: #fff;
+  box-shadow: 0 10px 28px color-mix(in srgb, var(--lab-accent) 38%, transparent);
+}
+
+.instr-lab__start-btn:active {
+  transform: translateY(0);
+}
+
+/* Run toolbar */
+.instr-lab__run {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.instr-lab__toolbar {
+  display: grid;
+  gap: 0.65rem;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--lab-border);
+  background: color-mix(in srgb, var(--lab-surface) 88%, var(--lab-accent) 12%);
+}
+
+.instr-lab__progress-track {
+  display: block;
+  height: 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--lab-border) 70%, transparent);
+  overflow: hidden;
+}
+
+.instr-lab__progress-fill {
+  display: block;
+  height: 100%;
+  width: 0%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--lab-accent), color-mix(in srgb, var(--lab-accent) 70%, #0ea5e9));
+  transition: width 0.38s var(--lab-ease);
+}
+
+.instr-lab__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.45rem 0.75rem;
+}
+
+.instr-lab__badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  background: var(--lab-accent-soft);
+  color: var(--lab-accent);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.instr-lab__hint {
+  margin: 0;
+  flex: 1 1 12rem;
+  min-width: 0;
+  color: var(--lab-muted);
+  font-size: 0.875rem;
+  line-height: 1.45;
+  text-wrap: pretty;
+}
+
+/* Progress widths — intercepts / sessions (5 steps) */
+#intercept-test-steps:has(.intercept-step-1) .instr-lab__progress-fill,
+#sessions-test-steps:has(.sessions-step-1) .instr-lab__progress-fill { width: 20%; }
+#intercept-test-steps:has(.intercept-step-2) .instr-lab__progress-fill,
+#sessions-test-steps:has(.sessions-step-2) .instr-lab__progress-fill { width: 40%; }
+#intercept-test-steps:has(.intercept-step-3) .instr-lab__progress-fill,
+#sessions-test-steps:has(.sessions-step-3) .instr-lab__progress-fill { width: 60%; }
+#intercept-test-steps:has(.intercept-step-4) .instr-lab__progress-fill,
+#sessions-test-steps:has(.sessions-step-4) .instr-lab__progress-fill { width: 80%; }
+#intercept-test-steps:has(.intercept-step-5) .instr-lab__progress-fill,
+#sessions-test-steps:has(.sessions-step-5) .instr-lab__progress-fill { width: 100%; }
+
+/* aviation / analysis / dict (3 steps) */
+#aviation-test-steps:has(.aviation-step-1) .instr-lab__progress-fill,
+#analysis-test-steps:has(.analysis-step-1) .instr-lab__progress-fill,
+#dict-test-steps:has(.dict-step-1) .instr-lab__progress-fill { width: 33.33%; }
+#aviation-test-steps:has(.aviation-step-2) .instr-lab__progress-fill,
+#analysis-test-steps:has(.analysis-step-2) .instr-lab__progress-fill,
+#dict-test-steps:has(.dict-step-2) .instr-lab__progress-fill { width: 66.66%; }
+#aviation-test-steps:has(.aviation-step-3) .instr-lab__progress-fill,
+#analysis-test-steps:has(.analysis-step-3) .instr-lab__progress-fill,
+#dict-test-steps:has(.dict-step-3) .instr-lab__progress-fill { width: 100%; }
+
+/* search (2 steps) */
+#search-test-steps:has(.search-step-1) .instr-lab__progress-fill { width: 50%; }
+#search-test-steps:has(.search-step-2) .instr-lab__progress-fill { width: 100%; }
+
+/* Mock app window */
+.instr-lab__window {
+  position: relative;
+  margin: 0.85rem;
+  border-radius: 16px;
+  border: 1px solid var(--lab-border);
+  background: var(--lab-surface-2);
+  overflow: visible;
+  box-shadow: 0 8px 28px rgba(15, 23, 42, 0.06);
+}
+
+.instr-lab__window::before {
+  content: "Симуляция интерфейса";
+  display: block;
+  padding: 0.45rem 0.75rem;
+  border-bottom: 1px solid var(--lab-border);
+  background: color-mix(in srgb, var(--lab-surface) 92%, transparent);
+  color: var(--lab-muted);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.instr-lab__window > .navbar,
+.instr-lab__window > nav.navbar {
+  margin: 0 !important;
+  border-radius: 0 !important;
+  min-height: 48px !important;
+  padding: 0.35rem 0.75rem !important;
+  background: color-mix(in srgb, var(--lab-surface) 96%, var(--lab-accent) 4%) !important;
+  border-bottom: 1px solid var(--lab-border) !important;
+  box-shadow: none !important;
+}
+
+.instr-lab__window .navbar-brand {
+  font-size: 0.9375rem !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.02em;
+}
+
+.instr-lab__window .nav-link {
+  font-size: 0.8125rem !important;
+  border-radius: 10px;
+  padding: 0.35rem 0.55rem !important;
+}
+
+.instr-lab__window .nav-link.active,
+.instr-lab__window .intercept-test-nav-item.active,
+.instr-lab__window .sessions-test-nav-item.active,
+.instr-lab__window .aviation-test-nav.active,
+.instr-lab__window .analysis-test-nav.active,
+.instr-lab__window .search-test-nav.active,
+.instr-lab__window .dict-test-nav.active {
+  background: var(--lab-accent-soft) !important;
+  color: var(--lab-accent) !important;
+  font-weight: 700;
+}
+
+.instr-lab__window .list-group-item {
+  border-radius: 12px !important;
+  margin-bottom: 0.25rem;
+  border: 1px solid transparent !important;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+
+.instr-lab__window .list-group-item:hover {
+  background: var(--lab-accent-soft) !important;
+  border-color: color-mix(in srgb, var(--lab-accent) 20%, transparent) !important;
+}
+
+.instr-lab__window .card {
+  border-radius: 14px !important;
+  border: 1px solid var(--lab-border) !important;
+  background: var(--lab-surface) !important;
+  box-shadow: none !important;
+}
+
+.instr-lab__window .form-control,
+.instr-lab__window textarea {
+  border-radius: 12px !important;
+  border-color: var(--lab-border) !important;
+  font-size: 16px;
+}
+
+.instr-lab__window .btn {
+  border-radius: 12px !important;
+}
+
+.intercept-mock-layout,
+.sessions-mock-layout {
+  min-height: 300px;
+}
+
+/* ─── Intercepts trainer: messenger mock shell ─── */
+#intercept-mock-page {
+  padding: 0 !important;
+  overflow: hidden;
+  border-radius: 16px !important;
+  background: transparent !important;
+}
+
+#intercept-mock-page.intercept-mock-page {
+  --tg-sidebar-w: min(280px, 38%);
+}
+
+#intercept-test-wrap,
+#intercept-test-steps,
+#intercept-mock-page,
+#intercept-mock-page .intercept-mock-shell {
+  overflow: visible;
+}
+
+.intercept-mock-shell {
+  display: flex;
+  min-height: min(480px, 62vh);
+  max-height: 540px;
+  border-radius: 16px;
+  border: 1px solid var(--lab-border);
+  background: var(--lab-surface);
+  overflow: hidden;
+}
+
+.intercept-mock-main-col {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.intercept-mock-rail {
+  position: relative;
+  flex: 0 0 72px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.65rem 0.45rem;
+  border-right: 1px solid var(--lab-border);
+  background: color-mix(in srgb, var(--lab-surface-2) 88%, var(--lab-accent) 12%);
+}
+
+.intercept-mock-rail__brand {
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--lab-muted);
+  padding-bottom: 0.35rem;
+}
+
+.intercept-mock-rail__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.intercept-mock-rail__link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.45rem 0.25rem;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  color: var(--lab-muted);
+  font-size: 0.5625rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.intercept-mock-rail__link i {
+  font-size: 1rem;
+}
+
+.intercept-mock-rail__link:hover {
+  color: var(--lab-text);
+  background: color-mix(in srgb, var(--lab-accent) 8%, transparent);
+}
+
+.intercept-mock-rail__link.intercept-test-rail-link--active,
+.intercept-mock-page.intercept-step-1 .intercept-test-rail-link {
+  color: var(--lab-accent);
+  background: var(--lab-accent-soft);
+  border-color: color-mix(in srgb, var(--lab-accent) 22%, transparent);
+  font-weight: 700;
+}
+
+.intercept-mock-topbar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 48px;
+  padding: 0.45rem 0.75rem;
+  border-bottom: 1px solid var(--lab-border);
+  background: color-mix(in srgb, var(--lab-surface) 92%, var(--lab-accent) 8%);
+}
+
+.intercept-mock-topbar__title {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--lab-text);
+}
+
+.intercept-mock-topbar-pos {
+  position: relative;
+}
+
+.intercept-mock-topbar-pos__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 34px;
+  padding: 0.25rem 0.65rem;
+  border: 1px solid var(--lab-border);
+  border-radius: 999px;
+  background: var(--lab-surface);
+  color: var(--lab-text);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.intercept-mock-topbar-pos__menu {
+  list-style: none;
+  margin: 0.35rem 0 0;
+  padding: 0.35rem;
+  min-width: 180px;
+  border: 1px solid var(--lab-border);
+  border-radius: 12px;
+  background: var(--lab-surface);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.1);
+}
+
+.intercept-mock-topbar-pos__item {
+  display: block;
+  width: 100%;
+  padding: 0.45rem 0.55rem;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--lab-text);
+  font-size: 0.8125rem;
+  text-align: left;
+}
+
+.intercept-mock-topbar-pos__item:hover {
+  background: var(--lab-accent-soft);
+}
+
+.intercept-mock-tg {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+#intercept-mock-page .tg-sidebar {
+  flex: 0 0 var(--tg-sidebar-w);
+  min-width: 0;
+  min-height: 0;
+  border-right: 1px solid var(--tg-border, var(--lab-border));
+}
+
+#intercept-mock-page .tg-chat {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+}
+
+#intercept-mock-page .groups-list-scroll,
+#intercept-mock-page .tg-callsign-list-scroll {
+  max-height: 160px;
+  overflow: auto;
+}
+
+#intercept-mock-page .tg-chat__log {
+  min-height: 120px;
+  font-family: "Times New Roman", Times, serif;
+  font-size: 12pt;
+}
+
+#intercept-mock-page .ix-mobile-segments {
+  display: flex;
+  gap: 0.35rem;
+  margin-bottom: 0.5rem;
+}
+
+#intercept-mock-page .ix-mobile-segments__btn {
+  flex: 1 1 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  min-height: 32px;
+  padding: 0.25rem 0.45rem;
+  border: 1px solid var(--tg-border, var(--lab-border));
+  border-radius: 10px;
+  background: transparent;
+  color: var(--tg-text-secondary, var(--lab-muted));
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+#intercept-mock-page .ix-mobile-segments__btn.active {
+  background: var(--tg-accent-soft, var(--lab-accent-soft));
+  border-color: color-mix(in srgb, var(--lab-accent) 28%, transparent);
+  color: var(--tg-accent, var(--lab-accent));
+}
+
+#intercept-test-wrap,
+#intercept-test-steps,
+#intercept-mock-page,
+#intercept-mock-page .intercept-mock-topbar {
+  overflow: visible;
+}
+
+/* Coach / hints */
+.instr-lab .intercept-hint-popover {
+  display: none;
+  position: absolute;
+  z-index: 10000;
+  min-width: 260px;
+  max-width: min(340px, 42vw);
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--lab-accent) 28%, var(--lab-border));
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--lab-surface) 88%, transparent);
+  backdrop-filter: blur(16px) saturate(1.25);
+  -webkit-backdrop-filter: blur(16px) saturate(1.25);
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.14);
+  overflow: hidden;
+}
+
+.instr-lab .intercept-hint-popover::before {
+  content: "Подсказка";
+  display: block;
+  padding: 0.45rem 0.85rem;
+  border-bottom: 1px solid var(--lab-border);
+  background: color-mix(in srgb, var(--lab-accent) 8%, var(--lab-surface));
+  color: var(--lab-accent);
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.instr-lab .intercept-hint-popover-body {
+  padding: 0.85rem 0.95rem !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+}
+
+.instr-lab .intercept-hint-popover-body p {
+  margin-bottom: 0.45rem;
+  color: var(--lab-text);
+  font-size: 0.875rem;
+  line-height: 1.45;
+  text-wrap: pretty;
+}
+
+.instr-lab .intercept-hint-popover-body p:last-child {
+  margin-bottom: 0;
+  color: var(--lab-muted);
+  font-size: 0.8125rem;
+}
+
+.instr-lab .intercept-hint-popover-arrow,
+.instr-lab .intercept-hint-popover-arrow-left,
+.instr-lab .intercept-hint-popover-arrow-right {
+  display: none;
+}
+
+/* Step visibility — intercepts hints */
+.intercept-hint-popover-step1 { display: none; }
+
+.intercept-mock-page.intercept-step-1 .intercept-hint-popover-step1,
+.intercept-mock-page.intercept-step-2 .intercept-hint-popover-step2,
+.intercept-mock-page.intercept-step-3 .intercept-hint-popover-step3,
+.intercept-mock-page.intercept-step-4 .intercept-hint-popover-step4,
+.intercept-mock-page.intercept-step-5 .intercept-hint-popover-step5,
+.aviation-mock.aviation-step-1 .aviation-hint-step1,
+.aviation-mock.aviation-step-2 .aviation-hint-step2,
+.aviation-mock.aviation-step-3 .aviation-hint-step3,
+.analysis-mock.analysis-step-1 .analysis-hint-step1,
+.analysis-mock.analysis-step-2 .analysis-hint-step2,
+.analysis-mock.analysis-step-3 .analysis-hint-step3,
+.search-mock.search-step-1 .search-hint-step1,
+.search-mock.search-step-2 .search-hint-step2,
+.dict-mock.dict-step-1 .dict-hint-step1,
+.dict-mock.dict-step-2 .dict-hint-step2,
+.dict-mock.dict-step-3 .dict-hint-step3 {
+  display: block;
+}
+
+.intercept-mock-page.intercept-step-1 .intercept-hint-popover-step2,
+.intercept-mock-page.intercept-step-1 .intercept-hint-popover-step3,
+.intercept-mock-page.intercept-step-1 .intercept-hint-popover-step4,
+.intercept-mock-page.intercept-step-1 .intercept-hint-popover-step5 {
+  display: none !important;
+}
+
+.intercept-hint-popover-step2,
+.intercept-hint-popover-step3,
+.intercept-hint-popover-step4,
+.intercept-hint-popover-step5 {
+  display: none;
+}
+
+/* Coach placement desktop — intercepts messenger mock */
+.intercept-mock-page.intercept-step-1 .intercept-hint-popover-step1 {
+  left: calc(100% + 10px);
+  right: auto;
+  top: 50%;
+  bottom: auto;
+  transform: translateY(-50%);
+}
+
+.intercept-mock-page.intercept-step-2 .intercept-hint-popover-step2,
+.intercept-mock-page.intercept-step-3 .intercept-hint-popover-step3,
+.intercept-mock-page.intercept-step-4 .intercept-hint-popover-step4,
+.instr-lab .intercept-hint-popover.generic-hint {
+  left: auto;
+  right: 0.75rem;
+  top: auto;
+  bottom: calc(100% + 10px);
+  transform: none;
+  margin: 0;
+}
+
+.intercept-mock-page.intercept-step-5 .intercept-hint-popover-step5 {
+  left: 50%;
+  right: auto;
+  top: auto;
+  bottom: calc(100% + 10px);
+  transform: translateX(-50%);
+  margin: 0;
+}
+
+/* Spotlight targets */
+@keyframes instr-spotlight-pulse {
+  0%, 100% { box-shadow: var(--lab-spot); }
+  50% { box-shadow: 0 0 0 2px var(--lab-accent), 0 0 0 10px color-mix(in srgb, var(--lab-accent) 12%, transparent), 0 16px 36px color-mix(in srgb, var(--lab-accent) 22%, transparent); }
+}
+
+.intercept-mock-page.intercept-step-1 .intercept-test-rail-link,
+.sessions-mock-page.sessions-step-1 > nav,
+.aviation-mock.aviation-step-1 > nav,
+.analysis-mock.analysis-step-1 > nav,
+.search-mock.search-step-1 > nav,
+.dict-mock.dict-step-1 > nav,
+.intercept-mock-page.intercept-step-2 .intercept-mock-topbar-pos,
+.intercept-mock-page.intercept-step-3 #intercept-test-groups-list,
+.intercept-mock-page.intercept-step-4 .intercept-mock-composer-zone,
+.intercept-mock-page.intercept-step-5 .intercept-mock-callsigns-zone,
+.sessions-mock-page.sessions-step-1 > nav,
+.sessions-mock-page.sessions-step-2 .sessions-mock-sidebar,
+.sessions-mock-page.sessions-step-3 .sessions-mock-table-zone,
+.sessions-mock-page.sessions-step-4 .sessions-mock-folder-zone,
+.sessions-mock-page.sessions-step-5 .sessions-mock-table-zone,
+.aviation-mock.aviation-step-2 .aviation-mock-sidebar,
+.aviation-mock.aviation-step-3 .aviation-mock-main,
+.analysis-mock.analysis-step-2 .analysis-mock-containers,
+.analysis-mock.analysis-step-3 .analysis-mock-positions,
+.search-mock.search-step-2 .search-mock-main .card,
+.dict-mock.dict-step-2 .dict-mock-main .nav-tabs,
+.dict-mock.dict-step-3 .dict-mock-main input#dict-test-search {
+  position: relative;
+  z-index: 20;
+  border-radius: 12px !important;
+  animation: instr-spotlight-pulse 2s var(--lab-ease) infinite;
+}
+
+/* Done state */
+.instr-lab__done {
+  padding: 1.25rem;
+}
+
+.instr-lab__done-card {
+  display: grid;
+  gap: 0.65rem;
+  justify-items: start;
+  padding: 1.15rem 1.2rem;
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, #22c55e 35%, var(--lab-border));
+  background:
+    radial-gradient(circle at 0% 0%, color-mix(in srgb, #22c55e 12%, transparent), transparent 55%),
+    color-mix(in srgb, var(--lab-surface) 96%, #22c55e 4%);
+}
+
+.instr-lab__done-icon {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: color-mix(in srgb, #22c55e 16%, transparent);
+  color: #16a34a;
+  font-size: 1.35rem;
+}
+
+.instr-lab__done-title {
+  margin: 0;
+  font-size: 1.0625rem;
+  font-weight: 800;
+}
+
+.instr-lab__done-text {
+  margin: 0;
+  color: var(--lab-muted);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+.instr-lab__restart-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 40px;
+  padding: 0.45rem 0.9rem;
+  border: 1px solid var(--lab-border);
+  border-radius: 12px;
+  background: var(--lab-surface);
+  color: var(--lab-text);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.instr-lab__restart-btn:hover {
+  background: var(--lab-surface-2);
+  color: var(--lab-text);
+}
+
+@media (max-width: 767.98px) {
+  .instr-lab__window {
+    margin: 0.55rem;
+  }
+
+  .intercept-mock-shell {
+    flex-direction: column;
+    min-height: 420px;
+    max-height: none;
+  }
+
+  .intercept-mock-rail {
+    flex: 0 0 auto;
+    flex-direction: row;
+    align-items: center;
+    padding: 0.45rem;
+    border-right: 0;
+    border-bottom: 1px solid var(--lab-border);
+  }
+
+  .intercept-mock-rail__brand {
+    display: none;
+  }
+
+  .intercept-mock-rail__nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .intercept-mock-rail__link {
+    flex: 1 1 auto;
+    flex-direction: row;
+    font-size: 0.6875rem;
+  }
+
+  #intercept-mock-page {
+    --tg-sidebar-w: 100%;
+  }
+
+  .intercept-mock-tg {
+    flex-direction: column;
+  }
+
+  #intercept-mock-page .tg-sidebar {
+    flex: 0 0 auto;
+    max-height: 220px;
+  }
+
+  .instr-lab .intercept-hint-popover {
+    position: fixed !important;
+    left: 50% !important;
+    right: auto !important;
+    top: auto !important;
+    bottom: max(12px, env(safe-area-inset-bottom)) !important;
+    transform: translateX(-50%) !important;
+    width: min(92vw, 360px);
+    max-width: none;
+    min-width: 0;
+    z-index: 10050;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .instr-lab__progress-fill,
+  .instr-lab__start-btn,
+  .intercept-mock-page.intercept-step-1 .intercept-test-rail-link,
+.sessions-mock-page.sessions-step-1 > nav,
+.aviation-mock.aviation-step-1 > nav,
+.analysis-mock.analysis-step-1 > nav,
+.search-mock.search-step-1 > nav,
+.dict-mock.dict-step-1 > nav,
+.intercept-mock-page.intercept-step-2 .intercept-mock-topbar-pos,
+  .intercept-mock-page.intercept-step-3 #intercept-test-groups-list,
+  .intercept-mock-page.intercept-step-4 .intercept-mock-composer-zone,
+  .intercept-mock-page.intercept-step-5 .intercept-mock-callsigns-zone,
+  .sessions-mock-page.sessions-step-1 > nav,
+  .sessions-mock-page.sessions-step-2 .sessions-mock-sidebar,
+  .sessions-mock-page.sessions-step-3 .sessions-mock-table-zone,
+  .sessions-mock-page.sessions-step-4 .sessions-mock-folder-zone,
+  .sessions-mock-page.sessions-step-5 .sessions-mock-table-zone,
+  .aviation-mock.aviation-step-2 .aviation-mock-sidebar,
+  .aviation-mock.aviation-step-3 .aviation-mock-main,
+  .analysis-mock.analysis-step-2 .analysis-mock-containers,
+  .analysis-mock.analysis-step-3 .analysis-mock-positions,
+  .search-mock.search-step-2 .search-mock-main .card,
+  .dict-mock.dict-step-2 .dict-mock-main .nav-tabs,
+  .dict-mock.dict-step-3 .dict-mock-main input#dict-test-search {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .instr-lab .intercept-hint-popover {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--lab-surface);
+  }
+}

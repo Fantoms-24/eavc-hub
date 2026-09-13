@@ -1,0 +1,807 @@
+/**
+ * Intercepts — modern web patterns (glass shell, content-visibility, container queries).
+ * Scoped to .ix-modern-ui; loads after intercepts-messenger.css.
+ */
+
+/* ─── Tokens ─── */
+.md3-intercepts.ix-messenger-ui.ix-modern-ui {
+  --ix-glass-blur: 16px;
+  --ix-glass-saturate: 1.35;
+  --ix-glass-fill: rgba(255, 255, 255, 0.72);
+  --ix-glass-fill-soft: rgba(255, 255, 255, 0.55);
+  --ix-glass-border: rgba(148, 163, 184, 0.28);
+  --ix-glass-border-soft: rgba(148, 163, 184, 0.16);
+  --ix-glass-shadow: 0 18px 48px rgba(15, 23, 42, 0.08);
+  --ix-surface: #eef3f9;
+  --ix-surface-2: #f8fafc;
+  --ix-accent: #2563eb;
+  --ix-accent-soft: rgba(37, 99, 235, 0.1);
+  --ix-accent-glow: rgba(37, 99, 235, 0.22);
+  --ix-cyan: #0ea5e9;
+  --ix-peer-h: 56px;
+  --ix-sidebar-w: min(380px, 34vw);
+  --tg-sidebar-w: var(--ix-sidebar-w);
+  --tg-peer-h: var(--ix-peer-h);
+}
+
+html[data-wp-theme="dark"] .md3-intercepts.ix-messenger-ui.ix-modern-ui {
+  --ix-glass-fill: var(--eavc-card, #111827);
+  --ix-glass-fill-soft: var(--eavc-card-2, #161f2e);
+  --ix-glass-border: var(--eavc-border, rgba(148, 163, 184, 0.09));
+  --ix-glass-border-soft: var(--eavc-border, rgba(148, 163, 184, 0.09));
+  --ix-glass-shadow: none;
+  --ix-surface: var(--eavc-bg-elevated, #0d121c);
+  --ix-surface-2: var(--eavc-card, #111827);
+  --ix-accent: var(--eavc-accent, #6b93ff);
+  --ix-accent-soft: var(--eavc-accent-soft, rgba(107, 147, 255, 0.1));
+  --ix-accent-glow: rgba(0, 0, 0, 0.35);
+  --ix-cyan: var(--eavc-accent-dim, #5478e6);
+}
+
+/* ─── Container queries ─── */
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-layout {
+  container-type: inline-size;
+  container-name: ix-shell;
+}
+
+@container ix-shell (max-width: 900px) {
+  .md3-intercepts.ix-messenger-ui.ix-modern-ui {
+    --ix-sidebar-w: min(100%, 320px);
+  }
+}
+
+/* ─── Shell ─── */
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-layout,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .ix-messenger-layout {
+  border: 1px solid var(--ix-glass-border);
+  background:
+    radial-gradient(circle at 0% 0%, rgba(96, 165, 250, 0.1), transparent 38%),
+    radial-gradient(circle at 100% 100%, rgba(14, 165, 233, 0.08), transparent 42%),
+    linear-gradient(180deg, var(--ix-surface-2) 0%, var(--ix-surface) 100%);
+  box-shadow: var(--ix-glass-shadow);
+}
+
+html[data-wp-theme="dark"] .md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-layout,
+html[data-wp-theme="dark"] .md3-intercepts.ix-messenger-ui.ix-modern-ui .ix-messenger-layout {
+  border: 1px solid var(--ix-glass-border);
+  background: var(--ix-surface-2);
+  box-shadow: none;
+}
+
+/* ─── Sidebar ─── */
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-sidebar {
+  background:
+    radial-gradient(circle at 8% 0%, rgba(96, 165, 250, 0.12), transparent 36%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.94) 0%, rgba(241, 245, 249, 0.96) 100%);
+  border-right-color: var(--ix-glass-border-soft);
+}
+
+html[data-wp-theme="dark"] .md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-sidebar {
+  background: var(--ix-surface-2);
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-sidebar__head {
+  position: relative;
+  z-index: 4;
+  background: var(--ix-glass-fill);
+  backdrop-filter: blur(var(--ix-glass-blur)) saturate(var(--ix-glass-saturate));
+  -webkit-backdrop-filter: blur(var(--ix-glass-blur)) saturate(var(--ix-glass-saturate));
+  border-bottom-color: var(--ix-glass-border-soft);
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-sidebar__menu-wrap {
+  z-index: 50;
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-sidebar__head::after {
+  content: "";
+  position: absolute;
+  left: var(--tg-pad-x);
+  right: var(--tg-pad-x);
+  bottom: 0;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--ix-accent), var(--ix-cyan));
+  opacity: 0.55;
+}
+
+html[data-wp-theme="dark"] .md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-sidebar__head::after {
+  opacity: 0.22;
+  background: linear-gradient(90deg, transparent, var(--eavc-border-strong, rgba(148, 163, 184, 0.2)), transparent);
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-sidebar__title {
+  font-size: 1.25rem;
+  font-weight: 650;
+  letter-spacing: -0.025em;
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-sidebar__search {
+  background: transparent;
+  border-bottom-color: var(--ix-glass-border-soft);
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-search-field {
+  min-height: 40px;
+  background: color-mix(in srgb, var(--ix-glass-fill-soft) 80%, transparent);
+  border: 1px solid var(--ix-glass-border-soft);
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-search-field:focus-within {
+  background: var(--ix-glass-fill);
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-sidebar__foot {
+  background: var(--ix-glass-fill-soft);
+  backdrop-filter: blur(12px) saturate(1.2);
+  -webkit-backdrop-filter: blur(12px) saturate(1.2);
+  border-top-color: var(--ix-glass-border-soft);
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui #groups-list .unit-groups-container {
+  border-left: none !important;
+  margin-left: 0.35rem;
+  padding-left: 0.35rem;
+}
+
+/* ─── Chat list ─── */
+.md3-intercepts.ix-messenger-ui.ix-modern-ui #groups-list {
+  padding: 0.35rem 0.4rem;
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui #groups-list .unit-header {
+  padding: 0.55rem 0.75rem 0.3rem !important;
+  font-size: 0.625rem !important;
+  letter-spacing: 0.08em;
+  color: color-mix(in srgb, var(--tg-text-secondary) 88%, transparent) !important;
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui #groups-list .tg-chat-item__btn {
+  padding: 0.45rem 0.55rem;
+  border-radius: 12px;
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui #groups-list .ix-catalog-row--selected {
+  border-color: var(--ix-accent) !important;
+  background: color-mix(in srgb, var(--ix-accent-soft) 80%, var(--ix-surface-2, #f8fafc)) !important;
+  box-shadow:
+    0 0 0 3px var(--ix-accent-glow, rgba(37, 99, 235, 0.22)),
+    0 8px 20px rgba(15, 23, 42, 0.1) !important;
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui #groups-list .ix-catalog-row--selected .tg-chat-item__btn {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+html[data-wp-theme="dark"] .md3-intercepts.ix-messenger-ui.ix-modern-ui #groups-list .tg-chat-item--active .tg-chat-item__btn,
+html[data-wp-theme="dark"] .md3-intercepts.ix-messenger-ui.ix-modern-ui #groups-list .list-group-item.active .tg-chat-item__btn {
+  background: var(--eavc-surface-active, color-mix(in srgb, var(--eavc-text, #eef2f8) 8%, transparent)) !important;
+  box-shadow: inset 2px 0 0 var(--ix-accent);
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-chat-item__avatar {
+  width: 40px;
+  height: 40px;
+  font-size: 0.875rem;
+  border-radius: 12px;
+  background: linear-gradient(145deg, #3b82f6 0%, #0ea5e9 100%);
+  box-shadow: none;
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-chat-item__title {
+  font-size: 0.875rem;
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-chat-item__preview {
+  font-size: 0.75rem;
+}
+
+/* ─── Main chat column ─── */
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-chat {
+  background:
+    radial-gradient(circle at 10% 88%, rgba(37, 99, 235, 0.06), transparent 34%),
+    radial-gradient(circle at 92% 8%, rgba(14, 165, 233, 0.07), transparent 38%),
+    linear-gradient(180deg, rgba(248, 251, 255, 0.95) 0%, rgba(255, 255, 255, 0.98) 100%);
+  background-image: none;
+}
+
+html[data-wp-theme="dark"] .md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-chat {
+  background: var(--ix-surface);
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-chat__header {
+  min-height: var(--ix-peer-h);
+  background: var(--ix-glass-fill);
+  backdrop-filter: blur(var(--ix-glass-blur)) saturate(var(--ix-glass-saturate));
+  -webkit-backdrop-filter: blur(var(--ix-glass-blur)) saturate(var(--ix-glass-saturate));
+  border-bottom-color: var(--ix-glass-border-soft);
+  z-index: 2;
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-chat__title {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.015em;
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-icon-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-icon-btn:hover:not(:disabled) {
+  background: var(--tg-bg-hover);
+  border-color: transparent !important;
+  color: var(--tg-text);
+  box-shadow: none !important;
+}
+
+/* ─── Blank / history ─── */
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-chat__body {
+  padding: 0.65rem var(--tg-pad-x) 0.35rem;
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-chat__history#intercept-text-wrapper,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui #intercept-text-wrapper {
+  border: none !important;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--ix-glass-fill) 88%, #fff 12%);
+  backdrop-filter: blur(10px) saturate(1.15);
+  -webkit-backdrop-filter: blur(10px) saturate(1.15);
+  box-shadow: none !important;
+}
+
+html[data-wp-theme="dark"] .md3-intercepts.ix-messenger-ui.ix-modern-ui #intercept-text-wrapper {
+  background: var(--ix-glass-fill-soft);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid var(--ix-glass-border) !important;
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui #intercept-text-wrapper:focus-within {
+  background: color-mix(in srgb, var(--ix-glass-fill) 94%, #fff 6%);
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui #intercept-text {
+  padding: 1rem 1.1rem !important;
+  font-size: 11.5pt !important;
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-chat__meta-text,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui #save-text {
+  font-variant-numeric: tabular-nums;
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .save-indicator {
+  box-shadow: 0 0 0 2px color-mix(in srgb, currentColor 25%, transparent);
+}
+
+/* ─── Composer ─── */
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-composer {
+  background: var(--ix-glass-fill);
+  backdrop-filter: blur(var(--ix-glass-blur)) saturate(var(--ix-glass-saturate));
+  -webkit-backdrop-filter: blur(var(--ix-glass-blur)) saturate(var(--ix-glass-saturate));
+  border-top: none;
+  box-shadow: none;
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-composer__inner::before {
+  letter-spacing: 0.07em;
+  color: color-mix(in srgb, var(--tg-text-secondary) 90%, var(--ix-accent) 10%);
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-composer__input,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui #intercept-input {
+  border: none !important;
+  border-radius: 14px !important;
+  background: color-mix(in srgb, var(--ix-glass-fill-soft) 70%, #fff 30%) !important;
+  box-shadow: none !important;
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui #intercept-input:focus {
+  background: color-mix(in srgb, var(--ix-glass-fill-soft) 55%, #fff 45%) !important;
+  box-shadow: none !important;
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-composer__send,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui #send-input-btn {
+  background-color: var(--ix-accent, #2563eb) !important;
+  background-image: linear-gradient(135deg, var(--ix-accent, #2563eb) 0%, color-mix(in srgb, var(--ix-accent, #2563eb) 70%, var(--ix-cyan, #0ea5e9) 30%) 100%) !important;
+  color: #fff !important;
+  box-shadow: none;
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-composer__send.is-empty,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui #send-input-btn.is-empty {
+  background-color: color-mix(in srgb, var(--ix-accent, #2563eb) 14%, var(--tg-bg, #fff)) !important;
+  background-image: none !important;
+  color: var(--ix-accent, #2563eb) !important;
+  box-shadow: none;
+}
+
+/* ─── Dropdown & side menu ─── */
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-dropdown-menu {
+  border: 1px solid var(--ix-glass-border);
+  border-radius: 14px;
+  background: var(--ix-glass-fill);
+  backdrop-filter: blur(18px) saturate(1.4);
+  -webkit-backdrop-filter: blur(18px) saturate(1.4);
+  box-shadow: var(--ix-glass-shadow);
+  padding: 0.35rem;
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-dropdown-menu .dropdown-item {
+  border-radius: 10px;
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-side-menu {
+  border: 1px solid var(--ix-glass-border);
+  border-radius: 14px;
+  background: var(--ix-glass-fill);
+  backdrop-filter: blur(18px) saturate(1.4);
+  -webkit-backdrop-filter: blur(18px) saturate(1.4);
+  box-shadow: var(--ix-glass-shadow);
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-side-menu[hidden] {
+  display: none !important;
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-side-menu__item--active {
+  background: var(--ix-accent-soft);
+  color: var(--ix-accent);
+}
+
+/* ─── Callsigns panel ─── */
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-callsign-list-scroll,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-cs-profile__scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(100, 116, 139, 0.35) transparent;
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-cs-profile__hero {
+  background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 52%, #0369a1 100%);
+}
+
+/* ─── AI proofread strip ─── */
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .ai-proofread-panel {
+  border-radius: 14px;
+  border-color: color-mix(in srgb, var(--ix-cyan) 35%, transparent);
+}
+
+/* ─── Performance: scroll regions ─── */
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-chat-list__scroll,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .groups-list-scroll,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-callsign-list-scroll {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 320px auto 480px;
+  overscroll-behavior: contain;
+  container-type: scroll-state;
+  position: relative;
+}
+
+@supports not (content-visibility: auto) {
+  .md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-chat-list__scroll,
+  .md3-intercepts.ix-messenger-ui.ix-modern-ui .groups-list-scroll,
+  .md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-callsign-list-scroll {
+    contain: layout style paint;
+  }
+}
+
+/* Scroll affordance hints (optional; invisible when unsupported) */
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-chat-list__scroll::before,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-chat-list__scroll::after {
+  content: "";
+  position: sticky;
+  left: 0;
+  right: 0;
+  height: 18px;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 1;
+  transition: opacity 0.18s ease;
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-chat-list__scroll::before {
+  top: 0;
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--ix-surface-2) 90%, transparent), transparent);
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-chat-list__scroll::after {
+  bottom: 0;
+  background: linear-gradient(to top, color-mix(in srgb, var(--ix-surface-2) 90%, transparent), transparent);
+}
+
+@container scroll-state(scrollable: top) {
+  .md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-chat-list__scroll::before {
+    opacity: 1;
+  }
+}
+
+@container scroll-state(scrollable: bottom) {
+  .md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-chat-list__scroll::after {
+    opacity: 1;
+  }
+}
+
+/* ─── Mobile dock ─── */
+@media (max-width: 1100px) {
+  .md3-intercepts.ix-messenger-ui.ix-modern-ui.ix-mobile-ui .ix-mobile-dock {
+    background: var(--ix-glass-fill);
+    backdrop-filter: blur(var(--ix-glass-blur)) saturate(var(--ix-glass-saturate));
+    -webkit-backdrop-filter: blur(var(--ix-glass-blur)) saturate(var(--ix-glass-saturate));
+    border-top: 1px solid var(--ix-glass-border-soft);
+    box-shadow: 0 -8px 32px rgba(15, 23, 42, 0.08);
+  }
+
+  .md3-intercepts.ix-messenger-ui.ix-modern-ui.ix-mobile-ui .ix-mobile-dock__btn.active {
+    color: var(--ix-accent);
+  }
+}
+
+/* ─── Reduced transparency / motion ─── */
+@media (prefers-reduced-transparency: reduce) {
+  .md3-intercepts.ix-messenger-ui.ix-modern-ui {
+    --ix-glass-blur: 0px;
+    --ix-glass-saturate: 1;
+  }
+
+  .md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-sidebar__head,
+  .md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-chat__header,
+  .md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-composer,
+  .md3-intercepts.ix-messenger-ui.ix-modern-ui #intercept-text-wrapper,
+  .md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-dropdown-menu,
+  .md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-side-menu {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: color-mix(in srgb, var(--ix-surface-2) 94%, transparent) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-chat-item__btn,
+  .md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-icon-btn,
+  .md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-composer__send,
+  .md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-chat-list__scroll::before,
+  .md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-chat-list__scroll::after {
+    transition: none !important;
+  }
+}
+
+/* ─── Flat surfaces: без синих обводок (перекрываем MD3 !important) ─── */
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .wp-intercepts-blank #intercept-text-wrapper,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-chat__history#intercept-text-wrapper {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .wp-intercepts-blank #intercept-text-wrapper:focus-within,
+html[data-wp-theme="dark"] .md3-intercepts.ix-messenger-ui.ix-modern-ui .wp-intercepts-blank #intercept-text-wrapper:focus-within {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .wp-intercepts-blank #intercept-text:focus-visible {
+  outline: none !important;
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui #intercept-input,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui #intercept-input:hover,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui #intercept-input:focus,
+html[data-wp-theme="dark"] .md3-intercepts.ix-messenger-ui.ix-modern-ui #intercept-input:focus {
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-search-field,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-search-field.md3-search-field,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .md3-search-field,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-search-field:hover,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-search-field.md3-search-field:hover,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .md3-search-field:hover {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-search-field:focus-within,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-search-field.md3-search-field:focus-within,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .md3-search-field:focus-within,
+html[data-wp-theme="dark"] .md3-intercepts.ix-messenger-ui.ix-modern-ui .md3-search-field:focus-within {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-sidebar__head-row .md3-intercepts-shift-select,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-sidebar__head-row .md3-intercepts-shift-select:hover,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-sidebar__head-row .md3-intercepts-shift-select:focus,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-sidebar__head-row .form-select:hover,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-sidebar__head-row .form-select:focus {
+  border: 1px solid var(--ix-glass-border-soft) !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-sidebar__head-row #start-new-btn,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-sidebar__head-row #start-new-btn:hover,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-sidebar__head-row #start-new-btn:focus,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-sidebar__head-row #start-new-btn:focus-visible {
+  border: 1px solid var(--ix-glass-border-soft) !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-sidebar__head-row #start-new-btn:hover:not(:disabled) {
+  background: var(--tg-bg-hover) !important;
+  border-color: var(--ix-glass-border-soft) !important;
+  color: var(--tg-accent);
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .wp-intercepts-blank #intercept-text-wrapper:hover,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui #intercept-text-wrapper:hover {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui #groups-list .list-group-item:not(.ix-catalog-row--selected):not(.active):hover,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui #groups-list .list-group-item:not(.ix-catalog-row--selected):not(.active):focus,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui #groups-list .list-group-item:not(.ix-catalog-row--selected):not(.active):focus-within {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui #groups-list .tg-chat-item:not(.tg-chat-item--active):not(.active):hover .tg-chat-item__btn {
+  box-shadow: none !important;
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui #groups-list .ix-catalog-row--selected .tg-chat-item__btn:hover,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui #groups-list .ix-catalog-row--selected .tg-chat-item__btn:focus {
+  box-shadow: none !important;
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui #groups-list .tg-chat-item__btn:hover,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui #groups-list .tg-chat-item__btn:focus,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui #groups-list .tg-chat-item__btn:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui #groups-list .tg-chat-item--active .tg-chat-item__btn:hover,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui #groups-list .list-group-item.active .tg-chat-item__btn:hover,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui #groups-list .tg-chat-item--active .tg-chat-item__btn:focus,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui #groups-list .list-group-item.active .tg-chat-item__btn:focus {
+  box-shadow: inset 3px 0 0 var(--ix-accent) !important;
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-composer__send:hover:not(:disabled),
+.md3-intercepts.ix-messenger-ui.ix-modern-ui #send-input-btn:hover:not(:disabled) {
+  box-shadow: none !important;
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-icon-btn:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* ─── Mobile fixes (messenger + eavc shell) ─── */
+@media (max-width: 767.98px) {
+  body.eavc-page-intercepts .eavc-content {
+    padding: 0 !important;
+    overflow: hidden;
+  }
+
+  body.eavc-page-intercepts .eavc-topbar--pro {
+    min-height: 52px;
+  }
+
+  body.eavc-page-intercepts .eavc-topbar__nav-title {
+    display: none;
+  }
+
+  body.eavc-page-intercepts .eavc-topbar__profile-name,
+  body.eavc-page-intercepts .eavc-topbar__profile-chevron {
+    display: none;
+  }
+
+  .md3-intercepts.ix-messenger-ui.ix-mobile-ui {
+    height: calc(100dvh - var(--eavc-topbar-h, 52px));
+    max-height: calc(100dvh - var(--eavc-topbar-h, 52px));
+  }
+
+  .md3-intercepts.ix-messenger-ui.ix-mobile-ui .sessions-main,
+  .md3-intercepts.ix-messenger-ui.ix-mobile-ui .sessions-main > .card,
+  .md3-intercepts.ix-messenger-ui.ix-mobile-ui .sessions-main > .card > .card-body {
+    height: 100%;
+    min-height: 0;
+  }
+
+  .md3-intercepts.ix-messenger-ui.ix-mobile-ui .tg-layout {
+    height: 100%;
+    max-height: none !important;
+    min-height: 0 !important;
+    border: none;
+    box-shadow: none;
+    background: var(--tg-bg);
+  }
+
+  .md3-intercepts.ix-messenger-ui.ix-mobile-ui .tg-sidebar,
+  .md3-intercepts.ix-messenger-ui.ix-mobile-ui .tg-chat {
+    height: 100%;
+    min-height: 0;
+  }
+
+  .md3-intercepts.ix-messenger-ui.ix-mobile-ui .tg-chat__body {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 0.35rem;
+  }
+
+  .md3-intercepts.ix-messenger-ui.ix-mobile-ui #intercept-text-wrapper {
+    flex: 1 1 auto;
+    min-height: 0 !important;
+  }
+
+  .md3-intercepts.ix-messenger-ui.ix-mobile-ui #intercept-text {
+    min-height: 100% !important;
+    resize: none !important;
+  }
+
+  .md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-sidebar {
+    background: var(--tg-bg);
+  }
+
+  .md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-chat {
+    background: var(--tg-bg-chat);
+  }
+
+  .md3-intercepts.ix-messenger-ui.ix-modern-ui.ix-mobile-ui .ix-mobile-dock {
+    z-index: 1060;
+    border: 1px solid var(--ix-glass-border);
+    border-radius: 20px;
+  }
+}
+
+/* ─── Dark: единые плоскости без голубых градиентов ─── */
+html[data-wp-theme="dark"] .md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-sidebar__head,
+html[data-wp-theme="dark"] .md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-chat__header,
+html[data-wp-theme="dark"] .md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-composer,
+html[data-wp-theme="dark"] .md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-sidebar__foot {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  background: var(--ix-surface-2);
+}
+
+html[data-wp-theme="dark"] .md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-search-field,
+html[data-wp-theme="dark"] .md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-search-field:focus-within {
+  background: var(--ix-glass-fill-soft) !important;
+  border: 1px solid var(--ix-glass-border) !important;
+  box-shadow: none !important;
+}
+
+html[data-wp-theme="dark"] .md3-intercepts.ix-messenger-ui.ix-modern-ui .wp-intercepts-blank #intercept-text-wrapper,
+html[data-wp-theme="dark"] .md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-chat__history#intercept-text-wrapper {
+  border: 1px solid var(--ix-glass-border) !important;
+  box-shadow: none !important;
+}
+
+html[data-wp-theme="dark"] .md3-intercepts.ix-messenger-ui.ix-modern-ui #intercept-input,
+html[data-wp-theme="dark"] .md3-intercepts.ix-messenger-ui.ix-modern-ui #intercept-input:focus {
+  background: var(--ix-glass-fill-soft) !important;
+  border: 1px solid var(--ix-glass-border) !important;
+  box-shadow: none !important;
+}
+
+html[data-wp-theme="dark"] .md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-composer__send,
+html[data-wp-theme="dark"] .md3-intercepts.ix-messenger-ui.ix-modern-ui #send-input-btn {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35) !important;
+}
+
+html[data-wp-theme="dark"] .md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-composer__send.is-empty,
+html[data-wp-theme="dark"] .md3-intercepts.ix-messenger-ui.ix-modern-ui #send-input-btn.is-empty {
+  background-color: var(--ix-glass-fill-soft) !important;
+  color: var(--ix-accent) !important;
+  border: 1px solid var(--ix-glass-border) !important;
+}
+
+/* Final override for selected frequency/group. This file loads after messenger.css. */
+.md3-intercepts.ix-messenger-ui.ix-modern-ui #groups-list .list-group-item.active,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui #groups-list .tg-chat-item.tg-chat-item--active,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui #groups-list .ix-catalog-row--selected,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui #groups-list [aria-current="true"] {
+  border: 2px solid var(--ix-accent, #2563eb) !important;
+  border-radius: 14px !important;
+  background: color-mix(in srgb, var(--ix-accent-soft, rgba(37, 99, 235, 0.1)) 82%, var(--ix-surface-2, #f8fafc)) !important;
+  box-shadow:
+    0 0 0 3px var(--ix-accent-glow, rgba(37, 99, 235, 0.22)),
+    0 8px 20px rgba(15, 23, 42, 0.12) !important;
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui #groups-list .list-group-item.active .tg-chat-item__btn,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui #groups-list .tg-chat-item.tg-chat-item--active .tg-chat-item__btn,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui #groups-list .ix-catalog-row--selected .tg-chat-item__btn,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui #groups-list [aria-current="true"] .tg-chat-item__btn,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui #groups-list .list-group-item.active .tg-chat-item__btn:hover,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui #groups-list .tg-chat-item.tg-chat-item--active .tg-chat-item__btn:hover,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui #groups-list .ix-catalog-row--selected .tg-chat-item__btn:hover,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui #groups-list [aria-current="true"] .tg-chat-item__btn:hover {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Blank text area: keep a single scrollbar and remove the large empty top gap. */
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .ix-blank-shell .ix-field-shell__body {
+  padding: 0 !important;
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .ix-blank-shell,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .ix-blank-shell .ix-field-shell__body,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .ix-blank-shell .ix-field-shell__field,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .ix-input-shell,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .ix-input-shell .ix-field-shell__body,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .ix-input-shell .ix-field-shell__field,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-composer,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-composer__inner,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-composer__field,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .ix-blank-shell #intercept-text-wrapper {
+  overflow: visible !important;
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .ix-blank-shell {
+  position: relative;
+  z-index: 1;
+  overflow: hidden !important;
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .ix-input-shell,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .tg-composer {
+  position: relative;
+  z-index: 2;
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui #intercept-text {
+  padding: 0.35rem 1rem 0.85rem !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  resize: none !important;
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui #intercept-text:disabled::placeholder {
+  padding-top: 0 !important;
+  text-align: left !important;
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .ix-blank-shell .intercept-resizer {
+  right: 8px !important;
+  bottom: 8px !important;
+  width: 18px !important;
+  height: 18px !important;
+  cursor: ns-resize !important;
+  z-index: 30;
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui .ix-blank-height-splitter {
+  z-index: 50;
+}
+
+.md3-intercepts.ix-messenger-ui.ix-modern-ui #cs-suggest,
+.md3-intercepts.ix-messenger-ui.ix-modern-ui #cs-suggest-input {
+  z-index: 3000 !important;
+  position: absolute !important;
+  pointer-events: auto;
+  box-shadow:
+    0 12px 28px rgba(15, 23, 42, 0.18),
+    0 0 0 1px var(--tg-border-strong, rgba(15, 23, 42, 0.14)) !important;
+}

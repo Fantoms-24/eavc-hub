@@ -1,0 +1,21 @@
+{
+  "bind_host": "0.0.0.0",
+  "port": 8787,
+  "listen_path": "/api/intercepts/telegram",
+  "secret_key": "",
+  "request_timeout_sec": 10,
+
+  "send_mode": "user",
+  "api_id": 12345678,
+  "api_hash": "your_api_hash_from_my.telegram.org",
+  "session_name": "tg_user",
+  "target": "@username_or_+79001234567",
+
+  "bot_token": "",
+  "chat_id": "",
+  "default_message_thread_id": null,
+  "topic_by_unit": {
+    "31 омбр": 7,
+    "425 мсп": 12
+  }
+}

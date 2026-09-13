@@ -1,0 +1,1447 @@
+from __future__ import annotations
+
+import json
+import os
+import re
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any, Callable
+
+from web_portal.lib.ai_agent_tools import (
+    RISK_ADMIN_WRITE,
+    RISK_BULK_WRITE,
+    RISK_SAFE_WRITE,
+    TOOL_REGISTRY,
+    ToolContext,
+    ToolResult,
+    get_tool,
+    run_tool,
+)
+from web_portal.lib.ai_client import generate_ai_text
+from web_portal.lib.ai_router import normalize_user_search_question, route_ai_question
+from web_portal.lib.ai_project_scope import get_planner_scope_block, wants_broad_project_scan
+from web_portal.lib.ai_vector_recall import search_planner_recall
+from web_portal.lib.db import connect
+from web_portal.lib.auth_db import (
+    ensure_ai_assistant_user,
+    get_ai_agent_memory,
+    list_chat_messages,
+    log_ai_agent_action,
+    set_ai_agent_memory,
+)
+from web_portal.lib.ai_sessions import _unit_key
+import logging
+
+_log = logging.getLogger("web_portal.lib.ai_assistant")
+
+
+# Планировщик: RAG-разведка по БД перед выбором инструмента; уточняющий вопрос при низкой уверенности.
+# Семантическая разведка: `search_planner_recall` (таблица ai_vector_chunks) + обзор route_project.
+# Индексация: scripts/reindex_ai_vectors.py, модель ollama: WEB_PORTAL_AI_EMBED_MODEL (nomic-embed-text).
+_PLANNER_RAG_MAX_CHARS = int(os.environ.get("WEB_PORTAL_AI_PLANNER_RAG_MAX_CHARS", "12000"))
+_PLANNER_RAG_ENABLED = os.environ.get("WEB_PORTAL_AI_PLANNER_RAG", "1").strip().lower() not in (
+    "0",
+    "false",
+    "no",
+    "off",
+)
+_PLANNER_CLARIFY_THRESHOLD = float(os.environ.get("WEB_PORTAL_AI_PLANNER_CLARIFY_THRESHOLD", "0.6"))
+
+# Нечёткие оценочные термины → подсказки для широкого поиска (route_project, shift_summary question).
+# Кортежи: (regex на нижний регистр, хвост-расширение для запроса).
+_VAGUE_TERM_EXPANSIONS: tuple[tuple[str, str], ...] = (
+    (
+        r"\bинтересн\w*",
+        "релевантно: необычные или нестандартные факты, риски, жалобы, паника, снабжение, эвакуация, отклонения",
+    ),
+    (
+        r"\bаномал\w*|\bаномалия",
+        "релевантно: нестандартные частоты/группы, подозрительные фразы, риск, 300 200, обстрел, дрон",
+    ),
+    (
+        r"\bважн\w*",
+        "релевантно: критичные события, срочные донесения, потери, обстрелы, командование, отказ",
+    ),
+    (r"\bстранн\w*", "релевантно: нетипичное в эфире, несоответствие норме, риск"),
+    (
+        r"\bподозритель\w*",
+        "релевантно: риск, враг, дрон, наведение, эвакуация, паника, 300 200",
+    ),
+    (r"\bсумбур\w*|\bразмыт\w*|\bнеоднозначн\w*", "нужны конкретные критерии: период, подразделение, ID, тип события"),
+)
+
+_TOOLS_WITH_PLANNER_QUESTION: frozenset[str] = frozenset(
+    {
+        "route_project",
+        "search_project",
+        "unit_profile",
+        "id_profile",
+        "sessions_cross_unit",
+        "dictionary_lookup",
+        "targeting_lookup",
+        "ml_lookup",
+        "apply_unit_assignment",
+        "shift_summary",
+        "sessions_analysis",
+    }
+)
+
+
+def _query_has_vague_term(text: str) -> bool:
+    low = (text or "").lower()
+    for pat, _ in _VAGUE_TERM_EXPANSIONS:
+        if re.search(pat, low, re.IGNORECASE):
+            return True
+    return False
+
+
+def _expand_vague_query(text: str) -> str:
+    """
+    Расширяет вопрос для поиска по смыслу, если в нём оценочные слова без конкретики.
+    Для `route_ai_question(..., force_project_search=True)` в конце всегда вызывается
+    `_format_project_search_answer`; ответ может быть пустым, если в БД нет совпадений.
+    """
+    t = (text or "").strip()
+    if not t:
+        return t
+    low = t.lower()
+    hints: list[str] = []
+    seen: set[str] = set()
+    for pat, hint in _VAGUE_TERM_EXPANSIONS:
+        if re.search(pat, low, re.IGNORECASE) and hint not in seen:
+            hints.append(hint)
+            seen.add(hint)
+    if not hints:
+        return t
+    return t + " " + " ".join(f"({h})" for h in hints)
+
+
+def _fallback_vague_clarify_canned() -> str:
+    return (
+        "Формулировка слишком обобщённая, чтобы однозначно выбрать источник в портале. "
+        "Уточните, пожалуйста: речь о **бланках перехватов** (смена), о **таблице сеансов связи**, "
+        "о **конкретном ID/подразделении/частоте** или о **санитарных/боевых потерях**? "
+        "Можно перефразировать с конкретными словами из эфира или датой."
+    )
+
+
+_CASUALTY_TERMS = (
+    "ранен",
+    "ранён",
+    "раненн",
+    "ранённ",
+    "300",
+    "трехсот",
+    "трёхсот",
+    "убит",
+    "погиб",
+    "200",
+    "двухсот",
+    "потер",
+    "эвакуац",
+    "медик",
+)
+_REPORT_TERMS = ("отчет", "отчёт", "доклад", "полный", "расшир", "военно-делов")
+_BULK_UNIT_RENAME_HELP = (
+    "### Массовая замена «везде» из чата\n\n"
+    "Заменить одну **формулировку** подразделения на **другую** сразу **по всему** проекту "
+    "через AI-чат **нельзя** — в базе слишком много разных мест (строка `unit` по парам "
+    "частота+группа, онлайн-поиск, бланки и т.д.), а ошибочная массовая подмена **опасна**.\n\n"
+    "**Что можно сделать:**\n"
+    "- **Точечно в Unit (частота + группа):** в интерфейсе портала откройте привязки/таблицу "
+    "и вручную исправьте нужные **пары**; либо в чате — явная **одноточечная** команда "
+    "привязки к **конкретному ID** (например: «укажи для ID … подразделение … где не указано») "
+    "— если у вас такой сценарий и есть права.\n"
+    "- **Реальная «везде в БД»** — только **резервная копия** + **скрипт/миграция** администратором, "
+    "с проверкой затронутых таблиц, не свободной фразой в чате.\n"
+)
+
+
+def _is_bulk_unit_rename_request(text: str, src: str) -> bool:
+    """Запрос вида «смени везде A на B» — не путать с unit_profile / поиском."""
+    if "везде" not in src:
+        return False
+    t = str(text or "")
+    t_low = t.lower()
+    if " на " not in t_low and " -> " not in t and "→" not in t:
+        return False
+    if not any(
+        w in src
+        for w in (
+            "смени",
+            "замен",
+            "помен",
+            "переимен",
+            "исправ",
+        )
+    ):
+        return False
+    return _has_unit_marker(t)
+
+
+_WRITE_TERMS = (
+    "запиши",
+    "записать",
+    "поставь",
+    "поставить",
+    "укажи",
+    "указать",
+    "привяжи",
+    "привязать",
+    "обнови",
+    "обновить",
+    "добавь",
+    "добавить",
+    "пометь",
+    "пометить",
+    "заполни",
+    "заполнить",
+    "назначь",
+    "назначить",
+    "присвой",
+    "присвоить",
+    "автоматически",
+)
+
+
+@dataclass
+class AgentMemory:
+    recent_text: str = ""
+    last_id: str = ""
+    last_unit: str = ""
+    last_unit_key: str = ""
+    last_period: str = ""
+    last_topic: str = ""
+    pending_action: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class AgentContext:
+    portal_conn: Any
+    main_db_path: Path
+    group_id: int | None
+    message_id: int
+    message_text: str
+    position_name: str
+    user_id: int
+    user_role: str
+    created_by: str
+    can_use_position: Callable[[str], bool]
+    has_permission: Callable[[str], bool]
+    memory: AgentMemory
+
+
+@dataclass
+class AgentStep:
+    tool: str
+    args: dict[str, Any] = field(default_factory=dict)
+    requires_confirmation: bool = False
+
+
+@dataclass
+class AgentPlan:
+    goal: str
+    steps: list[AgentStep]
+    requires_confirmation: bool = False
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class AgentResponse:
+    goal: str
+    results: list[ToolResult]
+    actions: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
+
+
+def _norm(text: str) -> str:
+    return str(text or "").strip().lower().replace("ё", "е")
+
+
+# Числа рядом с шифром части/позывным в кавычках — чаще про подразделение, а не ID корреспондента.
+_MILITARY_NUM_UNIT = re.compile(
+    r"(?iu)(?<![\d/])(\d{2,4})\s*[-–]?"
+    r"\s*(?:шб|мб|бон|брон|бтгр|бат|батальн|бригад|бригада|ошп|омбр|дшбр|оебр|нгу|рот|рота|оабр|нгш|оаб|пар)\b"
+)
+
+
+def _heuristic_military_unit_not_radio_id(message_text: str) -> bool:
+    """True, если число в фразе относится к наименованию части, а не к одиночному ID в эфире."""
+    raw = str(message_text or "")
+    n = _norm(raw)
+    if _MILITARY_NUM_UNIT.search(raw) or re.search(r"(?iu)\b\d{2,4}\s*ошп\b", raw):
+        return True
+    if re.search(r'(?ius)\d{2,4}[^\d\n]{0,50}[«""][^»""\n]{2,50}[""»]', raw) and _has_unit_marker(
+        message_text
+    ):
+        return True
+    if re.search(r"(?ius)\b\d{2,4}\b", raw) and "ошп" in n and _has_unit_marker(message_text):
+        return True
+    return False
+
+
+def _extract_json_object(text: str) -> dict[str, Any] | None:
+    raw = str(text or "").strip()
+    if not raw:
+        return None
+    try:
+        obj = json.loads(raw)
+        return obj if isinstance(obj, dict) else None
+    except Exception:
+        _log.debug("_extract_json_object: suppressed error", exc_info=True)
+    match = re.search(r"\{[\s\S]*\}", raw)
+    if not match:
+        return None
+    try:
+        obj = json.loads(match.group(0))
+        return obj if isinstance(obj, dict) else None
+    except Exception:
+        return None
+
+
+def _explicit_write_request(text: str) -> bool:
+    src = _norm(text)
+    return any(term in src for term in _WRITE_TERMS) or bool(
+        re.search(r"(?iu)\b(?:запиш\w*|постав\w*|укаж\w*|указа\w*|привяж\w*|привяза\w*|обнов\w*|добав\w*|помет\w*|заполн\w*|назнач\w*|присво\w*)\b", src)
+    )
+
+
+def _single_numeric_id(text: str) -> str:
+    ids = re.findall(r"(?<!\d)(\d{3,10})(?!\d)", str(text or ""))
+    return ids[0] if len(ids) == 1 else ""
+
+
+def _id_profile_question(radio_id: str) -> str:
+    return f"Расскажи про айдишник {radio_id}"
+
+
+def _clean_unit_display(value: str) -> str:
+    text = re.sub(r"\s+", " ", str(value or "")).strip(" ,.;:-")
+    text = re.sub(r'\s*"\s*"', '"', text)
+    text = re.sub(r'\s+"', ' "', text)
+    text = re.sub(r'"\s+', '" ', text)
+    noise = (
+        "расскажи",
+        "покажи",
+        "найди",
+        "проверь",
+        "что известно",
+        "информация",
+        "оперативные",
+        "дежурные",
+    )
+    for marker in noise:
+        idx = _norm(text).find(marker)
+        if idx > 0:
+            text = text[:idx].strip(" ,.;:-")
+    return text[:140]
+
+
+def _has_unit_marker(text: str) -> bool:
+    src = _norm(text)
+    return any(
+        marker in src
+        for marker in (
+            "шб",
+            "мб",
+            "бон",
+            "брон",
+            "бат",
+            "бтгр",
+            "ошп",
+            "омбр",
+            "дшбр",
+            "оебр",
+            "нгу",
+            "спартан",
+            "скала",
+            "подраздел",
+        )
+    )
+
+
+def _wants_unit_portal_query(message_text: str) -> bool:
+    """Совпадение маркеров подразделения в тексте ещё не значит, что это запрос к данным портала."""
+    if not _has_unit_marker(message_text):
+        return False
+    src = _norm(message_text)
+    return bool(_extract_unit_phrase(message_text)) or any(
+        x in src
+        for x in (
+            "подраздел",
+            "профил",
+            "покаж",
+            "провер",
+            "найди",
+            "расскаж",
+            "сводк",
+            "како",
+            "как назы",
+            "юнит",
+        )
+    )
+
+
+def _extract_unit_phrase(text: str) -> str:
+    raw = str(text or "").strip()
+    if not raw:
+        return ""
+    quoted = re.findall(r"[\"«](.+?)[\"»]", raw)
+    marker_match = re.search(
+        r"(?iu)(\d+\s+(?:шб|мб|бон|брон|бтгр|батальон|бригада|ошп|омбр|дшбр|оебр)\b[^\n,;]*)",
+        raw,
+    )
+    if marker_match:
+        candidate = marker_match.group(1).strip()
+        if quoted and quoted[0] not in candidate:
+            candidate = f'{candidate} "{quoted[0].strip()}"'
+        return _clean_unit_display(candidate)
+    if quoted and any(x in _norm(raw) for x in ("подраздел", "часть", "unit", "нгу", "спартан", "скала")):
+        return _clean_unit_display(quoted[0])
+    return ""
+
+
+def _memory_from_chat(portal_conn, *, group_id: int | None, before_message_id: int, limit: int = 12) -> AgentMemory:
+    recent_messages = list_chat_messages(portal_conn, group_id=group_id, limit=limit)
+    previous = [
+        str(m.get("message_text") or "")
+        for m in recent_messages
+        if int(m.get("id") or 0) < int(before_message_id)
+    ]
+    recent_text = "\n".join(previous)[-5000:]
+    id_matches = re.findall(r"(?iu)(?:\bID\b|айдишник\w*|айди)\s*[:#№-]?\s*(\d{3,10})", recent_text)
+    for line in recent_text.splitlines():
+        line_l = _norm(line)
+        if any(x in line_l for x in ("найди", "покажи", "проверь")):
+            candidate = _single_numeric_id(line)
+            if candidate:
+                id_matches.append(candidate)
+    unit_matches = re.findall(
+        r"(?iu)(?:профиль подразделения|подразделени[еяю]|часть|unit)\s*[:—-]?\s*([^\n]{4,120})",
+        recent_text,
+    )
+    recent_l = _norm(recent_text)
+    period = ""
+    if "месяц" in recent_l:
+        period = "месяц"
+    elif "недел" in recent_l:
+        period = "неделя"
+    elif "сегодня" in recent_l:
+        period = "сегодня"
+    elif "смен" in recent_l:
+        period = "смена"
+    topic = ""
+    if any(term in recent_l for term in _CASUALTY_TERMS):
+        topic = "casualty"
+    elif "смен" in recent_l or "перехват" in recent_l:
+        topic = "shift"
+    elif id_matches:
+        topic = "id"
+    return AgentMemory(
+        recent_text=recent_text,
+        last_id=id_matches[-1] if id_matches else "",
+        last_unit=_clean_unit_display(unit_matches[-1]) if unit_matches else "",
+        last_unit_key=_unit_key(unit_matches[-1]) if unit_matches else "",
+        last_period=period,
+        last_topic=topic,
+    )
+
+
+def _load_memory(portal_conn, *, user_id: int, group_id: int | None, message_id: int) -> AgentMemory:
+    memory = _memory_from_chat(portal_conn, group_id=group_id, before_message_id=message_id)
+    stored = get_ai_agent_memory(portal_conn, user_id=user_id, scope="ai_assistant")
+    if stored:
+        memory.last_id = memory.last_id or str(stored.get("last_id") or "")
+        memory.last_unit = memory.last_unit or str(stored.get("last_unit") or "")
+        memory.last_unit_key = memory.last_unit_key or str(stored.get("last_unit_key") or "")
+        memory.last_period = memory.last_period or str(stored.get("last_period") or "")
+        memory.last_topic = memory.last_topic or str(stored.get("last_topic") or "")
+        pending = stored.get("pending_action")
+        memory.pending_action = pending if isinstance(pending, dict) else {}
+    return memory
+
+
+def _persist_memory(ctx: AgentContext, response: AgentResponse) -> None:
+    text = f"{ctx.message_text}\n" + "\n".join(result.content for result in response.results)
+    id_matches = re.findall(r"(?iu)(?:\bID\b|айдишник\w*|айди)\s*[:#№-]?\s*(\d{3,10})", text)
+    if not id_matches:
+        candidate = _single_numeric_id(ctx.message_text)
+        if candidate and any(x in _norm(ctx.message_text) for x in ("найди", "покажи", "проверь")):
+            id_matches.append(candidate)
+    if id_matches:
+        ctx.memory.last_id = id_matches[-1]
+    unit_matches = re.findall(r"(?iu)профиль подразделения\s*[:—-]?\s*([^\n]{4,120})", text)
+    if unit_matches:
+        ctx.memory.last_unit = _clean_unit_display(unit_matches[-1])
+    if ctx.memory.last_unit:
+        ctx.memory.last_unit_key = _unit_key(ctx.memory.last_unit)
+    src = _norm(text)
+    if "месяц" in src:
+        ctx.memory.last_period = "месяц"
+    elif "недел" in src:
+        ctx.memory.last_period = "неделя"
+    elif "сегодня" in src:
+        ctx.memory.last_period = "сегодня"
+    elif "смен" in src:
+        ctx.memory.last_period = "смена"
+    if any(term in src for term in _CASUALTY_TERMS):
+        ctx.memory.last_topic = "casualty"
+    elif "смен" in src or "перехват" in src:
+        ctx.memory.last_topic = "shift"
+    set_ai_agent_memory(
+        ctx.portal_conn,
+        user_id=ctx.user_id,
+        scope="ai_assistant",
+        memory={
+            "last_id": ctx.memory.last_id,
+            "last_unit": ctx.memory.last_unit,
+            "last_unit_key": ctx.memory.last_unit_key,
+            "last_period": ctx.memory.last_period,
+            "last_topic": ctx.memory.last_topic,
+            "pending_action": ctx.memory.pending_action,
+        },
+    )
+
+
+def _patch_memory_after_step(ctx: AgentContext, step: AgentStep) -> None:
+    q = str(step.args.get("question") or "")
+    if step.tool == "id_profile":
+        cand = _single_numeric_id(q) or _single_numeric_id(ctx.message_text)
+        if cand:
+            ctx.memory.last_id = cand
+    elif step.tool == "unit_profile":
+        u = _extract_unit_phrase(ctx.message_text) or _extract_unit_phrase(q)
+        if u:
+            ctx.memory.last_unit = u
+            ctx.memory.last_unit_key = _unit_key(u)
+    elif step.tool == "apply_unit_assignment":
+        u = _clean_unit_display(_extract_unit_phrase(ctx.message_text) or _extract_unit_phrase(q))
+        if u:
+            ctx.memory.last_unit = u
+            ctx.memory.last_unit_key = _unit_key(u)
+        r = (ctx.memory.last_id or _single_numeric_id(q) or _single_numeric_id(ctx.message_text) or "").strip()
+        if r:
+            ctx.memory.last_id = r
+
+
+_PLANNER_ARG_KEYS: frozenset[str] = frozenset(
+    {
+        "question",
+        "canned",
+        "force_project_search",
+        "freeform_db",
+        "synthesize",
+        "unit",
+        "id",
+        "query",
+        "terms",
+        "date_from",
+        "date_to",
+        "period",
+        "unit_name",
+        "session_id",
+        "shift_index",
+    }
+)
+
+
+def _build_tools_catalog_for_planner() -> str:
+    lines: list[str] = []
+    for name, t in TOOL_REGISTRY.items():
+        desc = getattr(t, "description", "выполняет действие")
+        risk = getattr(t, "risk", "RISK_READ")
+        w = "да" if getattr(t, "writes", False) else "нет"
+        perm = getattr(t, "required_permission", "") or "нет"
+        lines.append(
+            f"- `{name}`: {desc}\n  risk={risk}, запись_в_бд={w}, право={perm}."
+        )
+    return "\n".join(lines)
+
+
+def _sanitize_planner_args(
+    tool: str,
+    args: Any,
+    message_text: str,
+) -> dict[str, Any]:
+    raw = args if isinstance(args, dict) else {}
+    out: dict[str, Any] = {}
+    for k, v in raw.items():
+        if k in _PLANNER_ARG_KEYS and v is not None and str(v).strip() != "":
+            out[k] = v
+    if tool == "general_chat" and "canned" in out and str(out.get("canned") or "").strip():
+        return {"canned": str(out.get("canned") or "")}
+    for portal_tool in (
+        "route_project",
+        "search_project",
+        "unit_profile",
+        "id_profile",
+        "sessions_cross_unit",
+        "dictionary_lookup",
+        "targeting_lookup",
+        "ml_lookup",
+        "apply_unit_assignment",
+    ):
+        if tool == portal_tool and "canned" not in out and not out.get("question"):
+            out["question"] = str(message_text)
+            break
+    if tool == "shift_summary" and not out.get("question"):
+        out["question"] = str(message_text)
+    if tool == "sessions_analysis" and not out.get("question"):
+        out["question"] = str(message_text)
+    if tool == "general_chat" and "canned" not in out and not out.get("question"):
+        out["question"] = str(message_text)
+    if tool in _TOOLS_WITH_PLANNER_QUESTION and out.get("question"):
+        out["question"] = _expand_vague_query(str(out["question"]))
+    return out
+
+
+def _parse_dynamic_planner_object(obj: dict[str, Any] | None, message_text: str) -> AgentPlan | None:
+    if not obj or not isinstance(obj, dict):
+        return None
+    try:
+        conf = float(obj.get("confidence", 1.0))
+    except (TypeError, ValueError):
+        conf = 1.0
+    conf = max(0.0, min(1.0, conf))
+    clarify = str(obj.get("clarify_question") or obj.get("clarify") or "").strip()
+    if conf < _PLANNER_CLARIFY_THRESHOLD and clarify:
+        return AgentPlan(
+            goal="уточнить запрос пользователя",
+            steps=[AgentStep("general_chat", {"canned": clarify})],
+            requires_confirmation=False,
+            metadata={"planner": "clarify", "confidence": conf, "source": "dynamic_llm"},
+        )
+    if (
+        conf < _PLANNER_CLARIFY_THRESHOLD
+        and (not clarify)
+        and _query_has_vague_term(message_text)
+    ):
+        return AgentPlan(
+            goal="уточнить обобщённый запрос (нечёткие термины)",
+            steps=[
+                AgentStep("general_chat", {"canned": _fallback_vague_clarify_canned()}),
+            ],
+            requires_confirmation=False,
+            metadata={
+                "planner": "clarify",
+                "confidence": conf,
+                "source": "vague_term_fallback",
+            },
+        )
+    goal = str(obj.get("goal") or "обработать запрос").strip() or "обработать запрос"
+    steps_in = obj.get("steps")
+    steps_out: list[AgentStep] = []
+    if isinstance(steps_in, list) and steps_in:
+        for i, s in enumerate(steps_in[:4]):
+            if not isinstance(s, dict):
+                return None
+            tool = str(s.get("tool") or "").strip()
+            if tool not in TOOL_REGISTRY:
+                return None
+            args = _sanitize_planner_args(tool, s.get("args"), message_text)
+            steps_out.append(
+                AgentStep(
+                    tool=tool,
+                    args=args,
+                    requires_confirmation=bool(s.get("requires_confirmation")),
+                )
+            )
+    else:
+        tool = str(obj.get("tool") or "").strip()
+        if not tool or tool not in TOOL_REGISTRY:
+            return None
+        args = _sanitize_planner_args(tool, obj.get("args"), message_text)
+        steps_out = [
+            AgentStep(
+                tool=tool,
+                args=args,
+                requires_confirmation=bool(obj.get("requires_confirmation")),
+            )
+        ]
+    if not steps_out:
+        return None
+    return AgentPlan(
+        goal=goal,
+        steps=steps_out,
+        requires_confirmation=bool(obj.get("requires_confirmation")),
+        metadata={
+            "planner": "dynamic_llm",
+            "confidence": conf,
+        },
+    )
+
+
+def _planner_rag_context(ctx: AgentContext, message_text: str) -> str:
+    """
+    Разведка: 1) семантический top-k по индексу (перехваты + сеансы), 2) широкий route_project.
+    """
+    if not _PLANNER_RAG_ENABLED:
+        return ""
+    if not str(ctx.position_name or "").strip():
+        return ""
+    if _is_pure_social_excluded_from_db(message_text):
+        return ""
+    try:
+        mconn = connect(ctx.main_db_path)
+        try:
+            try:
+                vec = search_planner_recall(
+                    mconn,
+                    question=message_text,
+                    position_name=ctx.position_name,
+                )
+            except Exception:
+                vec = ""
+            try:
+                raw = route_ai_question(
+                    conn=mconn,
+                    portal_conn=ctx.portal_conn,
+                    question=message_text,
+                    position_name=ctx.position_name,
+                    user_id=ctx.user_id,
+                    force_project_search=True,
+                )
+            except Exception:
+                raw = None
+        finally:
+            mconn.close()
+    except Exception:
+        return ""
+    text_kw = (raw or "").strip()
+    parts: list[str] = []
+    v = (vec or "").strip()
+    if v:
+        parts.append("### Семантически близкие фрагменты (бланки перехватов и сеансы)\n" + v)
+    if text_kw:
+        parts.append("### Обзор широкого поиска по данным портала\n" + text_kw)
+    if not parts:
+        return ""
+    out = "\n\n".join(parts)
+    if len(out) > _PLANNER_RAG_MAX_CHARS:
+        return out[: _PLANNER_RAG_MAX_CHARS] + "\n… [фрагмент обрезан по длине]"
+    return out
+
+
+def _dynamic_planner_plan(
+    message_text: str,
+    memory: AgentMemory,
+    *,
+    rag_context: str = "",
+) -> AgentPlan | None:
+    """
+    LLM выбирает инструмент(и) и аргументы по каталогу TOOL_REGISTRY.
+    """
+    tools_block = _build_tools_catalog_for_planner()
+    recent_ctx = str(memory.recent_text[-3500:]) if memory.recent_text else ""
+    scope_block = get_planner_scope_block()
+    system_prompt = f"""Ты планировщик действий EAVC Manager. Пользователь написал запрос; ты НЕ отвечаешь ему прямо — только план.
+ВАЖНО: Верни ТОЛЬКО сырой JSON (один объект), без markdown, без пояснений, без ``` и без обёрток.
+Разрешены только перечисленные инструменты; не выдумывай имена.
+Память: last_id={memory.last_id!r}, last_unit={memory.last_unit!r}, last_period={memory.last_period!r}.
+Контекст (хвост): {recent_ctx}
+
+{scope_block}
+
+Правила выбора:
+- Любой запрос о **фактах из портала** (события, ID, подразделение, частота, упоминания, риски) — не `general_chat` без поиска; предпочитай `route_project` с `force_project_search: true` и `synthesize: true`, чтобы пройти **все релевантные источники** проекта.
+- «По всему проекту / везде / пройдись / что в базе» — только `route_project` + force + synthesize (не одна вкладка).
+- «425 ошп "Скала"», число + шифр части, позывной — про подразделение/поиск; для полноты используй `route_project` с args: {{"question": "<переформулированный запрос>", "force_project_search": true, "synthesize": true}}.
+- Явный ID корреспондента/сеансы по одному радио-ID — `id_profile` (question=формулировка).
+- Проверка / поиск **одного ID** **в других подразделениях**, «где ещё встречался», пересечения по сетям — `route_project` с `force_project_search: true` и `synthesize: true` (нужны факты из БД), **не** `general_chat` и не повтор формулировки пользователя.
+- «Найди / где когда-либо / упоминания / 300 / 200 / поиск по перехватам» без явной привязки к **одной** смене — `route_project` с `force_project_search: true` и `synthesize: true`, **не** `shift_summary`.
+- Сводка по **бланкам перехватов** за **конкретную смену** (не обязательно последнюю): `shift_summary` с `question` = полный текст; при необходимости укажи `session_id` (id смены), `shift_index` (0=последняя, 1=предыдущая), или `date_from`/`date_to` (YYYY-MM-DD) / дату в `question` (например 20.02.2026) чтобы выбрать смену.
+- **Сеансы связи** (ID, кто дежурный, кто с кем в эфире, пересечения, всплески, аномалии): `sessions_analysis` с `question` и при необходимости `date_from`/`date_to`; **без явной даты** — все сеансы в базе, не только сегодня; не путай с `shift_summary` (там бланки перехватов по одной смене).
+- Если пользователь пишет **«в сеансах»**, **«по сеансам»**, **«именно в сеансах (не в перехватах)»** — обязательно `sessions_analysis`, **никогда** не `shift_summary` и не сводка по бланкам.
+- «Что было в смене / за 20.02 / с 10 до 13 / за вчера / кратко по смене» в смысле **перехватов/бланков** — `shift_summary` (даты в формулировке); при уточнении к ответу — новый `question` с сутью.
+- «Аномальные сеансы / всплески в сеансах / активность по сеансам» без явной даты — `sessions_analysis`, не `shift_summary`.
+- «Открой карточку/вкладку/интерфейс» — `general_chat` (в чате разделы не открываются) или `route_project`, если пользователь просит данные, а не клик по UI.
+- «Оформи / доклад / отчёт **по твоему последнему сообщению / ответу в чате**» (не про смену/перехваты) — `general_chat` с question; **не** `shift_summary` и **не** `route_project`.
+- Запись Unit только при явной команде (запиши, укажи, привяжи…) — `apply_unit_assignment` и requires_confirmation по необходимости; иначе не выбирай запись.
+- Бытовой вопрос без портала — `general_chat`.
+- Не уверен в инструменте — `route_project` + force + synthesize.
+- **Нечёткие оценочные слова** («интересные», «аномальные», «важные», «странные», «подозрительные») без критериев, дат, ID или источника (перехваты vs сеансы) — **понижай confidence**; при сомнении верни `clarify_question`, что именно имелось в виду. Система может подмешать к `question` поисковые подсказки, но **однозначный выбор инструмента** всё равно нужен.
+Уверенность и уточнение:
+- Поле `confidence` — число от 0 до 1 (насколько однозначен запрос для выбора инструментов).
+- Если confidence < {_PLANNER_CLARIFY_THRESHOLD:.2f} и запрос допускает разные толкования (например «оперативные» без контекста: дежурные в сеансах или сводка по перехватам, либо только оценочные прилагательные без фактов), верни вместо плана поле `clarify_question` — одну короткую вежливую фразу-вопрос пользователю на русском; `tool`/`steps` тогда не нужны.
+Форма ответа (один объект сырого JSON, без обёрток):
+{{"goal": "...", "confidence": 0.85, "tool": "...", "args": {{...}}, "requires_confirmation": false}}
+или: {{"goal": "...", "confidence": 0.4, "clarify_question": "Вы имеете в виду …?"}}
+или цепочка: {{"goal": "...", "confidence": 0.8, "steps": [{{"tool": "...", "args": {{}}, "requires_confirmation": false}}], "requires_confirmation": false}}.
+Максимум 3 шага в steps."""
+
+    blocks: list[str] = [f"Сообщение пользователя:\n{message_text}"]
+    if (rag_context or "").strip():
+        blocks.append(
+            "Краткие факты из базы (разведка по проекту: семантический top-k по бланкам/сеансам "
+            "+ широкий обзор route_project по всем источникам; выдача неполная, только для маршрутизации). "
+            "Содержимое:\n" + (rag_context or "").strip()
+        )
+    blocks.append(f"Каталог:\n{tools_block}")
+    user_prompt = "\n\n".join(blocks)
+    try:
+        r = generate_ai_text(
+            system_prompt=system_prompt,
+            user_prompt=user_prompt,
+            temperature=0.1,
+            max_tokens=900,
+        )
+        obj = _extract_json_object(str(r.get("text") or "")) or {}
+        return _parse_dynamic_planner_object(obj, message_text)
+    except Exception:
+        return None
+
+
+def _fallback_after_dynamic_planner(message_text: str) -> AgentPlan:
+    """Если динамический планировщик не вернул валидный план — безопасный дефолт."""
+    if _is_pure_social_excluded_from_db(message_text):
+        return AgentPlan(
+            goal="диалог",
+            steps=[AgentStep("general_chat", {"question": message_text})],
+            requires_confirmation=False,
+            metadata={"planner": "fallback_general"},
+        )
+    return AgentPlan(
+        goal="поиск по данным проекта (fallback)",
+        steps=[
+            AgentStep(
+                "route_project",
+                {
+                    "question": message_text,
+                    "force_project_search": True,
+                    "synthesize": True,
+                },
+            )
+        ],
+        requires_confirmation=False,
+        metadata={"planner": "fallback_route"},
+    )
+
+
+def _user_prefers_sessions_not_intercept_blanks(message_text: str) -> bool:
+    """
+    Явные формулировки «по сеансам / в сеансах / не перехваты» — иначе LLM часто
+    оставляет shift_summary (бланки перехватов) и повторяет тот же вид ответа.
+    """
+    t = re.sub(r"\s+", " ", (message_text or "").lower().replace("ё", "е"))
+    if not t:
+        return False
+    if re.search(r"\b(в|по)\s+сеанс", t):
+        return True
+    if re.search(r"\bименно\s+(в|по)\s*сеанс", t):
+        return True
+    if "по данным сеанс" in t or "анализ сеанс" in t:
+        return True
+    if "таблиц" in t and "сеанс" in t and "перехват" not in t:
+        return True
+    if "не в перехват" in t or "не про перехват" in t or "не в бланк" in t:
+        return True
+    return False
+
+
+def _sessions_analysis_question_for_planner(
+    message_text: str, memory: AgentMemory
+) -> str:
+    q = str(message_text or "").strip()
+    mem = str(memory.recent_text or "").strip()
+    if len(q) < 200 and mem:
+        return f"{q}\n\nКонтекст предыдущих реплик (тема и даты):\n{mem[-5000:]}"
+    return q
+
+
+def _wants_sessions_activity_analysis(message_text: str) -> bool:
+    """Всплески/аномалии/активность в сеансах — sessions_analysis, не shift_summary."""
+    t = re.sub(r"\s+", " ", (message_text or "").lower().replace("ё", "е"))
+    if not t:
+        return False
+    has_activity = any(
+        x in t
+        for x in ("всплеск", "анomal", "аномал", "активн", "интенсив", "загружен")
+    )
+    has_sessions = any(
+        x in t for x in ("сеанс", " id ", " id,", " id.", "айди", "дежурн", "оперативн")
+    ) or re.search(r"\bid\b", t)
+    return has_activity and has_sessions
+
+
+def _wants_shift_intercept_summary(message_text: str) -> bool:
+    """Сводка по бланкам перехватов за смену — не поиск по всем сменам и не сеансы."""
+    if _user_prefers_sessions_not_intercept_blanks(message_text):
+        return False
+    q = _norm(message_text)
+    if _wants_cross_shift_intercept_search(message_text):
+        return False
+    if any(x in q for x in ("найди", "поиск", "поищи", "упомин", "когда-либо", "когда либо")):
+        if not any(x in q for x in ("сводк", "что было", "что происходило", "кратк по смене")):
+            return False
+    summary_hints = (
+        "сводк",
+        "доклад",
+        "отчет",
+        "отчёт",
+        "что было",
+        "что происходило",
+        "кратк",
+        "итог",
+        "опиши",
+        "расскаж",
+        "обзор",
+        "резюме",
+    )
+    intercept_hints = ("перехват", "бланк", "радио", "эфир", "канал")
+    has_shift = any(x in q for x in ("смен", "последн", "вчера", "сегодня")) or bool(
+        re.search(r"\d{1,2}[./]\d{1,2}", str(message_text or ""))
+    )
+    has_summary = any(x in q for x in summary_hints)
+    has_intercept = any(x in q for x in intercept_hints)
+    if has_summary and (has_shift or has_intercept):
+        return True
+    if has_shift and has_intercept:
+        return True
+    if has_shift and any(x in q for x in ("опиши", "расскаж", "кратк", "итог", "событ")):
+        return True
+    return False
+
+
+def _wants_cross_shift_intercept_search(message_text: str) -> bool:
+    """Поиск упоминаний в перехватах по всем сменам, не сводка одной смены."""
+    raw = str(message_text or "").strip()
+    if not raw or _user_prefers_sessions_not_intercept_blanks(message_text):
+        return False
+    q = _norm(message_text)
+    if any(
+        x in q
+        for x in (
+            "сводк",
+            "доклад",
+            "отчет",
+            "отчёт",
+            "что было в смене",
+            "кратко по смене",
+        )
+    ) and (
+        re.search(r"последн", q)
+        or re.search(r"\d{1,2}[./]\d{1,2}", raw)
+        or "за вчера" in q
+        or "за сегодня" in q
+    ):
+        return False
+    has_search = any(
+        x in q
+        for x in (
+            "найди",
+            "поиск",
+            "поищи",
+            "упомин",
+            "где",
+            "когда-либо",
+            "когда либо",
+            "когда-нибудь",
+            "когда нибудь",
+            "за все",
+            "за всех",
+            "в проекте",
+            "в базе",
+        )
+    )
+    has_intercept_scope = any(
+        x in q
+        for x in (
+            "перехват",
+            "бланк",
+            "300",
+            "200",
+            "трехсот",
+            "двухсот",
+            "ранен",
+            "убит",
+            "погиб",
+            "эвакуац",
+        )
+    )
+    return has_search and has_intercept_scope
+
+
+def _wants_chat_reformat_report(message_text: str) -> bool:
+    """
+    Переоформление/доклад по последнему ответу ассистента в чате — не поиск по БД перехватов.
+    """
+    src = _norm(message_text)
+    if not src:
+        return False
+    about_assistant = bool(
+        re.search(r"тво(ем|ём|й|ю)\s+(сообщени|ответ|реплик)", src)
+        or re.search(r"последн\w*\s+(тво\w+\s+)?(сообщени|ответ|реплик)", src)
+        or re.search(r"что\s+ты\s+(написал|ответил|сказал)", src)
+    )
+    reformat = any(
+        x in src
+        for x in (
+            "военно-делов",
+            "доклад",
+            "отчет",
+            "отчёт",
+            "переформулиру",
+            "перескаж",
+            "оформи",
+            "состав",
+            "выдели главн",
+        )
+    )
+    if not about_assistant:
+        return False
+    if any(x in src for x in ("смен", "перехват", "бланк", "сеанс", "эфир")):
+        return False
+    return reformat or "последн" in src
+
+
+def _last_assistant_chat_text(
+    portal_conn,
+    *,
+    group_id: int | None,
+    before_message_id: int,
+) -> str:
+    ai_uid = ensure_ai_assistant_user(portal_conn)
+    messages = list_chat_messages(portal_conn, group_id=group_id, limit=40)
+    for msg in reversed(messages):
+        if int(msg.get("id") or 0) >= int(before_message_id):
+            continue
+        if int(msg.get("user_id") or 0) != ai_uid:
+            continue
+        text = str(msg.get("message_text") or "").strip()
+        if text:
+            return text
+    return ""
+
+
+def _wants_id_cross_unit_data_lookup(message_text: str) -> bool:
+    """
+    Проверка / поиск ID в других подразделениях (сеансы, пересечения) — иначе планировщик
+    часто уходит в general_chat, а модель дословно выводит блок «Сообщение пользователя:».
+    """
+    raw = str(message_text or "").strip()
+    if not raw:
+        return False
+    low = _norm(message_text)
+    if not (
+        re.search(r"(?i)\bID\b[\s:]*[0-9]{3,10}", raw)
+        or re.search(r"(?i)(?:айдишник|радио[\s-]*[Ii][Dd]|\bайди[\s,;])", raw)
+        or re.search(r"(?i)\bс\s+id\b", raw)
+    ):
+        return False
+    if not re.search(
+        r"(?i)(провер|наличие|друг(их|ом|ое)\s*подраздел|"
+        r"в\s+друг(их|ом)\s*подраздел|событ|пересеч|нескольк(их|ом)\s*подраздел|"
+        r"где\s+еще|где\s+ещё|встреч|встрет)",
+        low,
+    ):
+        return False
+    if not re.search(r"(?<![0-9./])([0-9]{3,10})(?![0-9./])", raw):
+        return False
+    if _MILITARY_NUM_UNIT.search(raw) and not re.search(
+        r"(?i)\bID\b[\s:]*[0-9]{3,10}|айдишник|айди[\s,]*[0-9]{3,10}", raw
+    ):
+        return False
+    return True
+
+
+def _id_verification_question_for_planner(
+    message_text: str, memory: AgentMemory
+) -> str:
+    q = str(message_text or "").strip()
+    mem = str(memory.recent_text or "").strip()
+    if len(q) < 200 and mem:
+        return f"{q}\n\nКонтекст диалога (какой ID и период были в фокусе):\n{mem[-5000:]}"
+    return q
+
+
+def _ai_plan(message_text: str, memory: AgentMemory, ctx: AgentContext) -> AgentPlan:
+    src = _norm(message_text)
+    if _is_bulk_unit_rename_request(message_text, src):
+        return AgentPlan(
+            goal="массовая замена не выполняется из чата",
+            steps=[AgentStep("general_chat", {"canned": _BULK_UNIT_RENAME_HELP})],
+            requires_confirmation=False,
+            metadata={"planner": "bulk_unit_rename_guard"},
+        )
+    if _user_prefers_sessions_not_intercept_blanks(message_text) or _wants_sessions_activity_analysis(
+        message_text
+    ):
+        return AgentPlan(
+            goal="анализ сеансов связи (таблица seanses, не бланки перехватов)",
+            steps=[
+                AgentStep(
+                    "sessions_analysis",
+                    {
+                        "question": _sessions_analysis_question_for_planner(
+                            message_text, memory
+                        ),
+                        "message_text": message_text,
+                    },
+                )
+            ],
+            requires_confirmation=False,
+            metadata={"planner": "heuristic_sessions"},
+        )
+    if str(ctx.position_name or "").strip() and _wants_shift_intercept_summary(message_text):
+        return AgentPlan(
+            goal="сводка по бланкам перехватов за смену",
+            steps=[AgentStep("shift_summary", {"question": message_text})],
+            requires_confirmation=False,
+            metadata={"planner": "heuristic_shift_summary"},
+        )
+    if (
+        str(ctx.position_name or "").strip()
+        and _wants_cross_shift_intercept_search(message_text)
+    ):
+        return AgentPlan(
+            goal="поиск упоминаний в перехватах по всем сменам",
+            steps=[
+                AgentStep(
+                    "route_project",
+                    {
+                        "question": message_text,
+                        "force_project_search": True,
+                        "synthesize": True,
+                    },
+                )
+            ],
+            requires_confirmation=False,
+            metadata={"planner": "heuristic_cross_shift_intercepts"},
+        )
+    if (
+        str(ctx.position_name or "").strip()
+        and _wants_id_cross_unit_data_lookup(message_text)
+    ):
+        return AgentPlan(
+            goal="проверка ID по подразделениям и данным портала",
+            steps=[
+                AgentStep(
+                    "route_project",
+                    {
+                        "question": _id_verification_question_for_planner(
+                            message_text, memory
+                        ),
+                        "force_project_search": True,
+                        "synthesize": True,
+                    },
+                )
+            ],
+            requires_confirmation=False,
+            metadata={"planner": "heuristic_id_verification"},
+        )
+    if str(ctx.position_name or "").strip() and wants_broad_project_scan(message_text):
+        return AgentPlan(
+            goal="широкий поиск по всем источникам проекта",
+            steps=[
+                AgentStep(
+                    "route_project",
+                    {
+                        "question": message_text,
+                        "force_project_search": True,
+                        "synthesize": True,
+                    },
+                )
+            ],
+            requires_confirmation=False,
+            metadata={"planner": "heuristic_broad_project"},
+        )
+    if _wants_chat_reformat_report(message_text):
+        last_ai = _last_assistant_chat_text(
+            ctx.portal_conn,
+            group_id=ctx.group_id,
+            before_message_id=ctx.message_id,
+        )
+        if last_ai:
+            return AgentPlan(
+                goal="доклад по последнему ответу ассистента",
+                steps=[
+                    AgentStep(
+                        "general_chat",
+                        {
+                            "question": message_text,
+                            "portal_context": last_ai,
+                            "style": "military_report",
+                        },
+                    )
+                ],
+                requires_confirmation=False,
+                metadata={"planner": "heuristic_chat_reformat"},
+            )
+        return AgentPlan(
+            goal="уточнить источник для доклада",
+            steps=[
+                AgentStep(
+                    "general_chat",
+                    {
+                        "canned": (
+                            "Не нашёл в истории чата предыдущий ответ ассистента для оформления доклада. "
+                            "Повторите запрос сразу после ответа ЕАВС или вставьте нужный текст в сообщение."
+                        ),
+                    },
+                )
+            ],
+            requires_confirmation=False,
+            metadata={"planner": "chat_reformat_no_source"},
+        )
+    rag = _planner_rag_context(ctx, message_text)
+    pl = _dynamic_planner_plan(message_text, memory, rag_context=rag)
+    if pl is not None and pl.steps:
+        return pl
+    return _fallback_after_dynamic_planner(message_text)
+
+
+def _guard_step(ctx: AgentContext, step: AgentStep) -> str | None:
+    tool = get_tool(step.tool)
+    if not tool:
+        return f"Инструмент `{step.tool}` не найден."
+    if step.tool != "general_chat" and not ctx.position_name:
+        return "Выберите позицию перед запросом к данным портала."
+    if step.tool != "general_chat" and ctx.position_name != "__all__" and not ctx.can_use_position(ctx.position_name):
+        return "Нет доступа к выбранной позиции."
+    if tool.required_permission and not ctx.has_permission(tool.required_permission):
+        return f"Недостаточно прав для действия `{step.tool}`."
+    if tool.risk == RISK_SAFE_WRITE and not _explicit_write_request(ctx.message_text):
+        return "Для записи в базу нужна явная команда: запиши, поставь, укажи, привяжи или обнови."
+    if tool.risk in {RISK_BULK_WRITE, RISK_ADMIN_WRITE}:
+        return "Это рискованное действие. Сначала подтвердите его отдельной командой."
+    if step.requires_confirmation:
+        return "Для этого действия нужно подтверждение. Уточните команду отдельным сообщением."
+    return None
+
+
+def _tool_context(ctx: AgentContext) -> ToolContext:
+    return ToolContext(
+        portal_conn=ctx.portal_conn,
+        main_db_path=ctx.main_db_path,
+        position_name=ctx.position_name,
+        user_id=ctx.user_id,
+        user_role=ctx.user_role,
+        created_by=ctx.created_by,
+        memory=ctx.memory,
+        can_use_position=ctx.can_use_position,
+    )
+
+
+def _execute_plan(ctx: AgentContext, plan: AgentPlan) -> AgentResponse:
+    results: list[ToolResult] = []
+    actions: list[str] = []
+    warnings: list[str] = []
+    tool_ctx = _tool_context(ctx)
+    if plan.metadata.get("intent"):
+        try:
+            log_ai_agent_action(
+                ctx.portal_conn,
+                user_id=ctx.user_id,
+                message_id=ctx.message_id,
+                goal=plan.goal,
+                tool="__intent__",
+                risk=RISK_READ,
+                args={
+                    "message_text": ctx.message_text,
+                    "memory": {
+                        "last_id": ctx.memory.last_id,
+                        "last_unit": ctx.memory.last_unit,
+                        "last_period": ctx.memory.last_period,
+                        "last_topic": ctx.memory.last_topic,
+                    },
+                },
+                result=plan.metadata.get("intent") if isinstance(plan.metadata.get("intent"), dict) else {},
+                confirmed=True,
+                changed=False,
+            )
+        except Exception:
+            _log.debug("_execute_plan: suppressed error", exc_info=True)
+    elif plan.metadata.get("planner") in ("llm", "dynamic_llm", "clarify") and plan.steps:
+        try:
+            log_ai_agent_action(
+                ctx.portal_conn,
+                user_id=ctx.user_id,
+                message_id=ctx.message_id,
+                goal=plan.goal,
+                tool="__plan__",
+                risk=RISK_READ,
+                args={
+                    "message_text": ctx.message_text,
+                    "step_tools": [s.tool for s in plan.steps],
+                },
+                result={"metadata": {k: v for k, v in plan.metadata.items() if k != "intent"}},
+                confirmed=True,
+                changed=False,
+            )
+        except Exception:
+            _log.debug("_execute_plan: suppressed error", exc_info=True)
+    for step in plan.steps:
+        guard_error = _guard_step(ctx, step)
+        if guard_error:
+            warnings.append(guard_error)
+            results.append(ToolResult(tool=step.tool, title="Действие не выполнено", content=guard_error, warnings=[guard_error]))
+            continue
+        result = run_tool(tool_ctx, step.tool, step.args)
+        results.append(result)
+        _patch_memory_after_step(ctx, step)
+        actions.extend(result.actions)
+        warnings.extend(result.warnings)
+        log_ai_agent_action(
+            ctx.portal_conn,
+            user_id=ctx.user_id,
+            message_id=ctx.message_id,
+            goal=plan.goal,
+            tool=step.tool,
+            risk=(get_tool(step.tool).risk if get_tool(step.tool) else ""),
+            args=step.args,
+            result={"title": result.title, "changed": result.changed, "warnings": result.warnings},
+            confirmed=not step.requires_confirmation,
+            changed=result.changed,
+        )
+    return AgentResponse(goal=plan.goal, results=results, actions=actions, warnings=warnings)
+
+
+def _format_response(response: AgentResponse) -> str:
+    if (
+        len(response.results) == 1
+        and response.results[0].content
+        and not response.actions
+        and not response.warnings
+        and response.results[0].tool in ("general_chat", "route_project")
+    ):
+        return response.results[0].content
+
+    if len(response.results) == 1 and response.results[0].content:
+        lines = [response.results[0].content]
+    else:
+        lines = [f"### Результат: {response.goal}"]
+        for result in response.results:
+            if not result.content:
+                continue
+            lines.append(f"\n#### {result.title}")
+            lines.append(result.content)
+
+    if response.warnings:
+        lines.append("\n#### Важно")
+        for warning in response.warnings[:8]:
+            lines.append(f"- {warning}")
+
+    changed_actions = [action for action in response.actions if action]
+    if changed_actions and any(result.changed for result in response.results):
+        lines.append("\n#### Что сделано")
+        for action in changed_actions[:8]:
+            lines.append(f"- {action}.")
+
+    if not any(str(r.content or "").strip() for r in response.results):
+        lines.append(
+            "\nНе удалось сформировать текст ответа. "
+            "Проверьте Ollama или переформулируйте запрос."
+        )
+    if any(result.changed for result in response.results):
+        lines.append("\n#### Что проверить")
+        lines.append("- Проверьте изменённые записи в соответствующей вкладке портала.")
+    return "\n".join(lines).strip()
+
+
+def _is_pure_social_excluded_from_db(message_text: str) -> bool:
+    """Короткие приветствия/без темы — не тянем широкий поиск по БД."""
+    t = re.sub(r"\s+", " ", str(message_text or "").strip().lower().replace("ё", "е"))
+    t = t.strip(" .!?:;")
+    if not t or len(t) > 80:
+        return False
+    if any(ch.isdigit() for ch in t):
+        return False
+    one = t.split()
+    if len(one) == 1 and one[0] in {
+        "привет", "здрасьте", "приветик", "пока", "спасибо", "благодарю", "спс", "ок", "хорошо", "мимо",
+        "да", "нет", "ага", "угу", "ok", "hi", "hello", "bye", "тест", "теста",
+    }:
+        return True
+    small_talk = {
+        "привет", "здравствуй", "здравствуйте", "добрый день", "добрый вечер", "доброе утро",
+        "как дела", "как поживаешь", "спасибо", "пока", "успехов",
+    }
+    if t in small_talk:
+        return True
+    for p in ("как дела", "как твои", "с днем рожден", "с днём рожден"):
+        if t.startswith(p) and len(t) < 40:
+            return True
+    return False
+
+
+def _maybe_freeform_db_plan(
+    plan: AgentPlan,
+    message_text: str,
+    *,
+    position_name: str,
+    can_use_position: Callable[[str], bool],
+) -> AgentPlan:
+    """
+    Обычный freeform-чат (general_chat) при выбранной позиции — широкий поход в БД + при провале
+    смысловой выдачи дополнение от LLM (см. route_project, force_project_search).
+    """
+    if not str(position_name or "").strip():
+        return plan
+    if position_name != "__all__" and not can_use_position(position_name):
+        return plan
+    if not plan.steps:
+        return plan
+    st0 = plan.steps[0]
+    if st0.args.get("canned"):
+        return plan
+    if st0.tool != "general_chat" or len(plan.steps) != 1:
+        return plan
+    if _is_pure_social_excluded_from_db(message_text):
+        return plan
+    return AgentPlan(
+        goal="поиск и ответ по данным проекта (свободный режим БД)",
+        steps=[
+            AgentStep(
+                "route_project",
+                {
+                    "question": message_text,
+                    "force_project_search": True,
+                    "synthesize": True,
+                },
+            )
+        ],
+        requires_confirmation=plan.requires_confirmation,
+        metadata={**plan.metadata, "planner": "freeform_db", "replaces": "general_chat"},
+    )
+
+
+def answer_ai_chat_message(
+    *,
+    portal_conn,
+    main_db_path: Path,
+    group_id: int | None,
+    message_id: int,
+    message_text: str,
+    position_name: str,
+    user_id: int,
+    user_role: str = "",
+    created_by: str,
+    can_use_position: Callable[[str], bool],
+    has_permission: Callable[[str], bool] | None = None,
+) -> str:
+    message_text = normalize_user_search_question(message_text)
+    memory = _load_memory(portal_conn, user_id=user_id, group_id=group_id, message_id=message_id)
+    ctx = AgentContext(
+        portal_conn=portal_conn,
+        main_db_path=main_db_path,
+        group_id=group_id,
+        message_id=message_id,
+        message_text=message_text,
+        position_name=position_name,
+        user_id=user_id,
+        user_role=user_role,
+        created_by=created_by,
+        can_use_position=can_use_position,
+        has_permission=has_permission or (lambda _perm: False),
+        memory=memory,
+    )
+    plan = _ai_plan(message_text, memory, ctx)
+    plan = _maybe_freeform_db_plan(
+        plan,
+        message_text,
+        position_name=position_name,
+        can_use_position=can_use_position,
+    )
+    response = _execute_plan(ctx, plan)
+    _persist_memory(ctx, response)
+    return _format_response(response)

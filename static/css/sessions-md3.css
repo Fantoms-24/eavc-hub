@@ -1,0 +1,794 @@
+/**
+ * Material Design 3 — страница «Сеансы»
+ * Область: .md3-sessions (вместе с .wp-workbench--sessions)
+ */
+
+:root {
+  --md3-primary: #1d4ed8;
+  --md3-on-primary: #ffffff;
+  --md3-primary-container: #dbeafe;
+  --md3-on-primary-container: #1e3a8a;
+  --md3-secondary: #5b6478;
+  --md3-on-secondary: #ffffff;
+  --md3-secondary-container: #e0e7ff;
+  --md3-on-secondary-container: #1a2370;
+  --md3-surface: #f7f8fc;
+  --md3-surface-dim: #eef1f8;
+  --md3-surface-container-lowest: #ffffff;
+  --md3-surface-container-low: #f1f4fb;
+  --md3-surface-container: #e8ecf6;
+  --md3-surface-container-high: #e1e6f2;
+  --md3-surface-container-highest: #d8deeb;
+  --md3-on-surface: #1a1d26;
+  --md3-on-surface-variant: #5c6378;
+  --md3-outline: #c6ccdc;
+  --md3-outline-variant: #e0e4ef;
+  --md3-error: #b3261e;
+  --md3-on-error-container: #410e0b;
+  --md3-error-container: #f9dedc;
+  --md3-success: #1b5e20;
+  --md3-success-container: #c8e6c9;
+  --md3-elevation-1: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.05);
+  --md3-elevation-2: 0 1px 4px rgba(15, 23, 42, 0.06), 0 2px 8px rgba(15, 23, 42, 0.04);
+  --md3-elevation-3: 0 4px 12px rgba(15, 23, 42, 0.07);
+  --md3-shape-sm: 10px;
+  --md3-shape-md: 12px;
+  --md3-shape-lg: 16px;
+  --md3-shape-xl: 20px;
+  --md3-shape-full: 9999px;
+  --md3-font: "Roboto Flex", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --md3-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --md3-motion: cubic-bezier(0.2, 0, 0, 1);
+  --md3-motion-fast: 180ms;
+}
+
+html[data-wp-theme="dark"] {
+  --md3-primary: #9ecaff;
+  --md3-on-primary: #003258;
+  --md3-primary-container: #1e4972;
+  --md3-on-primary-container: #cfe4ff;
+  --md3-secondary: #bcc7e5;
+  --md3-on-secondary: #1e2838;
+  --md3-secondary-container: #3d4a63;
+  --md3-on-secondary-container: #e4e9ff;
+  --md3-surface: #0f1419;
+  --md3-surface-dim: #0a0d11;
+  --md3-surface-container-lowest: #0e131a;
+  --md3-surface-container-low: #161c26;
+  --md3-surface-container: #1e2633;
+  --md3-surface-container-high: #262f3f;
+  --md3-surface-container-highest: #303a4c;
+  --md3-on-surface: #e8eaf0;
+  --md3-on-surface-variant: #b4bccf;
+  --md3-outline: #8b93a8;
+  --md3-outline-variant: #3d4658;
+  --md3-error: #ffb4ab;
+  --md3-on-error-container: #f9dedc;
+  --md3-error-container: #93000a;
+  --md3-success: #a5d6a7;
+  --md3-success-container: #1b5e20;
+  --md3-elevation-1: 0 1px 3px rgba(0, 0, 0, 0.45);
+  --md3-elevation-2: 0 2px 10px rgba(0, 0, 0, 0.5);
+  --md3-elevation-3: 0 6px 18px rgba(0, 0, 0, 0.55);
+}
+
+.md3-sessions {
+  font-family: var(--md3-font);
+  color: var(--md3-on-surface);
+  -webkit-font-smoothing: antialiased;
+}
+
+html[data-wp-theme="dark"] .md3-sessions {
+  color-scheme: dark;
+}
+
+/* Главная оболочка */
+.md3-sessions .md3-sessions-main-card {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  border-radius: var(--md3-shape-xl);
+}
+
+.md3-sessions .md3-sessions-main-body {
+  background: linear-gradient(
+    165deg,
+    var(--md3-surface-container-low) 0%,
+    var(--md3-surface-dim) 48%,
+    var(--md3-surface-container-high) 100%
+  );
+  border-radius: var(--md3-shape-xl);
+  border: 1px solid var(--md3-outline-variant);
+  box-shadow: var(--md3-elevation-1);
+}
+
+.md3-sessions .md3-sessions-topbar {
+  padding: 0.75rem 1rem;
+  margin: -0.25rem -0.35rem 1.25rem;
+  background: var(--md3-surface-container-lowest);
+  border: 1px solid var(--md3-outline-variant);
+  border-radius: var(--md3-shape-lg);
+}
+
+.md3-sessions .md3-sessions-topbar .wp-page-title {
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  font-size: clamp(1.05rem, 2vw, 1.28rem);
+  margin-bottom: 0.15rem;
+}
+
+.md3-sessions .md3-sessions-topbar .wp-page-lead {
+  font-size: 0.8125rem;
+  color: var(--md3-on-surface-variant);
+  max-width: 62ch;
+}
+
+/* Карточки секций */
+.md3-sessions .md3-sessions-section {
+  background: var(--md3-surface-container-lowest);
+  border: 1px solid var(--md3-outline-variant) !important;
+  border-radius: var(--md3-shape-lg) !important;
+  box-shadow: none !important;
+  overflow: hidden;
+}
+
+.md3-sessions .md3-sessions-section .card-body {
+  padding: 1.05rem 1.15rem;
+}
+
+.md3-sessions .md3-sessions-section-title {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--md3-on-surface);
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-bottom: 0;
+}
+
+.md3-sessions .md3-sessions-section-title .bi {
+  color: var(--md3-primary);
+  opacity: 0.95;
+}
+
+.md3-sessions .md3-sessions-hint,
+.md3-sessions .form-text {
+  font-size: 0.75rem;
+  color: var(--md3-on-surface-variant);
+  line-height: 1.4;
+}
+
+/* app.css: светлые формы */
+.md3-sessions .form-control,
+.md3-sessions .form-select {
+  background-color: var(--md3-surface-container-lowest) !important;
+  color: var(--md3-on-surface) !important;
+  border-color: var(--md3-outline) !important;
+  border-radius: var(--md3-shape-sm);
+}
+
+.md3-sessions .form-control::placeholder {
+  color: var(--md3-on-surface-variant);
+  opacity: 0.88;
+}
+
+.md3-sessions .form-control:focus,
+.md3-sessions .form-select:focus {
+  border-color: var(--md3-primary) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--md3-primary) 28%, transparent) !important;
+}
+
+.md3-sessions .input-group-text {
+  background: var(--md3-surface-container) !important;
+  color: var(--md3-on-surface-variant) !important;
+  border-color: var(--md3-outline) !important;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.md3-sessions .form-label {
+  color: var(--md3-on-surface-variant);
+  font-size: 0.8125rem;
+}
+
+/* Кнопки */
+.md3-sessions .btn {
+  border-radius: var(--md3-shape-full);
+  font-weight: 500;
+}
+
+.md3-sessions .btn-primary {
+  background: var(--md3-primary) !important;
+  border: none !important;
+  color: var(--md3-on-primary) !important;
+}
+
+.md3-sessions .btn-success {
+  background: #15803d !important;
+  border: none !important;
+  color: #fff !important;
+}
+
+html[data-wp-theme="dark"] .md3-sessions .btn-success {
+  background: color-mix(in srgb, #22c55e 75%, #14532d) !important;
+  color: #f0fdf4 !important;
+}
+
+.md3-sessions .btn-outline-secondary {
+  border-color: var(--md3-outline);
+  color: var(--md3-on-surface-variant);
+  background: var(--md3-surface-container-lowest);
+}
+
+.md3-sessions .btn-outline-success {
+  border-color: color-mix(in srgb, #22c55e 45%, var(--md3-outline));
+  color: color-mix(in srgb, #4ade80 70%, var(--md3-on-surface));
+  background: var(--md3-surface-container-lowest);
+}
+
+.md3-sessions .btn-danger {
+  border-radius: var(--md3-shape-full);
+}
+
+.md3-sessions .btn-group .btn {
+  border-radius: var(--md3-shape-sm);
+}
+
+.md3-sessions .btn-group .btn:first-child {
+  border-radius: var(--md3-shape-sm) 0 0 var(--md3-shape-sm);
+}
+
+.md3-sessions .btn-group .btn:last-child {
+  border-radius: 0 var(--md3-shape-sm) var(--md3-shape-sm) 0;
+}
+
+.md3-sessions #date-presets .btn {
+  font-size: 0.75rem;
+}
+
+/* Сортировка в шапке таблицы */
+.md3-sessions #sessions-table .sessions-sort {
+  color: var(--md3-primary) !important;
+  font-weight: 600;
+  font-size: inherit;
+}
+
+.md3-sessions #sessions-table .sessions-sort:hover {
+  color: color-mix(in srgb, var(--md3-primary) 85%, var(--md3-on-surface)) !important;
+  text-decoration: underline !important;
+}
+
+/* Обёртка таблицы */
+.md3-sessions.wp-workbench--sessions .table-responsive {
+  border-radius: var(--md3-shape-md);
+  border: 1px solid var(--md3-outline-variant);
+  background: var(--md3-surface-container-lowest);
+  max-height: min(72vh, 920px);
+  overflow: auto;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+html[data-wp-theme="dark"] .md3-sessions.wp-workbench--sessions .table-responsive {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+/* Таблица */
+.md3-sessions.wp-workbench--sessions #sessions-table {
+  --wp-sessions-mono-size: 0.8125rem;
+  --bs-table-bg: transparent;
+  --bs-table-color: var(--md3-on-surface);
+  --bs-border-color: var(--md3-outline-variant);
+  --bs-table-striped-bg: color-mix(in srgb, var(--md3-surface-container) 55%, transparent);
+  --bs-table-striped-color: var(--md3-on-surface);
+  --bs-table-hover-bg: color-mix(in srgb, var(--md3-primary) 10%, transparent);
+  --bs-table-hover-color: var(--md3-on-surface);
+  margin-bottom: 0;
+  font-size: 0.8125rem;
+}
+
+.md3-sessions.wp-workbench--sessions #sessions-table thead tr:first-child th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: linear-gradient(
+    180deg,
+    var(--md3-surface-container-high) 0%,
+    var(--md3-surface-container) 100%
+  ) !important;
+  box-shadow: inset 0 -1px 0 var(--md3-outline-variant);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--md3-on-surface-variant);
+  vertical-align: middle;
+  border-color: var(--md3-outline-variant);
+}
+
+.md3-sessions.wp-workbench--sessions #sessions-table thead tr.sessions-filter-row th {
+  position: sticky;
+  top: 2.45rem;
+  z-index: 1;
+  background: var(--md3-surface-container-lowest) !important;
+  box-shadow: inset 0 -1px 0 var(--md3-outline-variant);
+  padding-top: 0.4rem;
+  padding-bottom: 0.4rem;
+  border-color: var(--md3-outline-variant);
+}
+
+html[data-wp-density="compact"] .md3-sessions.wp-workbench--sessions #sessions-table thead tr.sessions-filter-row th {
+  top: 2.15rem;
+}
+
+.md3-sessions.wp-workbench--sessions #sessions-table tbody td {
+  border-color: var(--md3-outline-variant);
+  vertical-align: middle;
+}
+
+.md3-sessions.wp-workbench--sessions #sessions-table tbody tr:hover td {
+  background-color: color-mix(in srgb, var(--md3-primary) 8%, transparent) !important;
+}
+
+.md3-sessions.wp-workbench--sessions #sessions-table tbody td:nth-child(3),
+.md3-sessions.wp-workbench--sessions #sessions-table tbody td:nth-child(4),
+.md3-sessions.wp-workbench--sessions #sessions-table tbody td:nth-child(7) {
+  font-family: var(--md3-font-mono);
+  font-size: var(--wp-sessions-mono-size);
+  letter-spacing: -0.02em;
+}
+
+.md3-sessions.wp-workbench--sessions #sessions-table tbody td:nth-child(5) {
+  max-width: 28rem;
+  word-break: break-word;
+}
+
+/* Избранное — вместо table-warning */
+.md3-sessions #sessions-table tbody tr.md3-sessions-row-fav td {
+  background-color: color-mix(in srgb, var(--md3-primary) 14%, var(--md3-surface-container-lowest)) !important;
+  box-shadow: inset 3px 0 0 var(--md3-primary);
+}
+
+.md3-sessions #sessions-table tbody tr.md3-sessions-row-fav:hover td {
+  background-color: color-mix(in srgb, var(--md3-primary) 20%, var(--md3-surface-container-low)) !important;
+}
+
+/* Пустые / загрузка */
+.md3-sessions #sessions-table tbody td.text-muted {
+  color: var(--md3-on-surface-variant) !important;
+}
+
+/* Тулбар над таблицей */
+.md3-sessions #table-count {
+  color: var(--md3-on-surface-variant);
+  font-size: 0.8125rem;
+}
+
+/* Статистика БД — плитки */
+.md3-sessions .md3-sessions-stat-tile {
+  background: var(--md3-surface-container);
+  border: 1px solid var(--md3-outline-variant);
+  border-radius: var(--md3-shape-md);
+  height: 100%;
+  box-shadow: none;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.md3-sessions .md3-sessions-stat-tile:hover {
+  border-color: color-mix(in srgb, var(--md3-primary) 35%, var(--md3-outline-variant));
+  box-shadow: var(--md3-elevation-1);
+}
+
+.md3-sessions .md3-sessions-stat-tile .md3-sessions-stat-value {
+  font-weight: 700;
+  font-size: 1.35rem;
+  color: var(--md3-primary);
+  letter-spacing: -0.02em;
+}
+
+.md3-sessions .md3-sessions-stat-tile .md3-sessions-stat-label {
+  font-size: 0.75rem;
+  color: var(--md3-on-surface-variant);
+  margin-top: 0.25rem;
+}
+
+.md3-sessions .md3-sessions-stat-tile .md3-sessions-stat-sub {
+  font-size: 0.8125rem;
+  color: var(--md3-primary);
+  font-weight: 500;
+}
+
+/* Прогресс */
+.md3-sessions .progress {
+  background: var(--md3-surface-container);
+  border-radius: var(--md3-shape-full);
+  overflow: hidden;
+}
+
+.md3-sessions .progress-bar {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--md3-primary) 88%, #fff),
+    var(--md3-primary)
+  );
+}
+
+html[data-wp-theme="dark"] .md3-sessions .progress-bar {
+  background: linear-gradient(90deg, var(--md3-primary-container), var(--md3-primary));
+}
+
+/* Алерты */
+.md3-sessions .alert-warning {
+  background: color-mix(in srgb, #f59e0b 12%, var(--md3-surface-container-lowest)) !important;
+  border: 1px solid color-mix(in srgb, #f59e0b 35%, var(--md3-outline-variant)) !important;
+  color: var(--md3-on-surface) !important;
+}
+
+.md3-sessions .alert-danger {
+  background: color-mix(in srgb, var(--md3-error) 15%, var(--md3-surface-container-lowest)) !important;
+  border: 1px solid color-mix(in srgb, var(--md3-error) 40%, var(--md3-outline-variant)) !important;
+  color: var(--md3-on-surface) !important;
+}
+
+.md3-sessions .alert-success {
+  background: color-mix(in srgb, #22c55e 12%, var(--md3-surface-container-lowest)) !important;
+  border: 1px solid color-mix(in srgb, #22c55e 35%, var(--md3-outline-variant)) !important;
+  color: var(--md3-on-surface) !important;
+}
+
+/* Переключатель */
+.md3-sessions .form-check-input {
+  width: 2.25rem;
+  height: 1.15rem;
+  border-color: var(--md3-outline);
+  background-color: var(--md3-surface-container-high);
+}
+
+.md3-sessions .form-check-input:checked {
+  background-color: var(--md3-primary);
+  border-color: var(--md3-primary);
+}
+
+.md3-sessions .form-check-label {
+  color: var(--md3-on-surface);
+  font-size: 0.875rem;
+}
+
+/* Бейдж SQL */
+.md3-sessions #table-query-ms {
+  font-weight: 500;
+  font-size: 0.6875rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--md3-shape-full);
+  background: var(--md3-surface-container) !important;
+  color: var(--md3-on-surface-variant) !important;
+  border: 1px solid var(--md3-outline-variant);
+}
+
+/* Выпадающее меню действий */
+.md3-sessions #sessions-table .dropdown-menu {
+  border-radius: var(--md3-shape-sm);
+  border: 1px solid var(--md3-outline-variant);
+  background: var(--md3-surface-container-lowest);
+  box-shadow: var(--md3-elevation-3);
+}
+
+.md3-sessions #sessions-table .dropdown-item {
+  font-size: 0.8125rem;
+  color: var(--md3-on-surface);
+}
+
+.md3-sessions #sessions-table .dropdown-item:hover {
+  background: color-mix(in srgb, var(--md3-primary) 10%, transparent);
+}
+
+/* Модалка debug */
+.modal.md3-sessions-modal .modal-content {
+  border-radius: var(--md3-shape-lg) !important;
+  border: 1px solid var(--md3-outline-variant);
+  background: var(--md3-surface-container-lowest);
+  box-shadow: var(--md3-elevation-3);
+}
+
+.modal.md3-sessions-modal .modal-header {
+  background: var(--md3-surface-container-low);
+  border-bottom: 1px solid var(--md3-outline-variant);
+}
+
+.modal.md3-sessions-modal .modal-footer {
+  background: var(--md3-surface-container-low);
+  border-top: 1px solid var(--md3-outline-variant);
+}
+
+.modal.md3-sessions-modal pre {
+  background: var(--md3-surface-container);
+  color: var(--md3-on-surface);
+  border-radius: var(--md3-shape-sm);
+  padding: 0.75rem !important;
+  border: 1px solid var(--md3-outline-variant);
+}
+
+@media (max-width: 992px) {
+  .md3-sessions.wp-workbench--sessions #sessions-table thead tr.sessions-filter-row th {
+    top: 2.25rem;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Сеансы v2026 — hero, контекст, усиленные секции, тулбар таблицы
+   -------------------------------------------------------------------------- */
+
+.md3-sessions--v2026 .md3-sessions-topbar.md3-sessions-hero {
+  position: relative;
+  margin: -0.15rem -0.25rem 1.35rem;
+  padding: 0;
+  overflow: hidden;
+  border-radius: var(--md3-shape-xl);
+  border: 1px solid color-mix(in srgb, var(--md3-primary) 22%, var(--md3-outline-variant));
+  background: var(--md3-surface-container-lowest);
+  box-shadow: var(--md3-elevation-2);
+}
+
+.md3-sessions--v2026 .md3-sessions-hero__aurora {
+  position: absolute;
+  inset: -60% -30% -35% -30%;
+  pointer-events: none;
+  opacity: 0.48;
+  background:
+    radial-gradient(ellipse 85% 55% at 14% 36%, color-mix(in srgb, var(--md3-primary) 36%, transparent), transparent 58%),
+    radial-gradient(ellipse 70% 50% at 88% 64%, color-mix(in srgb, #6366f1 22%, transparent), transparent 52%),
+    radial-gradient(ellipse 50% 45% at 48% 100%, color-mix(in srgb, #22c55e 14%, transparent), transparent 46%);
+  animation: md3-sessions-aurora 18s ease-in-out infinite alternate;
+}
+
+@keyframes md3-sessions-aurora {
+  0% {
+    transform: translate(-1%, -0.5%) scale(1);
+  }
+  100% {
+    transform: translate(1.2%, 0.6%) scale(1.03);
+  }
+}
+
+.md3-sessions--v2026 .md3-sessions-hero__inner {
+  position: relative;
+  z-index: 1;
+  padding: 0.95rem 1.05rem 1rem;
+}
+
+.md3-sessions--v2026 .md3-sessions-hero .wp-page-header {
+  margin-bottom: 0;
+}
+
+.md3-sessions--v2026 .md3-sessions-hero .wp-page-title {
+  font-size: clamp(1.1rem, 2.2vw, 1.38rem);
+  letter-spacing: -0.03em;
+}
+
+.md3-sessions--v2026 .md3-sessions-hero .wp-page-title-icon {
+  font-size: 1.15em;
+  color: var(--md3-primary);
+  filter: drop-shadow(0 1px 2px color-mix(in srgb, var(--md3-primary) 25%, transparent));
+}
+
+.md3-sessions--v2026 .md3-sessions-context-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.75rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid color-mix(in srgb, var(--md3-outline-variant) 85%, transparent);
+}
+
+.md3-sessions--v2026 .md3-sessions-quick-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.68rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  color: var(--md3-on-surface-variant);
+  background: color-mix(in srgb, var(--md3-surface-container-lowest) 86%, transparent);
+  border: 1px solid var(--md3-outline-variant);
+  border-radius: var(--md3-shape-full);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition:
+    background var(--md3-motion-fast) var(--md3-motion),
+    color var(--md3-motion-fast) var(--md3-motion),
+    border-color var(--md3-motion-fast) var(--md3-motion),
+    box-shadow var(--md3-motion-fast) var(--md3-motion);
+}
+
+.md3-sessions--v2026 .md3-sessions-quick-link:hover {
+  color: var(--md3-primary);
+  border-color: color-mix(in srgb, var(--md3-primary) 42%, var(--md3-outline-variant));
+  background: color-mix(in srgb, var(--md3-primary) 9%, var(--md3-surface-container-lowest));
+  box-shadow: 0 1px 3px color-mix(in srgb, var(--md3-primary) 15%, transparent);
+}
+
+.md3-sessions--v2026 .md3-sessions-quick-link:focus-visible {
+  outline: 2px solid var(--md3-primary);
+  outline-offset: 2px;
+}
+
+.md3-sessions--v2026 .md3-sessions-hero__pill {
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: var(--md3-shape-full);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--md3-on-primary-container);
+  background: color-mix(in srgb, var(--md3-primary) 14%, var(--md3-surface-container-low));
+  border: 1px solid color-mix(in srgb, var(--md3-primary) 28%, var(--md3-outline-variant));
+}
+
+.md3-sessions--v2026 .md3-sessions-hero__pill-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--md3-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--md3-primary) 28%, transparent);
+  animation: md3-sessions-pill-pulse 2.8s ease-in-out infinite;
+}
+
+@keyframes md3-sessions-pill-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.75;
+    transform: scale(0.92);
+  }
+}
+
+.md3-sessions--v2026 .md3-sessions-section {
+  position: relative;
+  border-radius: var(--md3-shape-xl) !important;
+  background: color-mix(in srgb, var(--md3-surface-container-lowest) 92%, transparent) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: var(--md3-elevation-1) !important;
+  transition:
+    border-color var(--md3-motion-fast) var(--md3-motion),
+    box-shadow var(--md3-motion-fast) var(--md3-motion);
+}
+
+.md3-sessions--v2026 .md3-sessions-section:hover {
+  border-color: color-mix(in srgb, var(--md3-primary) 18%, var(--md3-outline-variant)) !important;
+}
+
+.md3-sessions--v2026 .md3-sessions-section--data {
+  border-color: color-mix(in srgb, var(--md3-primary) 22%, var(--md3-outline-variant)) !important;
+  box-shadow:
+    var(--md3-elevation-1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.45) !important;
+}
+
+.md3-sessions--v2026 .md3-sessions-section-title {
+  font-size: 0.95rem;
+  letter-spacing: -0.01em;
+}
+
+.md3-sessions--v2026 .md3-sessions-table-toolbar {
+  padding: 0.45rem 0.55rem;
+  margin: -0.15rem;
+  border-radius: var(--md3-shape-lg);
+  background: color-mix(in srgb, var(--md3-surface-container) 65%, transparent);
+  border: 1px solid var(--md3-outline-variant);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+.md3-sessions--v2026 #date-presets {
+  padding: 3px;
+  border-radius: var(--md3-shape-full);
+  background: var(--md3-surface-container-high);
+  border: 1px solid var(--md3-outline-variant);
+  gap: 2px !important;
+}
+
+.md3-sessions--v2026 #date-presets .btn {
+  border: none !important;
+  border-radius: var(--md3-shape-full) !important;
+  font-weight: 600;
+  font-size: 0.72rem;
+  padding: 0.28rem 0.65rem;
+  color: var(--md3-on-surface-variant);
+  background: transparent;
+}
+
+.md3-sessions--v2026 #date-presets .btn:hover {
+  background: color-mix(in srgb, var(--md3-primary) 10%, transparent);
+  color: var(--md3-on-surface);
+}
+
+.md3-sessions--v2026 #date-presets .btn:focus-visible {
+  outline: 2px solid var(--md3-primary);
+  outline-offset: 1px;
+}
+
+/* активный пресет подсвечивается скриптом через focus — оставляем нейтрально */
+
+@media (max-width: 575.98px) {
+  .md3-sessions--v2026 .md3-sessions-context-bar {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    padding-bottom: 0.2rem;
+  }
+
+  .md3-sessions--v2026 .md3-sessions-quick-link {
+    flex: 0 0 auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .md3-sessions--v2026 .md3-sessions-hero__aurora,
+  .md3-sessions--v2026 .md3-sessions-hero__pill-dot {
+    animation: none !important;
+  }
+
+  .md3-sessions--v2026 .md3-sessions-hero__aurora {
+    opacity: 0.26;
+  }
+}
+
+html[data-wp-theme="dark"] .md3-sessions--v2026 .md3-sessions-topbar.md3-sessions-hero {
+  background: var(--md3-surface-container-low);
+  box-shadow: var(--md3-elevation-2);
+}
+
+html[data-wp-theme="dark"] .md3-sessions--v2026 .md3-sessions-hero__aurora {
+  opacity: 0.34;
+}
+
+html[data-wp-theme="dark"] .md3-sessions--v2026 .md3-sessions-context-bar {
+  border-top-color: var(--md3-outline);
+}
+
+html[data-wp-theme="dark"] .md3-sessions--v2026 .md3-sessions-quick-link {
+  background: color-mix(in srgb, var(--md3-surface-container) 55%, transparent);
+  border-color: var(--md3-outline);
+}
+
+html[data-wp-theme="dark"] .md3-sessions--v2026 .md3-sessions-quick-link:hover {
+  color: #c4d4ff;
+  border-color: color-mix(in srgb, var(--md3-primary) 45%, var(--md3-outline));
+  background: color-mix(in srgb, var(--md3-primary) 14%, var(--md3-surface-container-low));
+}
+
+html[data-wp-theme="dark"] .md3-sessions--v2026 .md3-sessions-hero__pill {
+  background: color-mix(in srgb, var(--md3-primary) 22%, var(--md3-surface-container));
+  border-color: color-mix(in srgb, var(--md3-primary) 35%, var(--md3-outline));
+  color: var(--md3-on-primary-container);
+}
+
+html[data-wp-theme="dark"] .md3-sessions--v2026 .md3-sessions-section {
+  background: color-mix(in srgb, var(--md3-surface-container-low) 78%, transparent) !important;
+}
+
+html[data-wp-theme="dark"] .md3-sessions--v2026 .md3-sessions-section--data {
+  box-shadow:
+    var(--md3-elevation-1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
+}
+
+html[data-wp-theme="dark"] .md3-sessions--v2026 .md3-sessions-table-toolbar {
+  background: color-mix(in srgb, var(--md3-surface-container) 80%, transparent);
+  box-shadow: none;
+}
+
+html[data-wp-theme="dark"] .md3-sessions--v2026 #date-presets {
+  background: var(--md3-surface-container-high);
+  border-color: var(--md3-outline);
+}

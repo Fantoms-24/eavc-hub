@@ -1,0 +1,4658 @@
+/* -------------------------------------------------------------------------- */
+/*  Strict business theme (modern “messenger-like” layout)                     */
+/* -------------------------------------------------------------------------- */
+
+:root {
+    /* surfaces */
+    --wp-bg: #f6f8fc;
+    --wp-surface: #ffffff;
+    --wp-surface-2: #fbfcff;
+    --wp-border: rgba(15, 23, 42, .12);
+    --wp-border-strong: rgba(15, 23, 42, .18);
+
+    /* text */
+    --wp-text: #0f172a;
+    --wp-text-subtle: rgba(15, 23, 42, .65);
+
+    /* brand: CTA / логотип; accent — ссылки и кольца фокуса */
+    --wp-accent: #2563eb;
+    --wp-accent-2: #1e40af;
+    --wp-brand: #1d4ed8;
+    --wp-brand-hover: #1e3a8a;
+    --wp-brand-rgb: 29, 78, 216;
+    --wp-ring: rgba(37, 99, 235, .18);
+
+    /* typography */
+    --wp-line-tight: 1.25;
+    --wp-line-body: 1.4;
+    --wp-font-page-title: 1.125rem;
+    --wp-font-lead: 0.8125rem;
+    --wp-font-body: 14px;
+    --wp-font-small: 12.5px;
+    --wp-font-table: 13px;
+    --wp-font-table-head: 12.5px;
+
+    /* spacing */
+    --wp-space-xs: 0.25rem;
+    --wp-space-sm: 0.5rem;
+    --wp-space-md: 1rem;
+    --wp-space-lg: 1.5rem;
+
+    /* tables */
+    --wp-table-cell-padding-y: 0.45rem;
+    --wp-table-cell-padding-x: 0.65rem;
+
+    /* radii / shadows */
+    --wp-radius: 14px;
+    --wp-radius-sm: 12px;
+    --wp-shadow: 0 10px 28px rgba(15, 23, 42, .08);
+    --wp-shadow-sm: 0 6px 18px rgba(15, 23, 42, .07);
+
+    /* layout — MD3 compact top app bar */
+    --wp-nav-h: 56px;
+    --wp-app-bg-image: url("../images/backgrounds/app-bg.png");
+    /* MD3 outline / surface (nav) */
+    --wp-md3-outline: rgba(121, 116, 126, 0.28);
+    --wp-md3-surface-nav: #fdfcff;
+}
+
+/* Bootstrap: primary = фирменный CTA; ссылки — акцент */
+html {
+    --bs-primary: var(--wp-brand);
+    --bs-primary-rgb: var(--wp-brand-rgb);
+    --bs-link-color: var(--wp-accent);
+    --bs-link-hover-color: var(--wp-accent-2);
+}
+
+/* Режим плотности: только контент main (таблицы, подписи разделов) */
+html[data-wp-density="compact"] {
+    --wp-font-page-title: 1rem;
+    --wp-font-lead: 12px;
+    --wp-font-table: 12.5px;
+    --wp-font-table-head: 12px;
+    --wp-table-cell-padding-y: 0.32rem;
+    --wp-table-cell-padding-x: 0.5rem;
+}
+
+html[data-wp-density="compact"] main {
+    font-size: 13px;
+}
+
+html,
+body {
+    height: 100%;
+}
+
+body {
+    /* Мягкий фон без анимации — в духе страницы логина */
+    background:
+        radial-gradient(ellipse 100% 80% at 50% 0%, rgba(226, 232, 240, 0.9), transparent 55%),
+        radial-gradient(ellipse 80% 50% at 20% 100%, rgba(203, 213, 225, 0.5), transparent 50%),
+        radial-gradient(ellipse 70% 40% at 85% 90%, rgba(191, 219, 254, 0.4), transparent 45%),
+        linear-gradient(180deg, #f1f5f9 0%, #f8fafc 35%, #f1f5f9 100%);
+    color: var(--wp-text);
+    font-size: var(--wp-font-body);
+    line-height: var(--wp-line-body);
+}
+
+/* Фон приложения: static/images/backgrounds/app-bg.png (можно заменить файл) */
+body.wp-has-app-background {
+    background: #0a1628;
+    position: relative;
+    isolation: isolate;
+}
+
+body.wp-has-app-background::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    background-image: var(--wp-app-bg-image);
+    background-size: cover;
+    background-position: center 22%;
+    background-repeat: no-repeat;
+    pointer-events: none;
+}
+
+body.wp-has-app-background::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+        linear-gradient(180deg,
+            rgba(255, 255, 255, 0.2) 0%,
+            rgba(241, 245, 249, 0.62) 38%,
+            rgba(241, 245, 249, 0.88) 100%),
+        radial-gradient(ellipse 90% 55% at 50% 0%, rgba(255, 255, 255, 0.28), transparent 58%);
+}
+
+body.wp-has-app-background main {
+    background: transparent;
+}
+
+body.wp-has-app-background .wp-card {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(14px) saturate(150%);
+    -webkit-backdrop-filter: blur(14px) saturate(150%);
+    border-color: rgba(255, 255, 255, 0.55);
+}
+
+body.wp-has-app-background main .card.border-0.shadow-sm,
+body.wp-has-app-background main .card.wp-card {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(14px) saturate(150%);
+    -webkit-backdrop-filter: blur(14px) saturate(150%);
+}
+
+body.wp-has-app-background main.container-fluid {
+    background: transparent !important;
+}
+
+main {
+    min-height: calc(100vh - var(--wp-nav-h));
+    /* Без CSS zoom — лучше для масштаба ОС и доступности; плотность через body font-size */
+}
+
+/* Правая зона навбара: перенос строк при узкой ширине */
+.navbar .navbar-collapse > .d-flex.align-items-center {
+    flex-wrap: wrap;
+    row-gap: 0.5rem;
+}
+
+/* Интервалы в шапке: пункты меню и блок инструментов не «слипаются» */
+.navbar.wp-nav .navbar-nav.wp-navbar-primary {
+    column-gap: 0.35rem;
+    row-gap: 0.25rem;
+}
+
+@media (min-width: 992px) {
+    .navbar.wp-nav .navbar-nav.wp-navbar-primary {
+        column-gap: 0.5rem;
+    }
+}
+
+.navbar.wp-nav .wp-navbar-tools {
+    column-gap: 0.55rem;
+    row-gap: 0.45rem;
+    padding: 0.2rem 0.45rem;
+    border: 1px solid rgba(148, 163, 184, 0.28);
+    border-radius: 0.95rem;
+    background: rgba(255, 255, 255, 0.72);
+    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
+}
+
+/* Иконки с бейджами — резервируем место справа, чтобы бейдж не наезжал на соседнюю кнопку */
+.navbar.wp-nav .wp-navbar-tools > .wp-nav-icon-btn.position-relative {
+    margin-inline-end: 0.15rem;
+    padding-inline-end: 0.2rem;
+}
+
+.navbar.wp-nav .wp-navbar-tools > .wp-theme-toggle {
+    flex-shrink: 0;
+}
+
+.navbar.wp-nav .wp-navbar-position .form-select {
+    max-width: 100%;
+}
+
+.navbar.wp-nav .wp-toolbar-select {
+    height: 2rem;
+    border-radius: 0.75rem;
+    border-color: rgba(148, 163, 184, 0.28);
+    background-color: transparent;
+    padding-top: 0.2rem;
+    padding-bottom: 0.2rem;
+}
+
+.navbar.wp-nav .wp-nav-icon-btn {
+    width: 1.95rem;
+    height: 1.95rem;
+    min-width: 1.95rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    background: transparent;
+    color: rgba(33, 37, 41, .82);
+    text-decoration: none;
+}
+
+.navbar.wp-nav .wp-nav-icon-btn:hover {
+    background: rgba(37, 99, 235, .06);
+    color: rgba(33, 37, 41, 1);
+}
+
+.navbar.wp-nav .wp-user-menu-btn {
+    height: 2rem;
+    border: 1px solid transparent;
+    border-radius: 0.75rem;
+    background: transparent;
+    padding: 0.15rem 0.45rem;
+}
+
+.navbar.wp-nav .wp-user-menu-btn:hover,
+.navbar.wp-nav .wp-user-menu-btn:focus {
+    background: rgba(37, 99, 235, .06);
+    box-shadow: none;
+}
+
+.navbar.wp-nav .wp-user-menu-btn:focus-visible,
+.navbar.wp-nav .wp-nav-icon-btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 0.18rem rgba(37, 99, 235, .14);
+}
+
+.navbar.wp-nav #wp-user-menu+.dropdown-menu {
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 0.75rem;
+    box-shadow: 0 10px 28px rgba(15, 23, 42, .12);
+}
+
+.navbar.wp-nav #wp-user-menu+.dropdown-menu .dropdown-divider {
+    border-top-color: rgba(148, 163, 184, 0.25);
+}
+
+@media (max-width: 768px) {
+    .navbar.wp-nav .wp-navbar-tools {
+        padding-left: 0.35rem;
+        padding-right: 0.35rem;
+    }
+}
+
+/* navbar */
+.navbar {
+    border-color: var(--wp-border) !important;
+}
+
+.navbar.wp-nav {
+    background: rgba(255, 255, 255, .86) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+/* MD3 Top app bar + glass */
+.navbar.wp-nav.md3-top-app-bar {
+    background: rgba(255, 255, 255, 0.68) !important;
+    backdrop-filter: blur(20px) saturate(165%);
+    -webkit-backdrop-filter: blur(20px) saturate(165%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.45) !important;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.65) inset, 0 4px 24px rgba(15, 23, 42, 0.06);
+    min-height: var(--wp-nav-h);
+    padding-top: 0;
+    padding-bottom: 0;
+    font-family: "Roboto Flex", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+.navbar.wp-nav.md3-top-app-bar .container-fluid {
+    min-height: var(--wp-nav-h);
+    position: relative;
+}
+
+.navbar.wp-nav.md3-top-app-bar .navbar-brand {
+    font-size: 1.125rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    padding-top: 0;
+    padding-bottom: 0;
+    line-height: 1.2;
+}
+
+.navbar.wp-nav.md3-top-app-bar .wp-navbar-primary {
+    column-gap: 0.2rem;
+    row-gap: 0.15rem;
+}
+
+.navbar .navbar-brand {
+    letter-spacing: .2px;
+    margin-right: 0.75rem;
+    color: var(--wp-brand);
+}
+
+.navbar .navbar-brand:hover {
+    color: var(--wp-brand-hover);
+}
+
+.navbar .nav-link {
+    font-size: 13.5px;
+    color: rgba(33, 37, 41, .82);
+    padding: 0.4rem 0.65rem;
+    border-radius: 999px;
+}
+
+.navbar.wp-nav.md3-top-app-bar .nav-link {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    color: #44474e;
+    padding: 0.35rem 0.65rem;
+    min-height: 36px;
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    transition: background 0.18s cubic-bezier(0.2, 0, 0, 1), color 0.18s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.navbar .nav-link.dropdown-toggle {
+    padding-right: 0.6rem;
+}
+
+.navbar.wp-nav.md3-top-app-bar .nav-link.dropdown-toggle {
+    padding-right: 0.55rem;
+}
+
+.navbar .nav-link:hover {
+    color: rgba(33, 37, 41, 1);
+    background: color-mix(in srgb, var(--wp-accent) 8%, white);
+}
+
+.navbar.wp-nav.md3-top-app-bar .nav-link:hover {
+    color: #1a1c1e;
+    background: rgba(68, 71, 78, 0.08);
+}
+
+.navbar .nav-link.active {
+    color: var(--wp-accent-2);
+    background: color-mix(in srgb, var(--wp-accent) 12%, white);
+    border: 1px solid color-mix(in srgb, var(--wp-accent) 28%, transparent);
+}
+
+.navbar.wp-nav.md3-top-app-bar .nav-link.active {
+    color: #15448a;
+    background: #e8eefc;
+    border-color: rgba(37, 99, 235, 0.22);
+}
+
+@supports not (background: color-mix(in srgb, white 50%, black)) {
+    .navbar .nav-link:hover {
+        background: rgba(37, 99, 235, .06);
+    }
+
+    .navbar .nav-link.active {
+        color: rgba(15, 23, 42, 1);
+        background: rgba(37, 99, 235, .10);
+        border: 1px solid rgba(37, 99, 235, .18);
+    }
+
+    .navbar.wp-nav.md3-top-app-bar .nav-link:hover {
+        background: rgba(68, 71, 78, 0.08);
+    }
+
+    .navbar.wp-nav.md3-top-app-bar .nav-link.active {
+        color: #15448a;
+        background: #e8eefc;
+        border-color: rgba(37, 99, 235, 0.22);
+    }
+}
+
+.navbar.wp-nav.md3-top-app-bar .nav-link i {
+    font-size: 0.95em;
+    opacity: 0.92;
+}
+
+.navbar.wp-nav.md3-top-app-bar .dropdown-menu {
+    border-radius: 14px;
+    border: 1px solid var(--wp-md3-outline);
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.1);
+    padding: 0.35rem;
+    margin-top: 0.35rem;
+}
+
+.navbar.wp-nav.md3-top-app-bar .dropdown-item {
+    border-radius: 10px;
+    font-size: 0.8125rem;
+    padding: 0.45rem 0.65rem;
+    font-weight: 500;
+}
+
+.navbar.wp-nav.md3-top-app-bar .dropdown-item.active,
+.navbar.wp-nav.md3-top-app-bar .dropdown-item:active {
+    background: #e8eefc;
+    color: #15448a;
+}
+
+.navbar.wp-nav.md3-top-app-bar .wp-navbar-tools {
+    border-radius: 999px;
+    border: 1px solid var(--wp-md3-outline);
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: none;
+    padding: 0.15rem 0.45rem;
+    column-gap: 0.6rem;
+    row-gap: 0.45rem;
+}
+
+.navbar.wp-nav.md3-top-app-bar .wp-toolbar-select {
+    height: 1.85rem;
+    font-size: 0.8125rem;
+    border-radius: 999px;
+}
+
+.navbar.wp-nav.md3-top-app-bar .wp-navbar-position .small {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #5c5f66;
+}
+
+.navbar.wp-nav.md3-top-app-bar .wp-nav-icon-btn {
+    width: 1.85rem;
+    height: 1.85rem;
+    min-width: 1.85rem;
+}
+
+.navbar.wp-nav.md3-top-app-bar .wp-user-menu-btn {
+    height: 1.85rem;
+    font-size: 0.8125rem;
+    border-radius: 999px;
+    padding: 0.1rem 0.4rem;
+}
+
+.navbar.wp-nav.md3-top-app-bar .navbar-toggler {
+    border-radius: 10px;
+    padding: 0.3rem 0.5rem;
+    border-color: var(--wp-md3-outline);
+}
+
+.navbar.wp-nav.md3-top-app-bar .navbar-nav.mb-2 {
+    margin-bottom: 0 !important;
+}
+
+/* Desktop: вкладки по центру в «стеклянной» капсуле */
+@media (min-width: 992px) {
+    .navbar.wp-nav.md3-top-app-bar .navbar-brand {
+        position: relative;
+        z-index: 3;
+        margin-right: 0;
+    }
+
+    .navbar.wp-nav.md3-top-app-bar .wp-navbar-collapse {
+        flex: 1 1 auto;
+        align-items: center;
+        position: static;
+    }
+
+    .navbar.wp-nav.md3-top-app-bar .wp-navbar-tabs-shell {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 2;
+        pointer-events: none;
+        max-width: min(720px, calc(100vw - 22rem));
+        display: inline-flex;
+        padding: 4px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.42);
+        backdrop-filter: blur(24px) saturate(180%);
+        -webkit-backdrop-filter: blur(24px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.62);
+        box-shadow:
+            0 1px 0 rgba(255, 255, 255, 0.85) inset,
+            0 8px 32px rgba(15, 23, 42, 0.1),
+            0 2px 8px rgba(15, 23, 42, 0.05);
+    }
+
+    .navbar.wp-nav.md3-top-app-bar .wp-navbar-tabs-shell > * {
+        pointer-events: auto;
+    }
+
+    .navbar.wp-nav.md3-top-app-bar .wp-navbar-primary {
+        flex-direction: row;
+        flex-wrap: nowrap;
+        margin: 0 !important;
+        column-gap: 0.15rem;
+    }
+
+    .navbar.wp-nav.md3-top-app-bar .wp-navbar-primary .nav-link {
+        white-space: nowrap;
+        padding: 0.38rem 0.72rem;
+    }
+
+    .navbar.wp-nav.md3-top-app-bar .wp-navbar-primary .nav-link.active {
+        background: rgba(255, 255, 255, 0.72);
+        border-color: rgba(37, 99, 235, 0.2);
+        box-shadow: 0 1px 4px rgba(37, 99, 235, 0.12);
+    }
+
+    .navbar.wp-nav.md3-top-app-bar .wp-navbar-primary .nav-link:hover:not(.active) {
+        background: rgba(255, 255, 255, 0.35);
+    }
+
+    .navbar.wp-nav.md3-top-app-bar .wp-navbar-tools {
+        position: relative;
+        z-index: 3;
+        margin-left: auto !important;
+        background: rgba(255, 255, 255, 0.42);
+        backdrop-filter: blur(20px) saturate(165%);
+        -webkit-backdrop-filter: blur(20px) saturate(165%);
+        border: 1px solid rgba(255, 255, 255, 0.55);
+        box-shadow:
+            0 1px 0 rgba(255, 255, 255, 0.75) inset,
+            0 4px 20px rgba(15, 23, 42, 0.08);
+    }
+}
+
+/* Callsign tag modal */
+#callsignTagModal .callsign-tag-modal-dialog {
+    max-width: 640px;
+}
+
+#callsignTagModal .callsign-tag-modal-content {
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.2);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.98) 100%);
+}
+
+#callsignTagModal .modal-header {
+    border-bottom: 1px solid rgba(148, 163, 184, 0.26);
+    padding: 1rem 1.2rem 0.9rem;
+}
+
+#callsignTagModal .modal-body {
+    padding: 1rem 1.2rem 0.9rem;
+}
+
+#callsignTagModal .modal-footer {
+    border-top: 1px solid rgba(148, 163, 184, 0.26);
+    background: rgba(255, 255, 255, 0.72);
+    padding: 0.85rem 1.2rem 1rem;
+}
+
+#callsignTagModal .form-control {
+    border-radius: 10px;
+    border-color: rgba(148, 163, 184, 0.45);
+    background: rgba(255, 255, 255, 0.96);
+}
+
+#callsignTagModal .form-control:focus {
+    border-color: rgba(37, 99, 235, 0.44);
+    box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.14);
+}
+
+#callsignTagModal #cs-tag-desc {
+    min-height: 72px;
+}
+
+#callsignTagModal .callsign-tag-color-row {
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    border-radius: 12px;
+    padding: 0.55rem 0.7rem;
+    background: rgba(248, 250, 252, 0.88);
+}
+
+#callsignTagModal .form-check-input {
+    width: 2.1rem;
+    height: 1.15rem;
+}
+
+#callsignTagModal #cs-tag-color {
+    border-radius: 999px;
+    border: 1px solid rgba(148, 163, 184, 0.42);
+    padding: 0.15rem;
+}
+
+@media (max-width: 992px) {
+    .navbar.wp-nav .navbar-collapse {
+        padding-left: 0;
+    }
+}
+
+/* cards */
+.wp-card {
+    background: var(--wp-surface);
+    border: 1px solid var(--wp-border);
+    border-radius: var(--wp-radius);
+    box-shadow: var(--wp-shadow);
+}
+
+.wp-subtle {
+    color: var(--wp-text-subtle);
+}
+
+/* Шапки разделов (includes/page_header.html) */
+.wp-page-header {
+    margin-bottom: var(--wp-space-md);
+}
+
+.wp-page-title {
+    font-size: var(--wp-font-page-title);
+    font-weight: 700;
+    line-height: var(--wp-line-tight);
+    margin-bottom: var(--wp-space-xs);
+    color: var(--wp-text);
+    letter-spacing: .01em;
+}
+
+.wp-page-lead {
+    font-size: var(--wp-font-lead);
+    line-height: var(--wp-line-body);
+    color: var(--wp-text-subtle);
+    margin: 0;
+    max-width: 72ch;
+}
+
+.wp-page-title-icon {
+    color: var(--wp-brand);
+    font-size: 1.1em;
+    flex-shrink: 0;
+}
+
+/* Плотность: переключатель в шапке */
+.wp-density-toggle .btn.active {
+    background: color-mix(in srgb, var(--wp-brand) 14%, white);
+    border-color: color-mix(in srgb, var(--wp-brand) 35%, var(--wp-border));
+    color: var(--wp-accent-2);
+}
+
+@supports not (background: color-mix(in srgb, white 50%, black)) {
+    .wp-density-toggle .btn.active {
+        background: rgba(37, 99, 235, .12);
+        border-color: rgba(37, 99, 235, .35);
+        color: var(--wp-accent-2);
+    }
+}
+
+.wp-mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+/* analysis graph */
+.graph-wrap {
+    width: 100%;
+    min-height: 420px;
+    border: 1px solid var(--wp-border);
+    border-radius: var(--wp-radius);
+    background: #0b1220;
+    box-shadow: var(--wp-shadow-sm);
+    position: relative;
+    overflow: hidden;
+}
+
+.graph-wrap.fullscreen {
+    height: calc(100vh - 16px);
+}
+
+.graph-wrap:fullscreen {
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+}
+
+.graph-wrap.fullscreen #graph-canvas,
+.graph-wrap:fullscreen #graph-canvas {
+    height: 100%;
+}
+
+#graph-canvas {
+    display: block;
+    width: 100%;
+    height: 420px;
+}
+
+.graph-tooltip {
+    position: absolute;
+    z-index: 5;
+    pointer-events: none;
+    padding: 0.35rem 0.5rem;
+    border-radius: 0.5rem;
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    background: rgba(15, 23, 42, 0.95);
+    color: #e2e8f0;
+    font-size: 12.5px;
+    box-shadow: var(--wp-shadow-sm);
+    max-width: 240px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.graph-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.6rem;
+    font-size: 12.5px;
+    color: #cbd5f5;
+}
+
+.graph-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 0.45rem;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.7);
+}
+
+.graph-legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    display: inline-block;
+}
+
+.graph-legend-ring {
+    width: 12px;
+    height: 12px;
+    border-radius: 999px;
+    display: inline-block;
+    border: 2px solid #fbbf24;
+    box-shadow: 0 0 6px rgba(251, 191, 36, 0.7);
+}
+
+.graph-timeline {
+    padding: 0.75rem 0.9rem;
+    border: 1px solid var(--wp-border);
+    border-radius: var(--wp-radius);
+    background: #0f172a;
+}
+
+#graph-timeline {
+    width: 100%;
+    height: 90px;
+    display: block;
+}
+
+.graph-heatmap {
+    padding: 0.75rem 0.9rem;
+    border: 1px solid var(--wp-border);
+    border-radius: var(--wp-radius);
+    background: var(--wp-surface-2);
+}
+
+#graph-heatmap {
+    width: 100%;
+    height: 220px;
+    display: block;
+}
+
+.graph-compare {
+    padding: 0.75rem 0.9rem;
+    border: 1px solid var(--wp-border);
+    border-radius: var(--wp-radius);
+    background: #0f172a;
+}
+
+.graph-compare-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 0.75rem;
+}
+
+.graph-compare-panel {
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: var(--wp-radius);
+    background: #0b1220;
+    padding: 0.6rem 0.7rem;
+}
+
+#graph-compare:fullscreen {
+    width: 100vw;
+    height: 100vh;
+    padding: 1rem;
+    background: #0b1220;
+}
+
+#graph-compare:fullscreen .graph-compare-grid {
+    height: calc(100vh - 110px);
+}
+
+#graph-compare:fullscreen #graph-compare-prev,
+#graph-compare:fullscreen #graph-compare-cur {
+    height: calc(100vh - 190px);
+}
+
+.graph-compare-title {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-weight: 600;
+    font-size: 12.5px;
+    color: #cbd5f5;
+}
+
+#graph-compare-prev,
+#graph-compare-cur {
+    width: 100%;
+    height: 220px;
+    display: block;
+}
+
+.graph-cluster-panel {
+    padding: 0.6rem 0.75rem;
+    border: 1px solid var(--wp-border);
+    border-radius: var(--wp-radius);
+    background: #0f172a;
+    color: #e2e8f0;
+}
+
+.graph-cluster-list {
+    margin-top: 0.35rem;
+    max-height: 180px;
+    overflow: auto;
+    font-size: 12.5px;
+    color: #cbd5f5;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.25rem 0.6rem;
+}
+
+.graph-density-label {
+    min-width: 44px;
+    text-align: right;
+    color: #94a3b8;
+}
+
+.graph-compare-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    display: inline-block;
+    margin-right: 0.35rem;
+}
+
+.graph-compare-dot.current {
+    background: rgba(37, 99, 235, 0.85);
+}
+
+.graph-compare-dot.prev {
+    background: rgba(148, 163, 184, 0.85);
+}
+
+/* buttons — первичный = бренд (Bootstrap --bs-primary), вторичный = outline */
+.btn-primary {
+    --bs-btn-bg: var(--wp-brand);
+    --bs-btn-border-color: var(--wp-brand);
+    --bs-btn-hover-bg: var(--wp-brand-hover);
+    --bs-btn-hover-border-color: var(--wp-brand-hover);
+    --bs-btn-active-bg: var(--wp-brand-hover);
+    --bs-btn-active-border-color: var(--wp-brand-hover);
+    --bs-btn-focus-shadow-rgb: var(--wp-brand-rgb);
+}
+
+/* Вторичное действие в продукте: .btn-outline-secondary (см. блок ниже) */
+
+.btn {
+    --bs-btn-padding-y: .33rem;
+    --bs-btn-padding-x: .62rem;
+    --bs-btn-font-size: 13px;
+    --bs-btn-border-radius: .75rem;
+    transition: box-shadow .15s ease, border-color .15s ease, background-color .15s ease, transform .05s ease;
+}
+
+.btn-sm {
+    --bs-btn-padding-y: .24rem;
+    --bs-btn-padding-x: .52rem;
+    --bs-btn-font-size: 12.5px;
+    --bs-btn-border-radius: .70rem;
+}
+
+.btn:active {
+    transform: translateY(1px);
+}
+
+/* Make outline buttons look “product” not default bootstrap */
+.btn-outline-secondary,
+.btn-outline-primary,
+.btn-outline-danger {
+    background: rgba(255, 255, 255, .90);
+}
+
+.btn-outline-secondary:hover {
+    box-shadow: 0 0 0 4px rgba(15, 23, 42, .06);
+}
+
+.btn-outline-primary {
+    border-color: rgba(37, 99, 235, .35);
+}
+
+.btn-outline-primary:hover {
+    border-color: rgba(37, 99, 235, .55);
+    box-shadow: 0 0 0 4px var(--wp-ring);
+}
+
+.btn-outline-danger:hover {
+    box-shadow: 0 0 0 4px rgba(220, 38, 38, .10);
+}
+
+/* forms */
+.form-control,
+.form-select {
+    font-size: 13px;
+    border-color: var(--wp-border);
+    border-radius: var(--wp-radius-sm);
+    background: rgba(255, 255, 255, .95);
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--wp-border-strong);
+    box-shadow: 0 0 0 .20rem var(--wp-ring);
+}
+
+.form-control-sm,
+.form-select-sm {
+    font-size: 12.5px;
+}
+
+/* badges */
+.badge {
+    font-weight: 600;
+}
+
+.badge.text-bg-light {
+    background: rgba(255, 255, 255, .92) !important;
+}
+
+/* tables */
+.table {
+    font-size: var(--wp-font-table);
+}
+
+.table> :not(caption)>*>* {
+    padding: var(--wp-table-cell-padding-y) var(--wp-table-cell-padding-x);
+}
+
+.table thead th {
+    font-size: var(--wp-font-table-head);
+    font-weight: 700;
+    letter-spacing: .2px;
+    color: rgba(33, 37, 41, .86);
+}
+
+.wp-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: rgba(248, 250, 252, .92);
+    backdrop-filter: blur(8px);
+}
+
+.wp-table {
+    border-color: var(--wp-border);
+}
+
+.wp-table tbody tr:hover {
+    background: rgba(13, 110, 253, .03);
+}
+
+/* misc helpers */
+.th-sort {
+    cursor: pointer;
+    user-select: none;
+}
+
+.th-sort:active {
+    opacity: .85;
+}
+
+.os-editable {
+    cursor: text;
+    border-radius: .45rem;
+    background: rgba(13, 110, 253, .05);
+}
+
+.os-editable:hover {
+    outline: 2px solid rgba(13, 110, 253, .14);
+}
+
+.btn-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    border: 1px solid var(--wp-border);
+    background: rgba(255, 255, 255, .95);
+    color: #dc2626;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.btn-icon:hover {
+    border-color: rgba(220, 38, 38, .45);
+    box-shadow: 0 0 0 .20rem rgba(220, 38, 38, .10);
+}
+
+/* Поиск онлайн: улучшенная визуализация */
+.search-online-table {
+    background: var(--wp-surface);
+    box-shadow: var(--wp-shadow-sm);
+    border-radius: var(--wp-radius-sm);
+}
+
+.search-online-table thead th {
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, rgba(37, 99, 235, 0.02) 100%);
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.2s ease;
+}
+
+.search-online-table thead th:hover {
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.08) 0%, rgba(37, 99, 235, 0.04) 100%);
+}
+
+.search-online-table thead th.th-sort:hover {
+    color: var(--wp-accent);
+}
+
+.search-online-table tbody td {
+    padding: 10px 8px;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.search-online-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.search-online-table tbody tr.row-new {
+    background: rgba(34, 197, 94, 0.05);
+    border-left: 3px solid rgba(34, 197, 94, 0.3);
+}
+
+.search-online-table tbody tr.row-new:hover {
+    background: rgba(34, 197, 94, 0.08);
+}
+
+/* Заголовки с фильтрами */
+.th-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+}
+
+.th-filter-icon {
+    font-size: 10px;
+    opacity: 0.5;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.th-filterable:hover .th-filter-icon {
+    opacity: 1;
+    color: var(--wp-accent);
+}
+
+.th-filter-icon.filter-active {
+    opacity: 1;
+    color: var(--wp-accent);
+}
+
+/* Popup фильтра */
+.column-filter-popup {
+    position: fixed;
+    z-index: 1050;
+    background: var(--wp-surface);
+    border: 1px solid var(--wp-border);
+    border-radius: var(--wp-radius-sm);
+    box-shadow: var(--wp-shadow);
+    padding: 16px;
+    min-width: 250px;
+    max-width: 400px;
+}
+
+.column-filter-content {
+    width: 100%;
+}
+
+/* Badge NEW */
+.badge.bg-success {
+    font-size: 9px;
+    padding: 2px 6px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    animation: pulseNew 2s infinite;
+}
+
+@keyframes pulseNew {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.7;
+    }
+}
+
+/* layouts */
+.sessions-layout {
+    display: grid;
+    grid-template-columns: 180px minmax(0, 1fr);
+    gap: 16px;
+    align-items: start;
+    width: 100%;
+    min-width: 0;
+}
+
+.sessions-layout-no-sidebar {
+    width: 100%;
+    min-width: 0;
+}
+
+.sessions-layout.sessions-layout-no-sidebar {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.sessions-main {
+    min-width: 0;
+    width: 100%;
+}
+
+.sessions-main>.card.wp-card {
+    width: 100%;
+    max-width: 100%;
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Workbench: Сеансы — плотная таблица, иерархия панелей                         */
+/* -------------------------------------------------------------------------- */
+
+.wp-workbench--sessions .sessions-main>.card.wp-card>.card-body {
+    padding-bottom: 1.75rem;
+}
+
+.wp-workbench--sessions .sessions-main .card.border {
+    border-radius: var(--wp-radius-sm);
+    border-color: var(--wp-border) !important;
+    background: var(--wp-surface-2);
+    box-shadow: none;
+}
+
+.wp-workbench--sessions .sessions-main .card.border .card-title {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    color: var(--wp-text);
+}
+
+.wp-workbench--sessions .sessions-main .card.border .card-body {
+    padding: 1rem 1.1rem;
+}
+
+.wp-workbench--sessions #sessions-table {
+    --wp-sessions-mono-size: var(--wp-font-table);
+    margin-bottom: 0;
+}
+
+.wp-workbench--sessions #sessions-table thead tr:first-child th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
+    box-shadow: inset 0 -1px 0 var(--wp-border);
+    font-size: var(--wp-font-table-head);
+    font-weight: 600;
+    color: var(--wp-text);
+    vertical-align: middle;
+}
+
+.wp-workbench--sessions #sessions-table thead tr.sessions-filter-row th {
+    position: sticky;
+    top: 2.45rem;
+    z-index: 1;
+    background: var(--wp-surface);
+    box-shadow: inset 0 -1px 0 var(--wp-border);
+    padding-top: 0.35rem;
+    padding-bottom: 0.35rem;
+}
+
+html[data-wp-density="compact"] .wp-workbench--sessions #sessions-table thead tr.sessions-filter-row th {
+    top: 2.15rem;
+}
+
+.wp-workbench--sessions .table-responsive {
+    border-radius: var(--wp-radius-sm);
+    border: 1px solid var(--wp-border);
+    background: var(--wp-surface);
+    max-height: min(72vh, 920px);
+    overflow: auto;
+}
+
+.wp-workbench--sessions #sessions-table tbody td:nth-child(3),
+.wp-workbench--sessions #sessions-table tbody td:nth-child(4),
+.wp-workbench--sessions #sessions-table tbody td:nth-child(7) {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: var(--wp-sessions-mono-size);
+    letter-spacing: -0.01em;
+}
+
+.wp-workbench--sessions #sessions-table tbody td:nth-child(5) {
+    max-width: 28rem;
+    word-break: break-word;
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Workbench: Перехваты — бланк как главный объект, боковые панели вторичны   */
+/* -------------------------------------------------------------------------- */
+
+.wp-workbench--intercepts:not(.ix-messenger-ui) .wp-intercepts-sidebar .groups-drawer-inner {
+    padding: 0.65rem 0.75rem;
+    border-radius: var(--wp-radius-sm);
+    border: 1px solid var(--wp-border);
+    background: var(--wp-surface-2);
+}
+
+.wp-workbench--intercepts:not(.ix-messenger-ui) .wp-intercepts-sidebar .wp-intercepts-sidebar-head {
+    padding-bottom: 0.35rem;
+    margin-bottom: 0.35rem !important;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+.wp-workbench--intercepts:not(.ix-messenger-ui) .wp-intercepts-blank .blank-toolbar {
+    padding: 0.4rem 0.55rem;
+    margin-bottom: 0.5rem;
+    border-radius: var(--wp-radius-sm);
+    background: color-mix(in srgb, var(--wp-accent) 6%, var(--wp-surface));
+    border: 1px solid color-mix(in srgb, var(--wp-accent) 18%, var(--wp-border));
+}
+
+@supports not (background: color-mix(in srgb, white 50%, black)) {
+    .wp-workbench--intercepts:not(.ix-messenger-ui) .wp-intercepts-blank .blank-toolbar {
+        background: rgba(37, 99, 235, 0.06);
+        border-color: rgba(37, 99, 235, 0.22);
+    }
+}
+
+.wp-workbench--intercepts:not(.ix-messenger-ui) .wp-intercepts-blank #intercept-text-wrapper {
+    border-radius: var(--wp-radius-sm);
+    border: 1px solid var(--wp-border-strong);
+    background: #fff;
+    padding: 1px;
+}
+
+.wp-workbench--intercepts:not(.ix-messenger-ui) .wp-intercepts-blank #intercept-text {
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+.wp-workbench--intercepts:not(.ix-messenger-ui) .callsign-panel-card {
+    border: 1px solid var(--wp-border) !important;
+    border-radius: var(--wp-radius-sm) !important;
+    background: var(--wp-surface-2) !important;
+    box-shadow: none !important;
+}
+
+@media (max-width: 992px) {
+    .sessions-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .wp-workbench--sessions #sessions-table thead tr.sessions-filter-row th {
+        top: 2.25rem;
+    }
+}
+
+.analysis-layout {
+    display: grid;
+    grid-template-columns: 210px 210px minmax(0, 1fr);
+    gap: 16px;
+    align-items: start;
+}
+
+.analysis-layout.analysis-layout-no-pos {
+    grid-template-columns: 210px minmax(0, 1fr);
+}
+
+@media (max-width: 1200px) {
+    .analysis-layout {
+        grid-template-columns: 200px 200px minmax(0, 1fr);
+    }
+
+    .analysis-layout.analysis-layout-no-pos {
+        grid-template-columns: 200px minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 992px) {
+    .analysis-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+.wp-sidebar {
+    position: sticky;
+    top: calc(var(--wp-nav-h) + 10px);
+}
+
+/* Analysis containers (left sidebar) */
+#analysis-containers .list-group-item {
+    border-radius: 12px;
+    margin-bottom: 8px;
+}
+
+.analysis-container-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 42px;
+    position: relative;
+    padding-right: 2rem;
+}
+
+.analysis-container-btn .analysis-container-icon {
+    flex-shrink: 0;
+}
+
+.analysis-container-label {
+    font-size: 13px;
+    line-height: 1.25;
+    text-align: center;
+}
+
+.analysis-container-check {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.analysis-period-group {
+    width: auto;
+    max-width: 420px;
+}
+
+@media (max-width: 992px) {
+    .analysis-period-group {
+        width: 100%;
+        max-width: none;
+    }
+}
+
+.search-online-layout {
+    display: grid;
+    grid-template-columns: 260px minmax(0, 1fr) 280px;
+    gap: 16px;
+    align-items: start;
+}
+
+@media (max-width: 1200px) {
+    .search-online-layout {
+        grid-template-columns: 240px minmax(0, 1fr);
+    }
+
+    .search-online-layout .search-online-panel:nth-child(3) {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 992px) {
+    .search-online-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+.search-online-panel {
+    background: rgba(255, 255, 255, .92);
+    border: 1px solid var(--wp-border);
+    border-radius: var(--wp-radius);
+    padding: 12px;
+    box-shadow: var(--wp-shadow-sm);
+}
+
+.search-online-toolbar {
+    background: rgba(255, 255, 255, .65);
+    border: 1px solid var(--wp-border);
+    border-radius: 12px;
+    padding: 8px 10px;
+}
+
+.search-online-layout .search-online-panel:first-child {
+    position: sticky;
+    top: 12px;
+}
+
+.search-online-panel .table-responsive {
+    max-height: 72vh;
+}
+
+.os-tabs .nav-link {
+    padding: .35rem .65rem;
+    font-size: 12px;
+}
+
+.search-online-table tbody tr.os-row-selected {
+    outline: 2px solid rgba(37, 99, 235, .35);
+    background: rgba(13, 110, 253, .06);
+}
+
+.analysis-scroll {
+    max-height: 360px;
+    overflow: auto;
+}
+
+@media (max-width: 1200px) {
+    .analysis-scroll {
+        max-height: 320px;
+    }
+}
+
+/* lists */
+.list-group-item {
+    border-color: var(--wp-border);
+    background: rgba(255, 255, 255, .92);
+}
+
+.list-group-item-action {
+    font-size: 13px;
+}
+
+.list-group-item.active {
+    background-color: rgba(13, 110, 253, .08);
+    color: rgba(33, 37, 41, .95);
+    border-color: rgba(13, 110, 253, .22);
+}
+
+/* alerts */
+.alert {
+    border-radius: var(--wp-radius);
+}
+
+/* nicer focus for keyboard navigation */
+::focus-visible {
+    outline: 2px solid rgba(37, 99, 235, .40);
+    outline-offset: 2px;
+}
+
+/* Messenger-like “work area” polish */
+#groups-list .list-group-item,
+#cs-list .list-group-item {
+    border-radius: 12px;
+    margin-bottom: 8px;
+}
+
+#groups-list .list-group-item:hover,
+#cs-list .list-group-item:hover {
+    box-shadow: var(--wp-shadow-sm);
+}
+
+textarea#intercept-text {
+    border-radius: 14px;
+    background: rgba(255, 255, 255, .97);
+}
+
+/* Индикатор автосохранения */
+.save-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    transition: background-color 0.2s ease;
+}
+
+.save-indicator.saving {
+    background-color: #f59e0b;
+    animation: savePulse 1.2s ease-in-out infinite;
+}
+
+.save-indicator.saved {
+    background-color: #10b981;
+}
+
+.save-indicator.error {
+    background-color: #ef4444;
+}
+
+.save-indicator.idle {
+    background-color: transparent;
+}
+
+@keyframes savePulse {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.5;
+        transform: scale(0.9);
+    }
+}
+
+/* Визуальные улучшения для вкладки "Анализ" */
+#an-table tbody tr {
+    transition: all 0.2s ease;
+}
+
+#an-table tbody tr:hover {
+    transform: translateX(2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+#an-table tbody td {
+    position: relative;
+}
+
+/* Прогресс-бар для количества сеансов */
+.session-count-bar {
+    display: inline-block;
+    height: 6px;
+    background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%);
+    border-radius: 3px;
+    min-width: 4px;
+    transition: width 0.3s ease;
+}
+
+/* Бейджи для назначенных */
+.assignment-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    background: rgba(37, 99, 235, 0.1);
+    color: #2563eb;
+    border: 1px solid rgba(37, 99, 235, 0.2);
+}
+
+.assignment-badge.battalion {
+    background: rgba(245, 158, 11, 0.1);
+    color: #d97706;
+    border-color: rgba(245, 158, 11, 0.2);
+}
+
+.assignment-badge.company {
+    background: rgba(16, 185, 129, 0.1);
+    color: #059669;
+    border-color: rgba(16, 185, 129, 0.2);
+}
+
+/* Оперативный дежурный */
+.assignment-badge.duty {
+    background: rgba(99, 102, 241, 0.10);
+    color: #4f46e5;
+    border-color: rgba(99, 102, 241, 0.22);
+}
+
+#duty-box .fw-bold {
+    font-size: 1.35rem;
+    background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Анимация загрузки */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#an-table tbody tr {
+    animation: fadeIn 0.3s ease;
+}
+
+/* Улучшенные кнопки периода */
+.btn-group .btn.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-color: transparent;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+/* Стили для списков */
+#units-side .list-group-item,
+#pairs-side .list-group-item {
+    border-radius: 10px;
+    margin-bottom: 6px;
+    transition: all 0.2s ease;
+}
+
+#units-side .list-group-item:hover,
+#pairs-side .list-group-item:hover {
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+#units-side .list-group-item.active,
+#pairs-side .list-group-item.active {
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.12) 0%, rgba(37, 99, 235, 0.06) 100%);
+    border-color: rgba(37, 99, 235, 0.3);
+    font-weight: 600;
+}
+
+/* Визуальные улучшения для вкладки "Перехваты" */
+#groups-list .list-group-item {
+    border-radius: 10px;
+    margin-bottom: 6px;
+    transition: all 0.2s ease;
+    border: 1px solid var(--wp-border);
+}
+
+#groups-list .list-group-item:hover {
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border-color: rgba(37, 99, 235, 0.3);
+}
+
+#groups-list .list-group-item.active {
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.15) 0%, rgba(37, 99, 235, 0.08) 100%);
+    border-color: rgba(37, 99, 235, 0.4);
+    font-weight: 600;
+    box-shadow: 0 2px 12px rgba(37, 99, 235, 0.15);
+}
+
+/* Заголовки подразделений */
+#groups-list .text-uppercase {
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.08) 0%, rgba(37, 99, 235, 0.03) 100%);
+    padding: 8px 12px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    border-left: 3px solid rgba(37, 99, 235, 0.4);
+}
+
+/* Улучшенный textarea бланка */
+#intercept-text {
+    border: 2px solid var(--wp-border);
+    transition: all 0.2s ease;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+#intercept-text:focus {
+    border-color: rgba(37, 99, 235, 0.4);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+    outline: none;
+}
+
+#intercept-text:disabled {
+    background: rgba(248, 250, 252, 0.8);
+    cursor: not-allowed;
+    color: #000;
+    -webkit-text-fill-color: #000;
+}
+
+/* Подсветка строк времени в бланке (через JS можно добавить) */
+.intercept-time-header {
+    color: #2563eb;
+    font-weight: 600;
+}
+
+/* Список позывных */
+#cs-list .list-group-item {
+    border-radius: 10px;
+    margin-bottom: 6px;
+    transition: all 0.2s ease;
+    border: 1px solid var(--wp-border);
+}
+
+#cs-list .list-group-item:hover {
+    transform: translateX(2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    background: rgba(37, 99, 235, 0.03);
+}
+
+#cs-list .list-group-item button[data-action="ins"]:hover {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: transparent;
+    color: white;
+    transform: scale(1.05);
+}
+
+/* Кнопки действий */
+#manual-save-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    color: white;
+    transition: all 0.2s ease;
+}
+
+#manual-save-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+#manual-save-btn:disabled {
+    opacity: 0.5;
+    background: var(--wp-border);
+}
+
+#export-intercepts-btn {
+    transition: all 0.2s ease;
+}
+
+#export-intercepts-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+}
+
+/* Бейдж "есть новые" */
+#remote-new-badge {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+    color: white !important;
+    border: none !important;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.7;
+    }
+}
+
+/* Индикатор "печатает" */
+#typing-indicator {
+    color: #2563eb;
+    font-weight: 500;
+    font-style: italic;
+}
+
+/* Улучшенный select смен */
+#shift-select {
+    border-radius: 8px;
+    border: 1px solid var(--wp-border);
+    transition: all 0.2s ease;
+}
+
+#shift-select:focus {
+    border-color: rgba(37, 99, 235, 0.4);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+    outline: none;
+}
+
+/* Статистика бланка */
+#intercept-stats-row .card {
+    transition: transform 0.2s ease;
+}
+
+#intercept-stats-row .card:hover {
+    transform: translateY(-2px);
+}
+
+/* Админ-панель: карточки ролей (строго деловой ч/б стиль) */
+.admin-role-card {
+    transition: all 0.2s ease;
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.admin-role-card-bw {
+    background: #fff;
+    border: 1px solid #dee2e6;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.admin-role-card-bw .admin-role-card-icon {
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #f1f3f5;
+    color: #212529;
+    border-radius: 8px;
+    font-size: 1.1rem;
+}
+
+.admin-role-card-bw .admin-role-card-title {
+    color: #212529;
+    font-size: 0.95rem;
+}
+
+.admin-role-card-bw .admin-role-card-desc {
+    color: #6c757d;
+    line-height: 1.35;
+}
+
+.admin-role-card-bw .admin-role-card-badge {
+    background: #212529;
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 600;
+    min-width: 1.75rem;
+}
+
+.admin-role-card-bw:hover {
+    border-color: #adb5bd;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-1px);
+}
+
+.admin-role-card-bw:active,
+.admin-role-card.admin-role-card-bw.active {
+    border-color: #212529;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.admin-role-card:active {
+    transform: translateY(0);
+}
+
+/* Админ-панель: селектор роли в таблице */
+.admin-role-selector {
+    max-width: 160px;
+}
+
+.admin-role-selector .card {
+    transition: all 0.2s ease;
+    border-radius: 8px;
+}
+
+.admin-role-selector:hover .card {
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Админ-панель: выпадающее меню ролей */
+.admin-role-dropdown {
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.admin-role-option {
+    transition: all 0.15s ease;
+    border-radius: 0 !important;
+    padding: 10px 16px !important;
+}
+
+.admin-role-option:first-child {
+    border-top-left-radius: 8px !important;
+    border-top-right-radius: 8px !important;
+}
+
+.admin-role-option:last-child {
+    border-bottom-left-radius: 8px !important;
+    border-bottom-right-radius: 8px !important;
+}
+
+.admin-role-option:hover {
+    background-color: rgba(37, 99, 235, 0.08) !important;
+    transform: translateX(4px);
+}
+
+.admin-role-option.active {
+    font-weight: 600;
+}
+
+/* Админ-панель: строки пользователей */
+.admin-user-row {
+    transition: background-color 0.2s ease;
+}
+
+.admin-user-row:hover {
+    background-color: rgba(37, 99, 235, 0.03) !important;
+}
+
+/* Админ-панель: таблица */
+#users-table {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+#users-table thead th {
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--wp-text-subtle);
+    border-bottom: 2px solid var(--wp-border);
+    padding: 12px 16px;
+}
+
+#users-table tbody td {
+    padding: 16px;
+    vertical-align: middle;
+}
+
+/* Админ-панель: фильтры и массовые действия */
+.admin-filter-card {
+    background: rgba(255, 255, 255, .92);
+}
+
+.admin-bulk-bar {
+    background: rgba(248, 250, 252, 0.8);
+    border: 1px solid var(--wp-border);
+    border-radius: 10px;
+    padding: 8px 12px;
+}
+
+/* Админ-панель: кнопки */
+#users-table .btn {
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    font-size: 13px;
+}
+
+#users-table .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Сеансы: фильтры и действия */
+.sessions-filter-row th {
+    padding: 8px 16px;
+    background: #f8fafc;
+}
+
+.sessions-filter-row .form-control {
+    font-size: 12px;
+}
+
+#sessions-table .dropdown-toggle {
+    font-size: 12px;
+    padding: 2px 8px;
+}
+
+#table-count {
+    align-self: center;
+}
+
+/* Анализ: проверка ключей */
+.keys-new-row td {
+    text-decoration: underline;
+    text-decoration-color: rgba(22, 163, 74, 0.7);
+    text-decoration-thickness: 2px;
+}
+
+.graph-legend-header {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--wp-text-subtle);
+    margin-top: 8px;
+}
+
+/* Graph tab v2 (Cytoscape) */
+.rg-dashboard {
+    border: 1px solid var(--wp-border);
+    border-radius: var(--wp-radius);
+    background: rgba(255, 255, 255, 0.9);
+    padding: 12px;
+}
+
+.rg-toolbar {
+    border: 1px solid var(--wp-border);
+    border-radius: var(--wp-radius-sm);
+    background: rgba(248, 250, 252, 0.85);
+    padding: 10px;
+}
+
+.rg-toolbar-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 8px 10px;
+}
+
+.rg-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+}
+
+.rg-metric-card {
+    border: 1px solid var(--wp-border);
+    border-radius: var(--wp-radius-sm);
+    background: #fff;
+    padding: 10px;
+}
+
+.rg-main {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+}
+
+.rg-stage {
+    position: relative;
+    border: 1px solid var(--wp-border);
+    border-radius: var(--wp-radius);
+    overflow: hidden;
+    background: linear-gradient(180deg, #020617 0%, #0b1f3a 100%);
+    min-height: 560px;
+}
+
+.rg-stage-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 8px;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+    background: rgba(15, 23, 42, 0.85);
+}
+
+.rg-canvas {
+    width: 100%;
+    height: 620px;
+}
+
+.rg-context-menu {
+    position: absolute;
+    z-index: 8;
+    min-width: 180px;
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    border-radius: 10px;
+    background: rgba(15, 23, 42, 0.95);
+    box-shadow: 0 8px 24px rgba(2, 6, 23, 0.4);
+    padding: 4px;
+}
+
+.rg-context-menu button {
+    width: 100%;
+    text-align: left;
+    border: 0;
+    background: transparent;
+    color: #e2e8f0;
+    font-size: 12.5px;
+    padding: 7px 8px;
+    border-radius: 8px;
+}
+
+.rg-context-menu button:hover {
+    background: rgba(59, 130, 246, 0.2);
+}
+
+.rg-fs-panels {
+    display: none;
+}
+
+.rg-fs-panel {
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    border-radius: 10px;
+    background: rgba(15, 23, 42, 0.86);
+    color: #e2e8f0;
+    padding: 10px;
+    max-height: calc(100vh - 110px);
+    overflow: auto;
+}
+
+.rg-empty,
+.rg-loading {
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    top: 52px;
+    z-index: 4;
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    border-radius: 10px;
+    padding: 10px;
+    background: rgba(15, 23, 42, 0.9);
+    color: #e2e8f0;
+}
+
+.rg-side-panel {
+    border: 1px solid var(--wp-border);
+    border-radius: var(--wp-radius);
+    background: rgba(255, 255, 255, 0.92);
+    padding: 10px;
+}
+
+.rg-selection {
+    min-height: 72px;
+    white-space: pre-wrap;
+}
+
+.rg-ml-status {
+    border: 1px solid var(--wp-border);
+    border-radius: 10px;
+    background: rgba(248, 250, 252, 0.78);
+    padding: 8px;
+}
+
+.rg-playback {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.rg-playback .form-select {
+    max-width: 110px;
+}
+
+#rg-live-state.live-on {
+    background: #198754 !important;
+    color: #fff;
+}
+
+#rg-live-state.live-off {
+    background: #6c757d !important;
+    color: #fff;
+}
+
+.rg-fs-panel .rg-ml-status {
+    border-color: rgba(148, 163, 184, 0.35);
+    background: rgba(15, 23, 42, 0.55);
+}
+
+/* Temporary hidden neural-network UI blocks */
+#rg-metric-ml-risk,
+#rg-ml-dataset,
+#rg-ml-train,
+#rg-ml-prediction,
+#rg-ml-reasons,
+#rg-ml-hotspots,
+#rg-ml-model-panel,
+#rg-ml-tag,
+#rg-ml-minute-tag,
+#rg-ml-feedback-ok,
+#rg-ml-feedback-false,
+#rg-forecast-summary,
+#rg-forecast-reliability,
+#rg-forecast-h30,
+#rg-forecast-h60,
+#rg-forecast-h120,
+#rg-fs-ml-prediction,
+#rg-fs-ml-reasons,
+#rg-fs-ml-hotspots,
+#rg-fs-ml-model-panel,
+#rg-fs-ml-tag,
+#rg-fs-ml-minute-tag,
+#rg-fs-ml-feedback-ok,
+#rg-fs-ml-feedback-false {
+    display: none !important;
+}
+
+#asr-panel {
+    display: none !important;
+}
+
+.rg-bottom {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 12px;
+}
+
+.rg-bottom-card {
+    border: 1px solid var(--wp-border);
+    border-radius: var(--wp-radius-sm);
+    background: rgba(248, 250, 252, 0.85);
+    padding: 10px;
+}
+
+#rg-timeline {
+    width: 100%;
+    height: 110px;
+    display: block;
+}
+
+.rg-comp-metrics {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.rg-comp-chip {
+    border: 1px solid var(--wp-border);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.82);
+    padding: 7px 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.rg-comp-key {
+    font-size: 11.5px;
+    color: var(--wp-text-subtle);
+}
+
+.rg-comp-val {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--wp-text);
+}
+
+#rg-m-risk.risk-low {
+    color: #059669;
+}
+
+#rg-m-risk.risk-medium {
+    color: #d97706;
+}
+
+#rg-m-risk.risk-high {
+    color: #dc2626;
+}
+
+#rg-dashboard:fullscreen {
+    width: 100vw;
+    height: 100vh;
+    max-width: none;
+    border-radius: 0;
+    margin: 0;
+    padding: 14px;
+    display: grid;
+    grid-template-rows: auto auto auto minmax(0, 1fr) auto auto;
+    gap: 10px;
+    overflow-y: auto;
+}
+
+#rg-dashboard:fullscreen .rg-main {
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 0;
+}
+
+#rg-dashboard:fullscreen .rg-stage {
+    min-height: 360px;
+    height: 100%;
+}
+
+#rg-dashboard:fullscreen .rg-canvas {
+    height: clamp(320px, 48vh, 620px);
+}
+
+#rg-dashboard:fullscreen .rg-bottom {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.rg-stage:fullscreen {
+    width: 100vw;
+    height: 100vh;
+    max-width: none;
+    border-radius: 0;
+    border: 0;
+    margin: 0;
+    background: linear-gradient(180deg, #020617 0%, #0b1f3a 100%);
+}
+
+.rg-stage:fullscreen .rg-stage-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 4;
+}
+
+.rg-stage:fullscreen .rg-canvas {
+    height: calc(100vh - 54px);
+}
+
+.rg-stage:fullscreen .rg-fs-panels {
+    display: block;
+    position: absolute;
+    inset: 64px 12px 12px 12px;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.rg-stage:fullscreen .rg-fs-left {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: min(320px, 28vw);
+    max-height: calc(100vh - 210px);
+    pointer-events: auto;
+}
+
+.rg-stage:fullscreen .rg-fs-right {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: min(320px, 28vw);
+    max-height: calc(100vh - 210px);
+    pointer-events: auto;
+}
+
+.rg-stage:fullscreen .rg-fs-bottom {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: auto;
+}
+
+#rg-fs-timeline {
+    width: 100%;
+    height: 95px;
+    display: block;
+}
+
+@media (max-width: 1200px) {
+    .rg-main {
+        grid-template-columns: 1fr;
+    }
+
+    .rg-bottom {
+        grid-template-columns: 1fr;
+    }
+
+    .rg-comp-metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* Админ-панель: форма создания пользователя */
+#new-username,
+#new-callsign,
+#new-role,
+#new-password,
+#new-position-name {
+    border-radius: 8px;
+    border: 1px solid var(--wp-border);
+    transition: all 0.2s ease;
+}
+
+#new-username:focus,
+#new-callsign:focus,
+#new-role:focus,
+#new-password:focus,
+#new-position-name:focus {
+    border-color: rgba(37, 99, 235, 0.4);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+    outline: none;
+}
+
+/* Админ-панель: модальное окно позиций */
+#positionsModal .modal-content {
+    border-radius: 16px;
+    border: none;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+#positionsModal .table {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+#positionsModal .table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+#positionsModal .table tbody tr:hover {
+    background-color: rgba(37, 99, 235, 0.03);
+}
+
+/* Админ-панель: бейджи позиций */
+.badge {
+    border-radius: 6px;
+    font-weight: 500;
+    padding: 4px 8px;
+    font-size: 12px;
+}
+
+/* Авиация: общие стили */
+.aviation-layout {
+    max-width: 100%;
+}
+
+#frequencies-list .list-group-item {
+    border-radius: 8px;
+    margin-bottom: 4px;
+    transition: all 0.2s ease;
+}
+
+#frequencies-list .list-group-item:hover {
+    transform: translateX(2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+#frequencies-list .list-group-item.active {
+    background: rgba(37, 99, 235, 0.1);
+    border-color: rgba(37, 99, 235, 0.3);
+}
+
+#aviation-text {
+    border-radius: 8px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+#aviation-text:focus {
+    border-color: rgba(37, 99, 235, 0.4);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+    outline: none;
+}
+
+/* Авиация: список позывных */
+#cs-list .list-group-item {
+    border-radius: 8px;
+    margin-bottom: 4px;
+    transition: all 0.2s ease;
+}
+
+#cs-list .list-group-item:hover {
+    transform: translateX(2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    background: rgba(37, 99, 235, 0.03);
+}
+
+#cs-list .list-group-item button[data-action="ins"]:hover {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: transparent;
+    color: white;
+    transform: scale(1.05);
+}
+
+/* Авиация: модальное окно истории */
+#callsignHistoryModal .table {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+#callsignHistoryModal .table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+#callsignHistoryModal .table tbody tr:hover {
+    background-color: rgba(37, 99, 235, 0.03);
+}
+
+/* Авиация: боковая панель позывных */
+.aviation-callsigns-sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 350px;
+    height: 100vh;
+    background: var(--wp-surface);
+    border-right: 1px solid var(--wp-border);
+    z-index: 1050;
+    box-shadow: 4px 0 12px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+}
+
+.aviation-layout {
+    position: relative;
+}
+
+.aviation-layout.with-sidebar {
+    margin-left: 350px;
+    transition: margin-left 0.3s ease;
+}
+
+.aviation-layout:not(.with-sidebar) {
+    margin-left: 0;
+    transition: margin-left 0.3s ease;
+}
+
+#all-callsigns-list .list-group-item {
+    border-radius: 8px;
+    margin-bottom: 4px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+#all-callsigns-list .list-group-item:hover {
+    transform: translateX(2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    background: rgba(37, 99, 235, 0.05);
+}
+
+#all-callsigns-list .list-group-item.active {
+    background: rgba(37, 99, 235, 0.1);
+    border-color: rgba(37, 99, 235, 0.3);
+}
+
+/* Авиация: список дней позывного */
+.callsign-day-item {
+    border-radius: 8px;
+    margin-bottom: 4px;
+    transition: all 0.2s ease;
+}
+
+.callsign-day-item:hover {
+    background: rgba(37, 99, 235, 0.03);
+}
+
+.callsign-day-item.expanded {
+    background: rgba(37, 99, 235, 0.05);
+}
+
+/* Targeting/Notifications */
+#targeting-notification-btn {
+    color: inherit;
+    text-decoration: none;
+}
+
+#targeting-notification-btn:hover {
+    color: var(--bs-primary);
+}
+
+#targeting-badge {
+    font-size: 0.6rem;
+    padding: 0.15rem 0.3rem;
+}
+
+.whitespace-pre-wrap {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+/* Targeting checkboxes */
+#targeting-users-checkboxes .form-check {
+    padding: 0.5rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    transition: background-color 0.2s;
+}
+
+#targeting-users-checkboxes .form-check:last-child {
+    border-bottom: none;
+}
+
+#targeting-users-checkboxes .form-check:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+#targeting-users-checkboxes .form-check-label {
+    cursor: pointer;
+    width: 100%;
+    user-select: none;
+}
+
+/* Targeting Modal — строго-деловой стиль, компактный размер */
+.targeting-modal-content {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.08);
+    overflow: hidden;
+}
+
+.targeting-modal-header {
+    background: #fff;
+    color: #0f172a;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 1rem 1.25rem;
+}
+
+.targeting-modal-header-icon {
+    font-size: 1.25rem;
+    color: #475569;
+}
+
+.targeting-modal-subtitle {
+    color: #64748b;
+    font-size: 0.8125rem;
+    margin-top: 0.125rem;
+}
+
+.targeting-modal-header .btn-close {
+    opacity: 0.5;
+}
+
+.targeting-modal-header .btn-close:hover {
+    opacity: 0.8;
+}
+
+.targeting-modal-body {
+    padding: 1rem 1.25rem;
+    max-height: 60vh;
+    overflow-y: auto;
+    background: #f8fafc;
+}
+
+.targeting-modal-footer {
+    border-top: 1px solid #e2e8f0;
+    padding: 0.75rem 1.25rem;
+    background: #fff;
+}
+
+/* Карточки нацеливаний — деловой стиль */
+.targeting-card {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+    transition: box-shadow 0.2s ease;
+    border: 1px solid #e2e8f0;
+}
+
+.targeting-card:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.targeting-unread {
+    border-left: 3px solid #1e40af;
+    background: #fff;
+}
+
+.targeting-read {
+    border-left: 3px solid #cbd5e1;
+    opacity: 0.95;
+}
+
+.targeting-card-header {
+    padding: 1rem 1.25rem;
+    background: #fff;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.targeting-icon {
+    color: #475569;
+    font-size: 1.125rem;
+}
+
+.targeting-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    font-size: 0.8125rem;
+    color: #64748b;
+    margin-top: 0.375rem;
+}
+
+.targeting-author,
+.targeting-date,
+.targeting-expires {
+    display: inline-flex;
+    align-items: center;
+}
+
+.targeting-type-badge {
+    margin-top: 0.5rem;
+}
+
+.targeting-type-badge .badge {
+    font-weight: 500;
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+}
+
+.targeting-card-body {
+    padding: 1rem 1.25rem;
+    background: #fff;
+}
+
+.targeting-message {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    line-height: 1.55;
+    color: #334155;
+    font-size: 0.875rem;
+}
+
+.targeting-card-footer {
+    padding: 0.75rem 1.25rem;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.targeting-card-footer .btn-primary {
+    font-weight: 500;
+    font-size: 0.8125rem;
+    border-radius: 6px;
+    padding: 0.35rem 0.75rem;
+}
+
+.pulse-badge {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.7;
+    }
+}
+
+/* Scrollbar styling for targeting modal */
+.targeting-modal-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.targeting-modal-body::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.targeting-modal-body::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.targeting-modal-body::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+.targeting-notification-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    padding: 4px 7px;
+    border-radius: 50%;
+    background-color: #dc3545;
+    color: white;
+    font-size: 0.7em;
+    line-height: 1;
+}
+
+/* Spin animation для загрузки */
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ===== CHAT STYLES ===== */
+#chat-btn {
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+#chat-btn:hover {
+    transform: scale(1.1);
+}
+
+#chat-badge {
+    font-size: 10px;
+    padding: 2px 6px;
+    min-width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: pulseBadge 2s ease-in-out infinite;
+    box-shadow: 0 2px 6px rgba(220, 38, 38, 0.4);
+    border: 2px solid white;
+}
+
+@keyframes pulseBadge {
+
+    0%,
+    100% {
+        transform: scale(1);
+        box-shadow: 0 2px 6px rgba(220, 38, 38, 0.4);
+    }
+
+    50% {
+        transform: scale(1.1);
+        box-shadow: 0 2px 10px rgba(220, 38, 38, 0.6);
+    }
+}
+
+/* Toast уведомление для чата */
+.chat-toast-notification {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;
+    max-width: 350px;
+    min-width: 280px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15), 0 4px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--wp-border);
+    padding: 1rem;
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    cursor: pointer;
+    border-left: 4px solid #dc3545;
+}
+
+.chat-toast-notification.show {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+.chat-toast-notification:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2), 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.chat-toast-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #dc3545 0%, #b91c1c 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 18px;
+    flex-shrink: 0;
+    box-shadow: 0 3px 10px rgba(220, 38, 38, 0.3);
+}
+
+.chat-toast-notification .btn-close {
+    opacity: 0.5;
+    transition: opacity 0.2s ease;
+}
+
+.chat-toast-notification .btn-close:hover {
+    opacity: 1;
+}
+
+@media (max-width: 576px) {
+    .chat-toast-notification {
+        bottom: 10px;
+        right: 10px;
+        left: 10px;
+        max-width: none;
+        min-width: auto;
+    }
+}
+
+#chatModal .modal-dialog.chat-modal-dialog,
+#chatModal .chat-modal-dialog {
+    max-width: min(1180px, calc(100vw - 2rem));
+}
+
+#chatModal .chat-modal-body {
+    height: min(760px, calc(100vh - 7rem));
+    min-height: 560px;
+}
+
+#chatModal .chat-sidebar {
+    width: 280px;
+    min-width: 280px;
+    flex-shrink: 0;
+    overflow-y: auto;
+    background:
+        radial-gradient(circle at 20% 0%, rgba(96, 165, 250, 0.22), transparent 38%),
+        linear-gradient(180deg, #f8fbff 0%, #eef5ff 100%);
+    border-right: 1px solid rgba(148, 163, 184, 0.35);
+}
+
+#chatModal .chat-sidebar-hero {
+    margin: 1rem;
+    padding: 1rem;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 58%, #0ea5e9 100%);
+    color: #fff;
+    box-shadow: 0 12px 30px rgba(37, 99, 235, 0.22);
+}
+
+#chatModal .chat-sidebar-kicker {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    opacity: 0.78;
+}
+
+#chatModal .chat-sidebar-title-main {
+    margin-top: 0.35rem;
+    font-weight: 700;
+    line-height: 1.15;
+}
+
+#chatModal .chat-sidebar-text {
+    margin-top: 0.45rem;
+    font-size: 12px;
+    line-height: 1.4;
+    color: rgba(255, 255, 255, 0.82);
+}
+
+#chatModal .chat-sidebar-title {
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+}
+
+#chatModal .chat-channel-list {
+    border-top: none !important;
+}
+
+#chatModal .chat-channel-item {
+    border: 1px solid transparent;
+    border-radius: 0.85rem;
+    margin: 0 0.75rem 0.35rem;
+    font-size: 0.9rem;
+    background: rgba(255, 255, 255, 0.66);
+    transition: all 0.18s ease;
+}
+
+#chatModal .chat-channel-item:hover {
+    border-color: rgba(37, 99, 235, 0.18);
+    transform: translateX(2px);
+}
+
+#chatModal .chat-channel-item.active {
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.16), rgba(14, 165, 233, 0.10));
+    border-color: rgba(37, 99, 235, 0.25);
+    color: var(--wp-text);
+    font-weight: 650;
+}
+
+#chatModal .chat-main {
+    min-width: 0;
+}
+
+#chatModal .modal-content {
+    border-radius: 24px;
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    overflow: hidden;
+    box-shadow: 0 24px 70px rgba(15, 23, 42, 0.22);
+}
+
+#chatModal .modal-header {
+    background:
+        radial-gradient(circle at 12% 0%, rgba(59, 130, 246, 0.22), transparent 32%),
+        linear-gradient(135deg, #ffffff 0%, #f5f9ff 100%);
+    border-bottom: 1px solid rgba(148, 163, 184, 0.25);
+    padding: 1rem 1.35rem;
+}
+
+#chatModal .modal-header .modal-title {
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--wp-text);
+}
+
+#chatModal .chat-modal-logo {
+    width: auto;
+    height: auto;
+    min-width: 0;
+    border-radius: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: inherit;
+    background: transparent;
+    box-shadow: none;
+}
+
+#chatModal .chat-modal-logo img {
+    width: 88px;
+    height: auto;
+}
+
+#chatModal .chat-modal-logo .eavc-rail__lettermark--dark {
+    display: none;
+}
+
+html[data-wp-theme="dark"] #chatModal .chat-modal-logo .eavc-rail__lettermark--light {
+    display: none;
+}
+
+html[data-wp-theme="dark"] #chatModal .chat-modal-logo .eavc-rail__lettermark--dark {
+    display: block;
+}
+
+#chatModal .chat-modal-subtitle {
+    color: #64748b;
+}
+
+#chatModal .chat-conversation-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.9rem 1.25rem;
+    background: rgba(255, 255, 255, 0.88);
+    border-bottom: 1px solid rgba(148, 163, 184, 0.22);
+    backdrop-filter: blur(12px);
+}
+
+#chatModal .chat-conversation-title {
+    font-weight: 700;
+    color: var(--wp-text);
+}
+
+#chatModal .chat-conversation-hint {
+    font-size: 12px;
+    color: #64748b;
+}
+
+#chatModal .chat-ai-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    border: 1px solid rgba(37, 99, 235, 0.18);
+    border-radius: 999px;
+    padding: 0.35rem 0.7rem;
+    color: #1d4ed8;
+    background: rgba(37, 99, 235, 0.07);
+    font-size: 12px;
+    font-weight: 650;
+}
+
+#chatModal .chat-ai-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 0 5px rgba(34, 197, 94, 0.12);
+}
+
+#chat-messages-container {
+    background:
+        radial-gradient(circle at 8% 82%, rgba(37, 99, 235, 0.08) 0%, transparent 36%),
+        radial-gradient(circle at 88% 16%, rgba(14, 165, 233, 0.10) 0%, transparent 40%),
+        linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+    scroll-behavior: smooth;
+    position: relative;
+}
+
+#chat-messages-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+#chat-messages-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#chat-messages-container::-webkit-scrollbar-thumb {
+    background: var(--wp-border);
+    border-radius: 3px;
+}
+
+#chat-messages-container::-webkit-scrollbar-thumb:hover {
+    background: var(--wp-border-strong);
+}
+
+.chat-message {
+    margin-bottom: 1rem;
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.chat-message-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 16px;
+    flex-shrink: 0;
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    color: white;
+    box-shadow: 0 3px 10px rgba(37, 99, 235, 0.25), 0 1px 3px rgba(37, 99, 235, 0.15);
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    transition: all 0.2s ease;
+}
+
+.chat-message-avatar:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35), 0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+.chat-message-bubble {
+    background: white;
+    border-radius: 18px 18px 18px 6px;
+    padding: 0.95rem 1.15rem;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08), 0 2px 6px rgba(15, 23, 42, 0.04);
+    border: 1px solid rgba(148, 163, 184, 0.26);
+    max-width: min(82%, 820px);
+    word-wrap: break-word;
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.chat-message-bubble:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.06);
+    transform: translateY(-1px);
+}
+
+.chat-message-bubble::before {
+    content: '';
+    position: absolute;
+    left: -8px;
+    top: 14px;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 8px 8px 8px 0;
+    border-color: transparent white transparent transparent;
+    filter: drop-shadow(-2px 0 2px rgba(0, 0, 0, 0.04));
+}
+
+.chat-message-ai .chat-message-avatar {
+    background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 55%, #1d4ed8 100%);
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35), 0 2px 6px rgba(14, 165, 233, 0.25);
+}
+
+.chat-message-ai .chat-message-bubble {
+    background:
+        radial-gradient(circle at 16% 0%, rgba(255, 255, 255, 0.20), transparent 28%),
+        linear-gradient(135deg, #2563eb 0%, #1d4ed8 72%, #1e40af 100%);
+    border-color: rgba(37, 99, 235, 0.85);
+    color: #fff;
+    box-shadow: 0 6px 18px rgba(37, 99, 235, 0.22), 0 2px 6px rgba(29, 78, 216, 0.18);
+}
+
+.chat-message-ai .chat-message-bubble::before {
+    border-color: transparent #2563eb transparent transparent;
+}
+
+.chat-message-ai .chat-message-author,
+.chat-message-ai .chat-message-text {
+    color: #fff;
+}
+
+.chat-message-ai .chat-message-time {
+    color: rgba(255, 255, 255, 0.78);
+}
+
+.chat-message-text strong {
+    font-weight: 800;
+}
+
+.chat-md-heading {
+    margin: 0.85rem 0 0.45rem;
+    font-weight: 800;
+    line-height: 1.25;
+}
+
+.chat-md-heading:first-child {
+    margin-top: 0;
+}
+
+.chat-md-heading-1 {
+    font-size: 18px;
+}
+
+.chat-md-heading-2 {
+    font-size: 16px;
+}
+
+.chat-md-heading-3 {
+    font-size: 15px;
+}
+
+.chat-md-heading-4 {
+    font-size: 14px;
+    opacity: 0.96;
+}
+
+.chat-message-ai .chat-md-heading {
+    color: #fff;
+    text-shadow: 0 1px 0 rgba(15, 23, 42, 0.16);
+}
+
+.chat-message-text code {
+    padding: 0.08rem 0.32rem;
+    border-radius: 0.45rem;
+    background: rgba(15, 23, 42, 0.06);
+    color: #334155;
+    font-size: 0.92em;
+    font-weight: 700;
+}
+
+.chat-message-ai .chat-message-text code {
+    background: rgba(255, 255, 255, 0.18);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    text-shadow: none;
+}
+
+.chat-md-bullet {
+    color: #2563eb;
+    font-weight: 900;
+}
+
+.chat-message-ai .chat-md-bullet {
+    color: #bfdbfe;
+}
+
+.chat-open-blank-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin: 0.25rem 0;
+    padding: 0.3rem 0.65rem;
+    border-radius: 999px;
+    background: rgba(37, 99, 235, 0.08);
+    color: #1d4ed8;
+    font-weight: 650;
+    text-decoration: none;
+}
+
+.chat-open-blank-link:hover {
+    background: rgba(37, 99, 235, 0.14);
+    color: #1e40af;
+}
+
+.chat-message-ai .chat-open-blank-link {
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+}
+
+.chat-message-ai .chat-open-blank-link:hover {
+    background: rgba(255, 255, 255, 0.26);
+    color: #fff;
+}
+
+.chat-message-ai .chat-ai-feedback {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.5rem;
+    margin-top: 0.35rem;
+    padding-left: 0.1rem;
+}
+
+.chat-ai-feedback-label {
+    font-size: 11px;
+    color: var(--wp-text-subtle);
+    margin-right: 0.1rem;
+}
+
+.chat-message-ai .chat-ai-feedback-label {
+    color: rgba(255, 255, 255, 0.72);
+}
+
+.chat-ai-feedback-txt {
+    margin-left: 0.2rem;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: lowercase;
+}
+
+.chat-ai-feedback-btn {
+    line-height: 1;
+    padding: 0.15rem 0.35rem;
+    min-width: 0;
+    border: none;
+    background: transparent;
+    opacity: 0.75;
+}
+
+.chat-message-ai .chat-ai-feedback-btn {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.chat-ai-feedback-btn:hover,
+.chat-ai-feedback-btn:focus {
+    opacity: 1;
+}
+
+.chat-ai-feedback-btn.active {
+    opacity: 1;
+    color: #22c55e;
+}
+
+.chat-message-ai .chat-ai-feedback-btn.active {
+    color: #bbf7d0;
+    text-shadow: 0 0 1px rgba(0, 0, 0, 0.35);
+}
+
+.chat-message-ai .chat-ai-feedback-down.active {
+    color: #fecaca;
+}
+
+.chat-message-info {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    margin-bottom: 0.25rem;
+}
+
+.chat-message-author {
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--wp-text);
+}
+
+.chat-message-time {
+    font-size: 11px;
+    color: var(--wp-text-subtle);
+}
+
+.chat-message-text {
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--wp-text);
+    white-space: pre-wrap;
+}
+
+.chat-message-file {
+    margin-top: 0.625rem;
+    padding: 0.625rem 0.875rem;
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.08) 0%, rgba(37, 99, 235, 0.04) 100%);
+    border-radius: 10px;
+    border: 1px solid rgba(37, 99, 235, 0.18);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    color: var(--wp-text);
+}
+
+.chat-message-file:hover {
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.12) 0%, rgba(37, 99, 235, 0.06) 100%);
+    transform: translateX(3px);
+    border-color: rgba(37, 99, 235, 0.25);
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15);
+}
+
+.chat-message-file i {
+    color: #2563eb;
+}
+
+#chatModal .modal-body .border-top {
+    background: white;
+    border-top: 1px solid var(--wp-border) !important;
+    padding: 1rem;
+}
+
+#chatModal .chat-quick-prompts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem 0;
+    background: rgba(255, 255, 255, 0.92);
+    border-top: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+#chatModal .chat-prompt-chip {
+    border: 1px solid rgba(37, 99, 235, 0.16);
+    border-radius: 999px;
+    color: #1d4ed8;
+    background: rgba(37, 99, 235, 0.06);
+    font-weight: 600;
+}
+
+#chatModal .chat-prompt-chip:hover {
+    background: rgba(37, 99, 235, 0.12);
+    border-color: rgba(37, 99, 235, 0.28);
+}
+
+#chatModal .chat-input-area {
+    padding: 0.85rem 1rem 1rem;
+    background: rgba(255, 255, 255, 0.96);
+    border-top: 1px solid rgba(148, 163, 184, 0.20);
+}
+
+#chatModal .chat-attachment-row {
+    min-height: 31px;
+}
+
+#chatModal .chat-composer {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.65rem;
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    border-radius: 20px;
+    padding: 0.45rem;
+    background: #fff;
+    box-shadow: 0 8px 28px rgba(15, 23, 42, 0.08);
+}
+
+#chat-file-name {
+    display: inline-block;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+#chat-message-input {
+    min-height: 52px;
+    max-height: 150px;
+    resize: vertical;
+    border-radius: 16px;
+    border: none;
+    padding: 0.65rem 0.75rem;
+    font-size: 14px;
+    line-height: 1.45;
+    transition: all 0.2s ease;
+    box-shadow: none;
+}
+
+#chat-message-input:focus {
+    box-shadow: none;
+}
+
+#chatModal .btn-primary {
+    border-radius: 20px;
+    padding: 0.5rem 1.25rem;
+    font-weight: 500;
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    border: none;
+    transition: all 0.2s ease;
+}
+
+#chatModal .chat-send-btn {
+    width: 46px;
+    height: 46px;
+    min-width: 46px;
+    padding: 0;
+    border-radius: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#chatModal .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+#chatModal .btn-outline-secondary {
+    border-radius: 8px;
+    font-size: 12px;
+    padding: 0.375rem 0.75rem;
+}
+
+/* AI-модалка — тёмная тема */
+html[data-wp-theme="dark"] #chatModal .modal-content {
+    background: var(--wp-surface);
+    border-color: var(--wp-border-strong);
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
+}
+
+html[data-wp-theme="dark"] #chatModal .modal-header {
+    background:
+        radial-gradient(circle at 12% 0%, rgba(110, 168, 255, 0.16), transparent 34%),
+        linear-gradient(135deg, #121820 0%, #0f141c 100%);
+    border-bottom-color: var(--wp-border);
+}
+
+html[data-wp-theme="dark"] #chatModal .chat-modal-subtitle,
+html[data-wp-theme="dark"] #chatModal .chat-conversation-hint {
+    color: var(--wp-text-subtle);
+}
+
+html[data-wp-theme="dark"] #chatModal .chat-sidebar {
+    background:
+        radial-gradient(circle at 20% 0%, rgba(110, 168, 255, 0.12), transparent 38%),
+        linear-gradient(180deg, #101820 0%, #0c1118 100%);
+    border-right-color: var(--wp-border);
+}
+
+html[data-wp-theme="dark"] #chatModal .chat-sidebar-title {
+    color: var(--wp-text-subtle) !important;
+}
+
+html[data-wp-theme="dark"] #chatModal .chat-channel-item {
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--wp-text);
+}
+
+html[data-wp-theme="dark"] #chatModal .chat-channel-item:hover {
+    background: rgba(110, 168, 255, 0.08);
+    border-color: rgba(110, 168, 255, 0.18);
+}
+
+html[data-wp-theme="dark"] #chatModal .chat-channel-item.active {
+    background: linear-gradient(135deg, rgba(110, 168, 255, 0.18), rgba(56, 189, 248, 0.08));
+    border-color: rgba(110, 168, 255, 0.28);
+    color: var(--wp-text);
+}
+
+html[data-wp-theme="dark"] #chatModal .chat-conversation-top {
+    background: rgba(18, 24, 32, 0.92);
+    border-bottom-color: var(--wp-border);
+}
+
+html[data-wp-theme="dark"] #chatModal .chat-ai-status {
+    color: #9cc5ff;
+    background: rgba(110, 168, 255, 0.12);
+    border-color: rgba(110, 168, 255, 0.22);
+}
+
+html[data-wp-theme="dark"] #chat-messages-container {
+    background:
+        radial-gradient(circle at 8% 82%, rgba(110, 168, 255, 0.08) 0%, transparent 36%),
+        radial-gradient(circle at 88% 16%, rgba(56, 189, 248, 0.06) 0%, transparent 40%),
+        linear-gradient(180deg, #0d1218 0%, #0b0f14 100%);
+}
+
+html[data-wp-theme="dark"] #chatModal .chat-message:not(.chat-message-ai) .chat-message-bubble {
+    background: var(--wp-surface-2);
+    border-color: var(--wp-border-strong);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.28);
+    color: var(--wp-text);
+}
+
+html[data-wp-theme="dark"] #chatModal .chat-message:not(.chat-message-ai) .chat-message-bubble::before {
+    border-color: transparent var(--wp-surface-2) transparent transparent;
+    filter: none;
+}
+
+html[data-wp-theme="dark"] #chatModal .chat-message:not(.chat-message-ai) .chat-message-text,
+html[data-wp-theme="dark"] #chatModal .chat-message:not(.chat-message-ai) .chat-message-author {
+    color: var(--wp-text);
+}
+
+html[data-wp-theme="dark"] #chatModal .chat-message:not(.chat-message-ai) .chat-message-time {
+    color: var(--wp-text-subtle);
+}
+
+html[data-wp-theme="dark"] #chatModal .chat-message:not(.chat-message-ai) .chat-message-avatar {
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+html[data-wp-theme="dark"] #chatModal .chat-message-text code {
+    background: rgba(255, 255, 255, 0.08);
+    color: #dbeafe;
+}
+
+html[data-wp-theme="dark"] #chatModal .chat-md-bullet {
+    color: #93c5fd;
+}
+
+html[data-wp-theme="dark"] #chatModal .chat-open-blank-link {
+    background: rgba(110, 168, 255, 0.12);
+    color: #bfdbfe;
+}
+
+html[data-wp-theme="dark"] #chatModal .chat-open-blank-link:hover {
+    background: rgba(110, 168, 255, 0.2);
+    color: #fff;
+}
+
+html[data-wp-theme="dark"] #chatModal .chat-message-file {
+    background: rgba(110, 168, 255, 0.1);
+    border-color: rgba(110, 168, 255, 0.22);
+    color: var(--wp-text);
+}
+
+html[data-wp-theme="dark"] #chatModal .chat-message-file i {
+    color: #93c5fd;
+}
+
+html[data-wp-theme="dark"] #chatModal .modal-body .border-top,
+html[data-wp-theme="dark"] #chatModal .chat-quick-prompts,
+html[data-wp-theme="dark"] #chatModal .chat-input-area {
+    background: #101820;
+    border-top-color: var(--wp-border) !important;
+}
+
+html[data-wp-theme="dark"] #chatModal .chat-prompt-chip {
+    color: #bfdbfe;
+    background: rgba(110, 168, 255, 0.1);
+    border-color: rgba(110, 168, 255, 0.22);
+}
+
+html[data-wp-theme="dark"] #chatModal .chat-prompt-chip:hover {
+    background: rgba(110, 168, 255, 0.18);
+    border-color: rgba(110, 168, 255, 0.32);
+    color: #fff;
+}
+
+html[data-wp-theme="dark"] #chatModal .chat-composer {
+    background: var(--wp-surface-2);
+    border-color: var(--wp-border-strong);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.32);
+}
+
+html[data-wp-theme="dark"] #chatModal #chat-message-input {
+    background: transparent;
+    color: var(--wp-text);
+}
+
+html[data-wp-theme="dark"] #chatModal #chat-message-input::placeholder {
+    color: rgba(232, 234, 239, 0.45);
+}
+
+html[data-wp-theme="dark"] #chatModal .btn-outline-secondary {
+    color: var(--wp-text-subtle);
+    border-color: var(--wp-border-strong);
+}
+
+html[data-wp-theme="dark"] #chatModal .btn-outline-secondary:hover {
+    color: var(--wp-text);
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(110, 168, 255, 0.28);
+}
+
+html[data-wp-theme="dark"] #chatModal #chat-messages-container .text-muted {
+    color: var(--wp-text-subtle) !important;
+}
+
+/* ===== HUB STATUS STYLES ===== */
+.hub-status-online {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+    color: white !important;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+    animation: pulseGlow 2s ease-in-out infinite;
+}
+
+@keyframes pulseGlow {
+
+    0%,
+    100% {
+        box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+    }
+
+    50% {
+        box-shadow: 0 2px 12px rgba(16, 185, 129, 0.5);
+    }
+}
+
+.hub-status-recent {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+    color: white !important;
+}
+
+.hub-status-idle {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+    color: white !important;
+}
+
+.hub-status-offline {
+    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%) !important;
+    color: white !important;
+}
+
+.hub-status-unknown {
+    background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%) !important;
+    color: white !important;
+}
+
+.hub-row {
+    transition: all 0.2s ease;
+}
+
+.hub-row:hover {
+    background: rgba(37, 99, 235, 0.03) !important;
+    transform: translateX(2px);
+}
+
+.hub-online-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 6px;
+    animation: pulseDot 2s ease-in-out infinite;
+}
+
+@keyframes pulseDot {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.6;
+        transform: scale(0.9);
+    }
+}
+
+.hub-online-indicator.online {
+    background: #10b981;
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+}
+
+.hub-online-indicator.recent {
+    background: #3b82f6;
+}
+
+.hub-online-indicator.idle {
+    background: #f59e0b;
+}
+
+.hub-online-indicator.offline {
+    background: #6b7280;
+}
+
+/* Улучшенная таблица Hub'ов */
+#hubs-content table {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+#hubs-content .table thead {
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.08) 0%, rgba(37, 99, 235, 0.03) 100%);
+}
+
+#hubs-content .table thead th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    color: var(--wp-text-subtle);
+    border-bottom: 2px solid var(--wp-border);
+}
+
+#hubs-content .table tbody tr {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+#hubs-content .table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.hub-id-cell {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 12px;
+    color: var(--wp-text-subtle);
+    background: rgba(0, 0, 0, 0.02);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+}
+
+.hub-name-cell {
+    font-weight: 500;
+    color: var(--wp-text);
+}
+
+.hub-position-badge {
+    border-radius: 6px;
+    padding: 0.25rem 0.5rem;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.hub-ip-cell {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 12px;
+    color: var(--wp-text-subtle);
+}
+
+.hub-time-cell {
+    font-size: 12px;
+    color: var(--wp-text-subtle);
+}
+
+/* Анимация загрузки Hub'ов */
+@keyframes shimmer {
+    0% {
+        background-position: -1000px 0;
+    }
+
+    100% {
+        background-position: 1000px 0;
+    }
+}
+
+.hub-loading {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite;
+    height: 20px;
+    border-radius: 4px;
+}
+
+/* Улучшенный спиннер для чата */
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+/* Empty state для Hub'ов */
+.hub-empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--wp-text-subtle);
+}
+
+.hub-empty-state i {
+    font-size: 48px;
+    opacity: 0.3;
+    margin-bottom: 1rem;
+}
+
+.hub-empty-state h5 {
+    color: var(--wp-text-subtle);
+    margin-bottom: 0.5rem;
+}
+
+/* Статистические карточки Hub'ов */
+.hub-stat-card {
+    transition: all 0.2s ease;
+    border-radius: 12px;
+}
+
+.hub-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+/* Улучшенные индикаторы времени */
+.hub-time-cell {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+/* Анимация появления строк Hub'ов */
+.hub-row {
+    animation: fadeInRow 0.4s ease-in;
+}
+
+@keyframes fadeInRow {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    #chatModal .modal-dialog {
+        margin: 0.5rem;
+        max-width: calc(100% - 1rem);
+    }
+
+    #chatModal .chat-modal-body {
+        height: calc(100vh - 5.5rem);
+        min-height: 0;
+    }
+
+    #chatModal .chat-sidebar {
+        width: 108px;
+        min-width: 108px;
+    }
+
+    #chatModal .chat-sidebar-hero {
+        display: none;
+    }
+
+    #chatModal .chat-channel-item {
+        margin-inline: 0.35rem;
+        padding-inline: 0.45rem;
+        font-size: 12px;
+    }
+
+    #chatModal .chat-conversation-top {
+        align-items: flex-start;
+        padding: 0.75rem;
+    }
+
+    #chatModal .chat-conversation-hint,
+    #chatModal .chat-ai-status {
+        display: none;
+    }
+
+    .chat-message-bubble {
+        max-width: 92%;
+    }
+
+    #chat-messages-container {
+        padding: 1rem 0.75rem;
+    }
+
+    #chatModal .chat-quick-prompts {
+        padding-inline: 0.75rem;
+    }
+
+    #chatModal .chat-input-area {
+        padding: 0.75rem;
+    }
+
+    #hubs-content .table {
+        font-size: 12px;
+    }
+
+    .hub-id-cell,
+    .hub-ip-cell,
+    .hub-time-cell {
+        font-size: 11px;
+    }
+}
+
+/* Map tab */
+.map-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.map-content-row {
+    display: flex;
+    flex-wrap: wrap;
+    flex: 1;
+    min-height: 0;
+    align-items: stretch;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+.map-groups-col {
+    flex-shrink: 0;
+}
+
+.map-map-col {
+    display: flex;
+    flex-direction: column;
+    min-height: 400px;
+    min-width: 0;
+    flex: 1 1 0 !important;
+    max-width: none !important;
+    position: relative;
+    padding: 0 !important;
+    overflow: hidden;
+}
+
+.map-editor-col {
+    flex-shrink: 0;
+}
+
+.map-map-col .map-wrap {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+
+.map-map-col .map-root {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+.map-page-card {
+    min-height: calc(100vh - 100px);
+    border: none !important;
+}
+
+.map-page-body {
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - 140px);
+    flex: 1;
+    padding: 1rem !important;
+}
+
+.map-wrap {
+    border: none;
+    border-radius: 0;
+    overflow: hidden;
+    background: #e5e7eb;
+}
+
+.map-root {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 100%;
+    cursor: grab;
+    user-select: none;
+    overflow: hidden;
+    touch-action: none;
+}
+
+.map-root.dragging {
+    cursor: grabbing;
+}
+
+.map-root.add-mode {
+    cursor: crosshair;
+}
+
+.map-root.dragging-point {
+    cursor: move;
+}
+
+.map-layer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    overflow: hidden;
+}
+
+.map-layer-annotations-canvas {
+    pointer-events: auto;
+    touch-action: none;
+}
+
+.map-layer-relief-tiles {
+    opacity: 0.58;
+    pointer-events: none;
+    mix-blend-mode: multiply;
+}
+
+.map-layer-relief-tiles[hidden] {
+    display: none !important;
+}
+
+.map-tile {
+    position: absolute;
+    width: 256px;
+    height: 256px;
+    image-rendering: auto;
+}
+
+.map-marker {
+    position: absolute;
+    left: 0;
+    top: 0;
+    /* transform-origin: top-left маркера; в JS сдвигаем на -5,-5 чтобы центр dot (10×10) совпадал с кликом */
+    transform-origin: 0 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    border: 0;
+    background: transparent;
+    padding: 0;
+    pointer-events: none;
+}
+
+.map-marker-annotation {
+    pointer-events: auto;
+}
+
+.map-marker-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: #dc2626;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.9);
+}
+
+.map-marker--radar .map-marker-dot {
+    background: #ea580c;
+    box-shadow: 0 0 0 2px #fff, 0 0 10px rgba(234, 88, 12, 0.65);
+}
+
+.map-marker--radar {
+    pointer-events: auto;
+}
+
+.map-marker--radar-deletable {
+    cursor: pointer;
+}
+
+.map-marker--radar-deletable .map-marker-label::after {
+    content: "  ×";
+    color: #fecaca;
+    font-weight: 800;
+}
+
+.map-marker--radar-local .map-marker-dot {
+    background: #7c3aed;
+    box-shadow: 0 0 0 2px #fff, 0 0 10px rgba(124, 58, 237, 0.55);
+}
+
+.map-marker-label {
+    background: rgba(15, 23, 42, 0.84);
+    color: #f8fafc;
+    border-radius: 999px;
+    padding: 2px 8px;
+    font-size: 11px;
+    line-height: 1.2;
+    white-space: nowrap;
+    max-width: 260px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.map-marker-icon {
+    width: 18px;
+    height: 18px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 0;
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid var(--wp-border);
+    color: var(--ann-color, #1f2937);
+}
+
+.map-marker-icon svg {
+    width: 14px;
+    height: 14px;
+    display: block;
+}
+
+.map-marker-annotation .map-marker-dot {
+    background: var(--ann-color, #dc2626);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.95);
+}
+
+.map-marker-annotation.selected .map-marker-dot {
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.95), 0 0 0 6px color-mix(in srgb, var(--ann-color, #dc2626) 35%, transparent);
+}
+
+.map-marker-annotation .map-marker-label {
+    background: color-mix(in srgb, var(--ann-color, #dc2626) 32%, rgba(15, 23, 42, 0.78));
+}
+
+/* Выбор типа пометки иконками */
+.map-type-icons {
+    min-height: 36px;
+}
+
+.map-type-btn {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: 2px solid var(--wp-border);
+    border-radius: 8px;
+    background: var(--wp-bg);
+    color: var(--bs-body-color);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s, transform 0.1s;
+}
+
+.map-type-btn:hover {
+    border-color: var(--bs-primary);
+    background: color-mix(in srgb, var(--bs-primary) 10%, transparent);
+}
+
+.map-type-btn.active {
+    border-color: var(--bs-primary);
+    background: color-mix(in srgb, var(--bs-primary) 18%, transparent);
+    color: var(--bs-primary);
+}
+
+.map-type-btn-icon {
+    width: 20px;
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    line-height: 1;
+}
+
+.map-type-btn-icon svg {
+    width: 18px;
+    height: 18px;
+    display: block;
+}
+
+/* Слой маркеров-иконок на карте */
+.map-layer-annotation-markers {
+    pointer-events: none;
+}
+
+.map-marker-annotation {
+    pointer-events: auto;
+    width: 28px;
+    height: 28px;
+    transform-origin: 14px 14px;
+    left: 0;
+    top: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    padding: 0;
+    background: transparent;
+    cursor: pointer;
+    border-radius: 8px;
+}
+
+.map-marker-annotation .map-marker-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+
+.map-marker-annotation .map-marker-icon svg {
+    width: 16px;
+    height: 16px;
+}
+
+.map-editor {
+    background: var(--wp-surface);
+    border: 1px solid var(--wp-border);
+    border-radius: var(--wp-radius);
+    position: sticky;
+    top: calc(var(--wp-nav-h) + 14px);
+    max-height: calc(100vh - (var(--wp-nav-h) + 34px));
+}
+
+.map-editor .card-body {
+    overflow: auto;
+}
+
+.map-ann-list {
+    max-height: 240px;
+    overflow: auto;
+}
+
+.map-ann-item {
+    border-radius: 10px;
+}
+
+.map-ann-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    display: inline-block;
+}
+
+.map-ann-icon {
+    width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 0;
+    color: var(--ann-color, #1f2937);
+}
+
+.map-ann-icon svg {
+    width: 14px;
+    height: 14px;
+    display: block;
+}
+
+/* Левая панель: группы и точки */
+.map-groups-panel {
+    background: var(--wp-surface);
+    border: 1px solid var(--wp-border);
+    border-radius: var(--wp-radius);
+}
+
+.map-groups-panel .card-body {
+    overflow: auto;
+}
+
+.map-folders-list {
+    max-height: 40vh;
+    overflow: auto;
+}
+
+.map-folder-card {
+    background: var(--wp-bg);
+    border: 1px solid var(--wp-border);
+    border-radius: var(--wp-radius);
+}
+
+.map-folder-card .map-points-list {
+    max-height: 180px;
+    overflow: auto;
+}
+
+.map-folder-header {
+    cursor: pointer;
+}
+
+.map-folder-collapse {
+    opacity: 0.7;
+}
+
+.map-folder-collapse:hover {
+    opacity: 1;
+}
+
+.map-folder-collapsed .map-folder-body {
+    display: none !important;
+}
+
+.map-drop-zone {
+    min-height: 32px;
+    transition: background-color 0.15s;
+}
+
+.map-drop-zone.map-drop-active {
+    background-color: color-mix(in srgb, var(--bs-primary) 15%, transparent);
+    border-radius: var(--wp-radius);
+}
+
+.map-ann-item.map-dragging {
+    opacity: 0.6;
+}
+
+.map-ann-item {
+    cursor: grab;
+}
+
+.map-ann-item:active {
+    cursor: grabbing;
+}
+
+.map-points-list .map-ann-item {
+    border-radius: 6px;
+}
+
+.map-point-eye,
+.map-folder-eye {
+    opacity: 0.85;
+}
+
+.map-point-eye:hover,
+.map-folder-eye:hover {
+    opacity: 1;
+}
+
+/* Полный экран карты: панель поверх карты */
+.map-fullscreen-wrap {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+}
+
+.map-fullscreen-wrap:fullscreen,
+.map-fullscreen-wrap:-webkit-full-screen {
+    width: 100%;
+    height: 100%;
+    background: var(--wp-bg);
+    padding: 0;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.map-fullscreen-wrap:fullscreen>.d-flex:first-child,
+.map-fullscreen-wrap:fullscreen>.map-toolbar,
+.map-fullscreen-wrap:fullscreen>.map-chrome,
+.map-fullscreen-wrap:fullscreen>.map-mobile-segment,
+.map-fullscreen-wrap:-webkit-full-screen>.d-flex:first-child,
+.map-fullscreen-wrap:-webkit-full-screen>.map-toolbar,
+.map-fullscreen-wrap:-webkit-full-screen>.map-chrome,
+.map-fullscreen-wrap:-webkit-full-screen>.map-mobile-segment {
+    flex-shrink: 0;
+}
+
+.map-fullscreen-wrap:fullscreen .map-content-row,
+.map-fullscreen-wrap:-webkit-full-screen .map-content-row {
+    flex: 1;
+    min-height: 0;
+    position: relative;
+    margin-top: 0.5rem;
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.map-fullscreen-wrap:fullscreen .map-groups-col,
+.map-fullscreen-wrap:-webkit-full-screen .map-groups-col {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 20;
+    width: 280px;
+    max-width: 90vw;
+    padding-right: 0.5rem;
+}
+
+.map-fullscreen-wrap:fullscreen .map-editor-col,
+.map-fullscreen-wrap:-webkit-full-screen .map-editor-col {
+    position: absolute;
+    right: 0;
+    left: auto;
+    top: 0;
+    bottom: 0;
+    z-index: 20;
+    width: 320px;
+    max-width: 90vw;
+    padding-left: 0.5rem;
+}
+
+.map-fullscreen-wrap:fullscreen .map-editor,
+.map-fullscreen-wrap:-webkit-full-screen .map-editor {
+    position: sticky;
+    top: 0;
+    max-height: 100%;
+    overflow: auto;
+}
+
+.map-fullscreen-wrap:fullscreen .map-map-col,
+.map-fullscreen-wrap:-webkit-full-screen .map-map-col {
+    position: absolute;
+    left: 280px;
+    right: 320px;
+    top: 0;
+    bottom: 0;
+    width: auto;
+    min-width: 0;
+    max-width: none !important;
+    flex: none;
+    box-sizing: border-box;
+}
+
+.map-fullscreen-wrap:fullscreen .map-map-col .map-wrap,
+.map-fullscreen-wrap:-webkit-full-screen .map-map-col .map-wrap {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    margin: 0;
+    border-radius: 0;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.map-fullscreen-wrap:fullscreen .map-map-col .map-root,
+.map-fullscreen-wrap:-webkit-full-screen .map-map-col .map-root {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    min-height: 0;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Тема: светлая / тёмная — data-wp-theme на <html>, localStorage wp-theme     */
+/* -------------------------------------------------------------------------- */
+
+html[data-wp-theme="dark"] {
+    color-scheme: dark;
+    --wp-bg: #0b0f14;
+    --wp-surface: #131a24;
+    --wp-surface-2: #18202c;
+    --wp-border: rgba(255, 255, 255, 0.09);
+    --wp-border-strong: rgba(255, 255, 255, 0.14);
+    --wp-text: #e8eaef;
+    --wp-text-subtle: rgba(232, 234, 239, 0.7);
+    --wp-accent: #7ab4ff;
+    --wp-accent-2: #b3d4ff;
+    --wp-brand: #6ea8ff;
+    --wp-brand-hover: #9cc5ff;
+    --wp-brand-rgb: 110, 168, 255;
+    --wp-ring: rgba(110, 168, 255, 0.35);
+    --wp-md3-outline: rgba(200, 210, 230, 0.14);
+    --wp-md3-surface-nav: #101820;
+    --wp-shadow: 0 10px 28px rgba(0, 0, 0, 0.5);
+    --wp-shadow-sm: 0 6px 18px rgba(0, 0, 0, 0.38);
+}
+
+html[data-wp-theme="dark"] body {
+    background:
+        radial-gradient(ellipse 100% 80% at 50% 0%, rgba(37, 99, 235, 0.14), transparent 52%),
+        radial-gradient(ellipse 80% 50% at 15% 100%, rgba(30, 58, 138, 0.22), transparent 48%),
+        linear-gradient(180deg, #080b10 0%, #0d1218 45%, #080b10 100%);
+    color: var(--wp-text);
+}
+
+html[data-wp-theme="dark"] body.wp-has-app-background {
+    background: #060a12;
+}
+
+html[data-wp-theme="dark"] body.wp-has-app-background::after {
+    background:
+        linear-gradient(180deg,
+            rgba(6, 10, 18, 0.45) 0%,
+            rgba(8, 11, 16, 0.78) 42%,
+            rgba(8, 11, 16, 0.92) 100%),
+        radial-gradient(ellipse 100% 70% at 50% 100%, rgba(15, 23, 42, 0.55), transparent 58%);
+}
+
+html[data-wp-theme="dark"] body.wp-has-app-background .wp-card,
+html[data-wp-theme="dark"] body.wp-has-app-background main .card.border-0.shadow-sm,
+html[data-wp-theme="dark"] body.wp-has-app-background main .card.wp-card {
+    background: rgba(16, 24, 36, 0.88);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+html[data-wp-theme="dark"] .navbar.wp-nav {
+    background: rgba(16, 24, 32, 0.92) !important;
+}
+
+html[data-wp-theme="dark"] .navbar.wp-nav.md3-top-app-bar {
+    background: rgba(10, 14, 22, 0.72) !important;
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset, 0 4px 24px rgba(0, 0, 0, 0.35);
+}
+
+@media (min-width: 992px) {
+    html[data-wp-theme="dark"] .navbar.wp-nav.md3-top-app-bar .wp-navbar-tabs-shell {
+        background: rgba(28, 36, 50, 0.52);
+        border-color: rgba(255, 255, 255, 0.12);
+        box-shadow:
+            0 1px 0 rgba(255, 255, 255, 0.08) inset,
+            0 8px 32px rgba(0, 0, 0, 0.35),
+            0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    html[data-wp-theme="dark"] .navbar.wp-nav.md3-top-app-bar .wp-navbar-primary .nav-link.active {
+        background: rgba(37, 99, 235, 0.28);
+        border-color: rgba(110, 168, 255, 0.32);
+        box-shadow: 0 1px 6px rgba(37, 99, 235, 0.2);
+    }
+
+    html[data-wp-theme="dark"] .navbar.wp-nav.md3-top-app-bar .wp-navbar-primary .nav-link:hover:not(.active) {
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    html[data-wp-theme="dark"] .navbar.wp-nav.md3-top-app-bar .wp-navbar-tools {
+        background: rgba(28, 36, 50, 0.55);
+        border-color: rgba(255, 255, 255, 0.1);
+        box-shadow:
+            0 1px 0 rgba(255, 255, 255, 0.06) inset,
+            0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+}
+
+html[data-wp-theme="dark"] .navbar.wp-nav .wp-navbar-tools {
+    border-color: rgba(148, 163, 184, 0.22);
+    background: rgba(22, 30, 40, 0.85);
+}
+
+html[data-wp-theme="dark"] .navbar.wp-nav .wp-nav-icon-btn {
+    color: rgba(226, 232, 240, 0.88);
+}
+
+html[data-wp-theme="dark"] .navbar.wp-nav .wp-nav-icon-btn:hover {
+    background: rgba(110, 168, 255, 0.12);
+    color: #f8fafc;
+}
+
+html[data-wp-theme="dark"] .navbar.wp-nav .wp-user-menu-btn:hover,
+html[data-wp-theme="dark"] .navbar.wp-nav .wp-user-menu-btn:focus {
+    background: rgba(110, 168, 255, 0.12);
+}
+
+html[data-wp-theme="dark"] .navbar.wp-nav #wp-user-menu+.dropdown-menu {
+    background: var(--wp-surface-2);
+    border-color: rgba(148, 163, 184, 0.22);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+}
+
+html[data-wp-theme="dark"] .navbar.wp-nav #wp-user-menu+.dropdown-menu .dropdown-divider {
+    border-top-color: rgba(148, 163, 184, 0.2);
+}
+
+html[data-wp-theme="dark"] .navbar.wp-nav.md3-top-app-bar .nav-link {
+    color: #c8cdd8;
+}
+
+html[data-wp-theme="dark"] .navbar.wp-nav.md3-top-app-bar .nav-link:hover {
+    color: #f1f5f9;
+    background: rgba(255, 255, 255, 0.07);
+}
+
+html[data-wp-theme="dark"] .navbar.wp-nav.md3-top-app-bar .nav-link.active {
+    color: #b3d4ff;
+    background: rgba(37, 99, 235, 0.22);
+    border-color: rgba(110, 168, 255, 0.35);
+}
+
+html[data-wp-theme="dark"] .navbar.wp-nav.md3-top-app-bar .dropdown-menu {
+    background: var(--wp-surface-2);
+    border-color: var(--wp-md3-outline);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+html[data-wp-theme="dark"] .navbar.wp-nav.md3-top-app-bar .dropdown-item {
+    color: var(--wp-text);
+}
+
+html[data-wp-theme="dark"] .navbar.wp-nav.md3-top-app-bar .dropdown-item.active,
+html[data-wp-theme="dark"] .navbar.wp-nav.md3-top-app-bar .dropdown-item:active {
+    background: rgba(37, 99, 235, 0.28);
+    color: #dbeafe;
+}
+
+html[data-wp-theme="dark"] .navbar.wp-nav.md3-top-app-bar .wp-navbar-tools {
+    background: rgba(18, 26, 36, 0.92);
+    border-color: var(--wp-md3-outline);
+}
+
+html[data-wp-theme="dark"] .navbar.wp-nav.md3-top-app-bar .wp-navbar-position .small {
+    color: #a8b0c0;
+}
+
+html[data-wp-theme="dark"] .navbar.wp-nav.md3-top-app-bar .wp-toolbar-select {
+    background-color: rgba(255, 255, 255, 0.06);
+    border-color: rgba(200, 210, 230, 0.2);
+    color: var(--wp-text);
+}
+
+html[data-wp-theme="dark"] .navbar.wp-nav.md3-top-app-bar .navbar-toggler {
+    border-color: var(--wp-md3-outline);
+}
+
+html[data-wp-theme="dark"] #callsignTagModal .callsign-tag-modal-content {
+    background: linear-gradient(180deg, rgba(24, 32, 44, 0.98) 0%, rgba(18, 24, 34, 0.98) 100%);
+    border-color: rgba(148, 163, 184, 0.28);
+}
+
+html[data-wp-theme="dark"] #callsignTagModal .modal-header {
+    border-bottom-color: rgba(148, 163, 184, 0.22);
+}
+
+html[data-wp-theme="dark"] #callsignTagModal .modal-footer {
+    border-top-color: rgba(148, 163, 184, 0.22);
+    background: rgba(15, 20, 28, 0.72);
+}
+
+html[data-wp-theme="dark"] .wp-subtle {
+    color: var(--wp-text-subtle) !important;
+}

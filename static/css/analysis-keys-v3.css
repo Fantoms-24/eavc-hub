@@ -1,0 +1,351 @@
+/**
+ * Проверка ключей — v3 (refined toolbar & header)
+ * Overrides v2 для шапки и панели фильтров.
+ */
+
+.k2-page.k2-page--v3 {
+  --k2-r: 10px;
+  --k2-r-lg: 14px;
+  --k2-r-pill: 999px;
+  --k2-h: 2.25rem;
+  --k2-icon: 0.9rem;
+  --k2-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --k2-shadow-focus: 0 0 0 3px color-mix(in srgb, var(--k2-accent) 22%, transparent);
+}
+
+.k2-page--v3 .k2 {
+  border-radius: var(--k2-r-lg);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03), 0 8px 28px rgba(15, 23, 42, 0.04);
+}
+
+/* ─── Header ─── */
+.k2-page--v3 .k2__bar {
+  padding: 0.7rem 0.95rem 0.65rem;
+  gap: 0.75rem;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--k2-bg) 96%, var(--k2-accent) 4%) 0%,
+    var(--k2-surface) 100%
+  );
+}
+
+.k2-page--v3 .k2__kicker {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--k2-accent);
+  margin-bottom: 0.12rem;
+}
+
+.k2-page--v3 .k2__title h2 {
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+  line-height: 1.2;
+}
+
+.k2-page--v3 .k2__status {
+  margin: 0.2rem 0 0;
+  font-size: 0.75rem;
+  color: var(--k2-muted);
+}
+
+.k2-page--v3 .k2__status:empty {
+  display: none;
+}
+
+/* ─── Buttons in header ─── */
+.k2-page--v3 .k2__bar-actions {
+  gap: 0.4rem;
+}
+
+.k2-page--v3 .k2__bar-actions .k2-btn {
+  height: 2.25rem;
+  padding: 0 0.95rem;
+  border-radius: var(--k2-r-pill);
+  font-size: 0.8125rem;
+  font-weight: 650;
+  letter-spacing: -0.005em;
+}
+
+.k2-page--v3 .k2__bar-actions .k2-btn--primary {
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--k2-accent) 35%, transparent),
+    0 6px 18px color-mix(in srgb, var(--k2-accent) 22%, transparent);
+}
+
+.k2-page--v3 .k2__bar-actions .k2-btn--primary:hover {
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+}
+
+.k2-page--v3 .k2__bar-actions .k2-btn--success {
+  box-shadow: 0 1px 0 rgba(5, 150, 105, 0.35),
+    0 6px 18px rgba(5, 150, 105, 0.18);
+}
+
+.k2-page--v3 .k2__bar-actions .k2-btn--success:hover {
+  transform: translateY(-1px);
+}
+
+.k2-page--v3 .k2__bar-actions .k2-btn--icon {
+  width: 2.25rem;
+  min-width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--k2-r-pill);
+  padding: 0;
+}
+
+/* ─── Toolbar — единая «панель команд» ─── */
+.k2-page--v3 .k2__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.6rem 0.95rem;
+  background: var(--k2-bg);
+  border-bottom: 1px solid var(--k2-border);
+}
+
+.k2-page--v3 .k2-tools__group {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex: 0 1 auto;
+}
+
+.k2-page--v3 .k2-tools__group--main {
+  flex: 1 1 22rem;
+  min-width: 0;
+}
+
+.k2-page--v3 .k2-tools__group--quick {
+  margin-left: auto;
+}
+
+.k2-page--v3 .k2-tools__sep {
+  flex-shrink: 0;
+  width: 1px;
+  height: 1.55rem;
+  background: var(--k2-border);
+  margin: 0 0.1rem;
+}
+
+/* ─── Fields ─── */
+.k2-page--v3 .k2-field {
+  height: 2.25rem;
+  min-height: 2.25rem;
+  padding: 0 0.75rem;
+  gap: 0.5rem;
+  border-radius: var(--k2-r);
+  background: var(--k2-surface);
+  border-color: color-mix(in srgb, var(--k2-border) 75%, transparent);
+  box-shadow: var(--k2-shadow-sm);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.k2-page--v3 .k2-field:hover {
+  border-color: color-mix(in srgb, var(--k2-accent) 24%, var(--k2-border));
+}
+
+.k2-page--v3 .k2-field:focus-within {
+  background: var(--k2-bg);
+  border-color: color-mix(in srgb, var(--k2-accent) 60%, var(--k2-border));
+  box-shadow: var(--k2-shadow-focus);
+}
+
+.k2-page--v3 .k2-field__icon {
+  font-size: 0.95rem;
+  color: var(--k2-muted);
+}
+
+.k2-page--v3 .k2-field:focus-within .k2-field__icon {
+  color: var(--k2-accent);
+}
+
+.k2-page--v3 .k2-field__input {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--k2-text);
+}
+
+.k2-page--v3 .k2-field--date {
+  flex: 0 0 auto;
+}
+
+.k2-page--v3 .k2-field--date input[type="date"].k2-field__input {
+  width: 8rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.k2-page--v3 .k2-field--search {
+  flex: 1 1 14rem;
+  max-width: 22rem;
+}
+
+/* ─── Chips (NEW, Учёт ID) ─── */
+.k2-page--v3 .k2-chip {
+  height: 2.25rem;
+  min-height: 2.25rem;
+  padding: 0 0.85rem;
+  gap: 0.4rem;
+  border-radius: var(--k2-r-pill);
+  background: var(--k2-surface);
+  border: 1px solid color-mix(in srgb, var(--k2-border) 75%, transparent);
+  box-shadow: var(--k2-shadow-sm);
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease,
+    transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.k2-page--v3 .k2-chip:hover {
+  border-color: color-mix(in srgb, var(--k2-accent) 30%, var(--k2-border));
+  color: var(--k2-accent);
+}
+
+.k2-page--v3 .k2-chip:hover .k2-chip__label,
+.k2-page--v3 .k2-chip:hover .k2-chip__icon {
+  color: var(--k2-accent);
+}
+
+.k2-page--v3 .k2-chip:has(.k2-chip__input:checked) {
+  background: var(--k2-accent);
+  border-color: var(--k2-accent);
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--k2-accent) 35%, transparent),
+    0 4px 14px color-mix(in srgb, var(--k2-accent) 22%, transparent);
+}
+
+.k2-page--v3 .k2-chip:has(.k2-chip__input:checked) .k2-chip__label,
+.k2-page--v3 .k2-chip:has(.k2-chip__input:checked) .k2-chip__icon {
+  color: #fff;
+}
+
+.k2-page--v3 .k2-chip__icon {
+  font-size: 0.95rem;
+  color: var(--k2-muted);
+  line-height: 1;
+  transition: color 0.15s ease;
+}
+
+.k2-page--v3 .k2-chip__label {
+  font-size: 0.78rem;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+  color: var(--k2-text);
+  transition: color 0.15s ease;
+}
+
+/* Скрываем стандартный квадратный чекбокс — иконка показывает состояние */
+.k2-page--v3 .k2-chip__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.k2-page--v3 .k2-chip:focus-within {
+  outline: none;
+  box-shadow: var(--k2-shadow-focus);
+}
+
+/* ─── Quick action buttons (Все даты / Просмотрено всё) ─── */
+.k2-page--v3 .k2-btn--quick {
+  height: 2.25rem;
+  padding: 0 0.85rem;
+  gap: 0.4rem;
+  border-radius: var(--k2-r-pill);
+  background: var(--k2-surface);
+  border: 1px solid color-mix(in srgb, var(--k2-border) 75%, transparent);
+  color: var(--k2-text);
+  font-size: 0.78rem;
+  font-weight: 650;
+  box-shadow: var(--k2-shadow-sm);
+}
+
+.k2-page--v3 .k2-btn--quick .bi {
+  font-size: 0.95rem;
+  color: var(--k2-muted);
+  transition: color 0.15s ease;
+}
+
+.k2-page--v3 .k2-btn--quick:hover {
+  border-color: color-mix(in srgb, var(--k2-accent) 32%, var(--k2-border));
+  color: var(--k2-accent);
+}
+
+.k2-page--v3 .k2-btn--quick:hover .bi {
+  color: var(--k2-accent);
+}
+
+.k2-page--v3 .k2-btn--quick:focus-visible {
+  outline: none;
+  box-shadow: var(--k2-shadow-focus);
+}
+
+/* ─── Mobile ─── */
+@media (max-width: 767.98px) {
+  .k2-page--v3 .k2__bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .k2-page--v3 .k2__bar-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .k2-page--v3 .k2__bar-actions .k2-btn {
+    flex: 1 1 auto;
+  }
+
+  .k2-page--v3 .k2__bar-actions .k2-btn--icon {
+    flex: 0 0 auto;
+  }
+
+  .k2-page--v3 .k2-tools__sep {
+    display: none;
+  }
+
+  .k2-page--v3 .k2-tools__group--main,
+  .k2-page--v3 .k2-tools__group {
+    flex: 1 1 100%;
+    flex-wrap: wrap;
+  }
+
+  .k2-page--v3 .k2-tools__group--quick {
+    margin-left: 0;
+  }
+
+  .k2-page--v3 .k2-field--search,
+  .k2-page--v3 .k2-field--date {
+    flex: 1 1 100%;
+    max-width: none;
+  }
+
+  .k2-page--v3 .k2-field--date input[type="date"].k2-field__input {
+    width: auto;
+  }
+}
+
+/* ─── Reduced motion ─── */
+@media (prefers-reduced-motion: reduce) {
+  .k2-page--v3 .k2-chip,
+  .k2-page--v3 .k2-btn--quick,
+  .k2-page--v3 .k2-field,
+  .k2-page--v3 .k2__bar-actions .k2-btn {
+    transition: none;
+  }
+
+  .k2-page--v3 .k2__bar-actions .k2-btn:hover {
+    transform: none;
+  }
+}

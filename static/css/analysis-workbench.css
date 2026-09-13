@@ -1,0 +1,465 @@
+/**
+ * Анализ — workbench UI (EAVC premium, двухколоночный layout)
+ */
+
+.md3-analysis-group.an-workbench-ui {
+  --an-sidebar-w: min(300px, 30vw);
+  --an-pad: 0.85rem;
+  --an-radius: 14px;
+  --an-radius-sm: 10px;
+  --an-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --an-accent: var(--eavc-accent, #3d6df0);
+  --an-accent-soft: var(--eavc-accent-soft, rgba(61, 109, 240, 0.12));
+  --an-bg: var(--eavc-bg, #eef1f7);
+  --an-surface: var(--eavc-card, #fff);
+  --an-surface-2: var(--eavc-card-2, #f3f6fb);
+  --an-border: var(--eavc-border, rgba(15, 23, 42, 0.08));
+  --an-text: var(--eavc-text, #0c1222);
+  --an-muted: var(--eavc-text-muted, #5c6b82);
+  --an-shadow: var(--eavc-shadow-sm, 0 4px 20px rgba(15, 23, 42, 0.06));
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  color: var(--an-text);
+  font-family: "Roboto Flex", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+html[data-wp-theme="dark"] .md3-analysis-group.an-workbench-ui {
+  --an-bg: var(--eavc-bg, #06090f);
+  --an-surface: var(--eavc-card, #141c2a);
+  --an-surface-2: var(--eavc-card-2, #1a2436);
+}
+
+.an-workbench-ui .an-shell {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.an-workbench-ui .an-layout {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  overflow: hidden;
+}
+
+/* app.css .analysis-layout — grid + align-items:start; в workbench нужен flex по высоте */
+.an-workbench-ui .an-layout.analysis-layout {
+  display: flex;
+  align-items: stretch;
+  grid-template-columns: unset;
+  gap: 0;
+}
+
+/* ─── Sidebar модулей ─── */
+.an-workbench-ui .an-sidebar {
+  flex: 0 0 var(--an-sidebar-w);
+  width: var(--an-sidebar-w);
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  padding: var(--an-pad);
+  background: var(--an-surface);
+  border-right: 1px solid var(--an-border);
+  overflow: hidden;
+}
+
+.an-workbench-ui .an-sidebar__block {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0.75rem;
+  border-radius: var(--an-radius);
+  background: var(--an-surface-2);
+  border: 1px solid var(--an-border);
+  overflow: hidden;
+}
+
+.an-workbench-ui .an-sidebar__title {
+  margin: 0 0 0.35rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.an-workbench-ui .an-sidebar__title i {
+  color: var(--an-accent);
+}
+
+.an-workbench-ui .an-hint {
+  margin: 0 0 0.65rem;
+  font-size: 0.72rem;
+  line-height: 1.35;
+  color: var(--an-muted);
+  flex-shrink: 0;
+}
+
+.an-workbench-ui .an-modules-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  gap: 0.35rem;
+  border: none !important;
+  background: transparent !important;
+}
+
+.an-workbench-ui #analysis-containers .list-group-item {
+  border: 1px solid var(--an-border) !important;
+  border-radius: var(--an-radius-sm) !important;
+  margin-bottom: 0.35rem !important;
+  padding: 0.55rem 0.65rem !important;
+  background: var(--an-surface) !important;
+  color: var(--an-text) !important;
+  text-decoration: none !important;
+  display: block;
+  transition:
+    background 0.2s var(--an-ease),
+    border-color 0.2s var(--an-ease),
+    box-shadow 0.2s var(--an-ease),
+    transform 0.15s var(--an-ease);
+}
+
+.an-workbench-ui #analysis-containers .list-group-item:hover {
+  border-color: color-mix(in srgb, var(--an-accent) 28%, var(--an-border)) !important;
+  box-shadow: var(--an-shadow);
+}
+
+.an-workbench-ui #analysis-containers .list-group-item.active {
+  background: var(--an-accent-soft) !important;
+  border-color: color-mix(in srgb, var(--an-accent) 35%, var(--an-border)) !important;
+  color: var(--an-text) !important;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--an-accent) 12%, transparent);
+}
+
+.an-workbench-ui #analysis-containers .list-group-item.active .analysis-container-icon,
+.an-workbench-ui #analysis-containers .list-group-item.active .analysis-container-label {
+  color: var(--an-accent) !important;
+}
+
+.an-workbench-ui #analysis-containers .analysis-container-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  width: 100%;
+}
+
+.an-workbench-ui #analysis-containers .analysis-container-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 0.8125rem;
+  font-weight: 650;
+  line-height: 1.25;
+  text-align: left;
+}
+
+.an-workbench-ui #analysis-containers .analysis-container-icon {
+  flex-shrink: 0;
+  margin-right: 0 !important;
+  font-size: 1rem;
+  opacity: 0.85;
+}
+
+.an-workbench-ui #analysis-containers .analysis-container-check {
+  flex-shrink: 0;
+  color: var(--an-accent);
+  font-size: 1rem;
+}
+
+/* ─── Main content area ─── */
+.an-workbench-ui .an-main {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--an-bg);
+  overflow: hidden;
+}
+
+.an-workbench-ui .an-main > .sessions-main {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.an-workbench-ui .sessions-main > .card.wp-card {
+  flex: 1 1 auto;
+  min-height: 0;
+  margin: 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.an-workbench-ui .sessions-main > .card.wp-card > .card-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: var(--an-pad);
+  padding: 1rem 1.1rem !important;
+  border-radius: var(--an-radius);
+  border: 1px solid var(--an-border);
+  background: var(--an-surface);
+  box-shadow: var(--an-shadow);
+}
+
+/* Дублирующие заголовки — в топбаре уже есть раздел */
+@media (min-width: 768px) {
+  body.eavc-page-analysis .an-workbench-ui .sessions-main .wp-page-header {
+    display: none;
+  }
+
+  body.eavc-page-analysis .an-workbench-ui .sessions-main > .card > .card-body > .d-flex:first-child {
+    display: none !important;
+  }
+}
+
+/* Calls workspace — flex внутри модуля позывных */
+.an-workbench-ui .analysis-workspace {
+  min-height: 0;
+}
+
+.an-workbench-ui .sessions-main.rg2-page {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.an-workbench-ui [data-container-body="graph"] .rg2,
+.an-workbench-ui [data-container-body="graph"] #rg-dashboard {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.an-workbench-ui [data-container-body="graph"] .rg2__workspace {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.an-workbench-ui .sessions-main.k2-page {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.an-workbench-ui [data-container-body="keys"] .k2 {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.an-workbench-ui .sessions-main.bs2-page {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.an-workbench-ui [data-container-body="blanks-search"] .bs2 {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* Сетка / таблицы внутри модулей */
+.an-workbench-ui .table {
+  --bs-table-bg: transparent;
+}
+
+.an-workbench-ui .btn-outline-secondary {
+  border-color: var(--an-border);
+}
+
+.an-workbench-ui .btn-outline-secondary:hover,
+.an-workbench-ui .analysis-period-group .btn.active,
+.an-workbench-ui .analysis-period-group .btn:active {
+  background: var(--an-accent-soft);
+  border-color: color-mix(in srgb, var(--an-accent) 30%, var(--an-border));
+  color: var(--an-accent);
+}
+
+/* Mobile hero скрыт на desktop workbench */
+@media (min-width: 768px) {
+  .an-workbench-ui .an-mobile-hero,
+  .an-workbench-ui .an-mobile-panel-head {
+    display: none !important;
+  }
+}
+
+@media (max-width: 991.98px) {
+  .an-workbench-ui {
+    --an-sidebar-w: min(280px, 42vw);
+  }
+}
+
+/* ─── Общий анализ радиосети (net-page) ─── */
+.an-workbench-ui .sessions-main.net-page {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+}
+
+.an-workbench-ui .sessions-main.net-page > .net-page__card {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  margin: var(--an-pad) !important;
+  border: 1px solid var(--an-border) !important;
+  border-radius: var(--an-radius) !important;
+  background: var(--an-surface) !important;
+  box-shadow: var(--an-shadow) !important;
+}
+
+.an-workbench-ui .sessions-main.net-page > .net-page__card > .net-page__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.an-workbench-ui .net-page__toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  flex-shrink: 0;
+  padding: 1rem 1.1rem 0.85rem;
+  border-bottom: 1px solid var(--an-border);
+  background: var(--an-surface);
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--an-border) 65%, transparent);
+}
+
+.an-workbench-ui .net-page__content {
+  padding: 0.85rem 1.1rem 1.25rem;
+}
+
+.an-workbench-ui .net-page .net-viz-section {
+  flex-shrink: 0;
+}
+
+.an-workbench-ui .net-page .net-viz-band {
+  display: block;
+  flex-shrink: 0;
+}
+
+.an-workbench-ui .net-page .net-viz-scroll {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  overflow-y: visible;
+  overscroll-behavior-x: contain;
+  min-height: 280px;
+  padding: 0.5rem 0.75rem 1rem;
+}
+
+.an-workbench-ui .net-page .net-viz-card {
+  flex: 0 0 auto;
+  width: 152px;
+}
+
+.an-workbench-ui .net-page .net-viz-card__bar {
+  min-height: 168px;
+}
+
+.an-workbench-ui .net-page .net-viz-card__fill-up,
+.an-workbench-ui .net-page .net-viz-card__fill-cur,
+.an-workbench-ui .net-page .net-viz-card__fill-drop,
+.an-workbench-ui .net-page .net-viz-card__fill-same {
+  left: 23px;
+  right: 0;
+  width: auto;
+}
+
+@media (min-width: 768px) {
+  body.eavc-page-analysis .an-workbench-ui .sessions-main.net-page > .net-page__card > .net-page__body > .d-flex:first-child {
+    display: none !important;
+  }
+}
+
+/* Общий анализ радиосети: прокрутка внутри card-body (таблица + диаграммы) */
+body.eavc-page-analysis .md3-analysis-group.an-workbench-ui[data-an-container="network"] .an-main {
+  overflow: hidden !important;
+  min-height: 0;
+}
+
+body.eavc-page-analysis .md3-analysis-group.an-workbench-ui[data-an-container="network"] .sessions-main,
+body.eavc-page-analysis .md3-analysis-group.an-workbench-ui[data-an-container="network"] .sessions-main > .card.wp-card,
+body.eavc-page-analysis .md3-analysis-group.an-workbench-ui[data-an-container="network"] .sessions-main.net-page,
+body.eavc-page-analysis .md3-analysis-group.an-workbench-ui[data-an-container="network"] .sessions-main.net-page > .net-page__card {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+body.eavc-page-analysis .md3-analysis-group.an-workbench-ui[data-an-container="network"] .sessions-main > .card.wp-card > .card-body,
+body.eavc-page-analysis .md3-analysis-group.an-workbench-ui[data-an-container="network"] .sessions-main.net-page > .net-page__card > .net-page__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+body.eavc-page-analysis .md3-analysis-group.an-workbench-ui[data-an-container="network"] .net-page__toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 6;
+}
+
+/* Стили диаграмм — и для legacy-разметки без .net-page */
+.an-workbench-ui .net-viz-section {
+  flex-shrink: 0;
+}
+
+.an-workbench-ui .net-viz-band {
+  display: block;
+  flex-shrink: 0;
+}
+
+.an-workbench-ui .net-viz-scroll {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  overflow-y: visible;
+  overscroll-behavior-x: contain;
+  min-height: 280px;
+  padding: 0.5rem 0.75rem 1rem;
+}
+
+.an-workbench-ui .net-viz-card {
+  flex: 0 0 auto;
+  width: 152px;
+}
+
+.an-workbench-ui .net-viz-card__bar {
+  min-height: 168px;
+}

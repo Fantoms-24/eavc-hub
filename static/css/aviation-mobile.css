@@ -1,0 +1,144 @@
+/**
+ * Авиация — mobile (≤767.98px)
+ */
+
+@media (max-width: 767.98px) {
+  .md3-aviation.av-workbench-ui.av-mobile-ui {
+    --av-dock-h: 58px;
+    padding-bottom: calc(var(--av-dock-h) + env(safe-area-inset-bottom, 0px) + 0.35rem);
+  }
+
+  body.eavc-page-aviation main.eavc-content {
+    padding: 0 !important;
+  }
+
+  .av-workbench-ui.av-mobile-ui .av-layout {
+    flex-direction: column;
+  }
+
+  .av-workbench-ui.av-mobile-ui .av-sidebar,
+  .av-workbench-ui.av-mobile-ui .av-main {
+    width: 100%;
+    max-width: none;
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  .av-workbench-ui.av-mobile-ui .av-mobile-section {
+    display: none !important;
+  }
+
+  .av-workbench-ui.av-mobile-ui[data-av-section="freq"] .av-mobile-section--freq {
+    display: flex !important;
+  }
+
+  .av-workbench-ui.av-mobile-ui[data-av-section="work"] .av-mobile-section--work {
+    display: flex !important;
+  }
+
+  .av-workbench-ui.av-mobile-ui[data-av-section="more"] .av-mobile-section--work {
+    display: flex !important;
+  }
+
+  .av-workbench-ui.av-mobile-ui[data-av-section="more"] .av-panel[data-av-panel="blank"] {
+    display: none !important;
+  }
+
+  .av-workbench-ui.av-mobile-ui[data-av-section="more"] .av-panel[data-av-panel="callsigns"],
+  .av-workbench-ui.av-mobile-ui[data-av-section="more"] .av-panel[data-av-panel="stats"] {
+    display: flex !important;
+    flex: 0 0 auto;
+    min-height: auto;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .av-workbench-ui.av-mobile-ui[data-av-section="more"] .av-main__body {
+    overflow-y: auto;
+    gap: 0.75rem;
+  }
+
+  .av-workbench-ui.av-mobile-ui[data-av-section="freq"] .av-main {
+    display: none !important;
+  }
+
+  .av-workbench-ui.av-mobile-ui .av-main__back {
+    display: inline-flex;
+  }
+
+  .av-workbench-ui.av-mobile-ui .av-main__tabs {
+    flex: 1;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .av-workbench-ui.av-mobile-ui .av-main__tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .av-mobile-dock {
+    display: none;
+    position: fixed;
+    left: max(10px, env(safe-area-inset-left, 0px));
+    right: max(10px, env(safe-area-inset-right, 0px));
+    bottom: max(8px, env(safe-area-inset-bottom, 0px));
+    z-index: 1045;
+    padding: 5px;
+    gap: 4px;
+    border-radius: 20px;
+    background: color-mix(in srgb, var(--eavc-card, #fff) 94%, transparent);
+    border: 1px solid var(--eavc-border);
+    backdrop-filter: blur(14px);
+    box-shadow: 0 8px 32px rgba(15, 23, 42, 0.14);
+    --av-dock-index: 0;
+    --av-dock-count: 3;
+  }
+
+  .md3-aviation.av-mobile-ui .av-mobile-dock {
+    display: flex;
+    align-items: stretch;
+  }
+
+  .av-mobile-dock__pill {
+    position: absolute;
+    top: 5px;
+    bottom: 5px;
+    left: 5px;
+    width: calc((100% - 10px) / var(--av-dock-count));
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--eavc-accent), var(--eavc-accent-dim, #2f5ad4));
+    box-shadow: 0 4px 14px color-mix(in srgb, var(--eavc-accent) 40%, transparent);
+    transform: translateX(calc(var(--av-dock-index, 0) * 100%));
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    pointer-events: none;
+  }
+
+  .av-mobile-dock__btn {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    min-height: 46px;
+    border: none;
+    background: transparent;
+    color: var(--eavc-text-muted);
+    font-size: 0.625rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.15rem;
+  }
+
+  .av-mobile-dock__btn i {
+    font-size: 1.1rem;
+  }
+
+  .av-mobile-dock__btn.active,
+  .av-mobile-dock__btn[aria-selected="true"] {
+    color: #fff;
+  }
+}

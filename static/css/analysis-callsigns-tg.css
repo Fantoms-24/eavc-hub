@@ -1,0 +1,675 @@
+/**
+ * Анализ позывных — минималистичный layout (v2)
+ */
+.an-workbench-ui .sessions-main.an-callsigns-tg {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+}
+
+.an-callsigns-tg {
+  --an2-accent: var(--wp-brand, #2563eb);
+  --an2-accent-soft: rgba(var(--wp-brand-rgb, 37, 99, 235), 0.1);
+  --an2-bg: var(--eavc-card, #fff);
+  --an2-surface: var(--eavc-card-2, #f6f8fc);
+  --an2-border: var(--eavc-border, rgba(15, 23, 42, 0.08));
+  --an2-text: var(--eavc-text, #0f172a);
+  --an2-muted: var(--eavc-text-muted, #64748b);
+  --an2-nav-w: 272px;
+  --an2-drawer-w: min(360px, 92vw);
+  --an2-radius: 12px;
+  font-family: "Roboto Flex", system-ui, sans-serif;
+  color: var(--an2-text);
+}
+
+html[data-wp-theme="dark"] .an-callsigns-tg {
+  --an2-bg: var(--eavc-card, #141c2a);
+  --an2-surface: var(--eavc-card-2, #1a2436);
+  --an2-border: rgba(148, 163, 184, 0.12);
+  --an2-text: #e8eef5;
+  --an2-muted: rgba(203, 213, 225, 0.65);
+  --an2-accent-soft: rgba(147, 197, 253, 0.12);
+}
+
+.an-callsigns-tg .an2 {
+  flex: 1 1 auto;
+  min-height: min(70vh, 680px);
+  display: flex;
+  flex-direction: column;
+  background: var(--an2-bg);
+  border: 1px solid var(--an2-border);
+  border-radius: var(--an2-radius);
+  overflow: hidden;
+}
+
+/* ─── Верхняя строка: период + экспорт ─── */
+.an-callsigns-tg .an2__bar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--an2-border);
+  background: var(--an2-surface);
+}
+
+.an-callsigns-tg .an2__scope {
+  flex: 1 1 12rem;
+  min-width: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--an2-text);
+}
+
+.an-callsigns-tg .an2__period {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.an-callsigns-tg .an2__period-seg {
+  display: inline-flex;
+  padding: 2px;
+  border-radius: 999px;
+  background: var(--an2-bg);
+  border: 1px solid var(--an2-border);
+}
+
+.an-callsigns-tg .an2__period-seg .btn {
+  border: 0;
+  border-radius: 999px;
+  padding: 0.2rem 0.65rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--an2-muted);
+  background: transparent;
+  box-shadow: none;
+}
+
+.an-callsigns-tg .an2__period-seg .btn.active {
+  background: var(--an2-accent);
+  color: #fff;
+}
+
+.an-callsigns-tg .an2__period-more summary {
+  list-style: none;
+  cursor: pointer;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--an2-muted);
+  padding: 0.25rem 0.5rem;
+  border-radius: 8px;
+}
+
+.an-callsigns-tg .an2__period-more summary::-webkit-details-marker {
+  display: none;
+}
+
+.an-callsigns-tg .an2__period-more[open] summary {
+  color: var(--an2-accent);
+}
+
+.an-callsigns-tg .an2__dates {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0 0;
+}
+
+.an-callsigns-tg .an2__dates input[type="date"] {
+  width: 8.5rem;
+  font-size: 0.8125rem;
+}
+
+.an-callsigns-tg .an2__icon-btn {
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1px solid var(--an2-border);
+  background: var(--an2-bg);
+  color: var(--an2-muted);
+}
+
+.an-callsigns-tg .an2__icon-btn:hover {
+  color: var(--an2-accent);
+  border-color: var(--an2-accent);
+}
+
+/* ─── Тело: навигация + контент ─── */
+.an-callsigns-tg .an2__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  position: relative;
+}
+
+.an-callsigns-tg .an2__nav {
+  flex: 0 0 var(--an2-nav-w);
+  width: var(--an2-nav-w);
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--an2-border);
+  background: var(--an2-bg);
+}
+
+.an-callsigns-tg .an2__search {
+  flex-shrink: 0;
+  margin: 0.5rem 0.6rem 0.35rem;
+  padding: 0.4rem 0.65rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-radius: 999px;
+  background: var(--an2-surface);
+  border: 1px solid var(--an2-border);
+}
+
+.an-callsigns-tg .an2__search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  font-size: 0.875rem;
+  outline: none;
+}
+
+.an-callsigns-tg .an2__search i {
+  color: var(--an2-muted);
+  font-size: 0.9rem;
+}
+
+.an-callsigns-tg .an2__tree {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 0.35rem 0.5rem;
+}
+
+.an-callsigns-tg .an2__nav-foot {
+  flex-shrink: 0;
+  padding: 0.4rem 0.6rem 0.5rem;
+  border-top: 1px solid var(--an2-border);
+}
+
+.an-callsigns-tg .an2__nav-foot .btn-link {
+  font-size: 0.8125rem;
+  padding: 0;
+}
+
+.an-callsigns-tg .an2__nav-foot .btn-link.active {
+  color: var(--an2-accent);
+  font-weight: 600;
+}
+
+/* Дерево подразделений */
+.an-callsigns-tg .an2-unit {
+  margin-bottom: 0.15rem;
+}
+
+.an-callsigns-tg .an2-unit__head {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  width: 100%;
+  padding: 0.45rem 0.5rem;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  text-align: left;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--an2-text);
+  cursor: pointer;
+}
+
+.an-callsigns-tg .an2-unit__head:hover {
+  background: var(--an2-surface);
+}
+
+.an-callsigns-tg .an2-unit--open .an2-unit__head,
+.an-callsigns-tg .an2-unit__head--active {
+  background: transparent;
+  color: var(--an2-accent);
+}
+
+.an-callsigns-tg .an2-unit__chev {
+  font-size: 0.7rem;
+  color: var(--an2-muted);
+  transition: transform 0.15s ease;
+}
+
+.an-callsigns-tg .an2-unit--open .an2-unit__chev {
+  transform: rotate(90deg);
+}
+
+.an-callsigns-tg .an2-unit__pairs {
+  display: none;
+  padding: 0 0 0.25rem 0.65rem;
+}
+
+.an-callsigns-tg .an2-unit--open .an2-unit__pairs {
+  display: block;
+}
+
+.an-callsigns-tg .an2-pair {
+  display: block;
+  width: 100%;
+  padding: 0.4rem 0.55rem;
+  margin: 0.1rem 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  text-align: left;
+  font-family: ui-monospace, monospace;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--an2-muted);
+  cursor: pointer;
+}
+
+.an-callsigns-tg .an2-pair:hover {
+  background: var(--an2-surface);
+  color: var(--an2-text);
+}
+
+.an-callsigns-tg .an2-pair--active {
+  background: transparent;
+  color: var(--an2-accent);
+  box-shadow: none;
+}
+
+.an-callsigns-tg .an2-pair--unit-wide {
+  font-family: inherit;
+  font-weight: 500;
+  font-size: 0.8125rem;
+}
+
+/* ─── Основная колонка ─── */
+.an-callsigns-tg .an2__main {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--an2-surface);
+}
+
+.an-callsigns-tg .an2__main-top {
+  flex-shrink: 0;
+  padding: 0.5rem 0.75rem 0;
+  border-bottom: 1px solid var(--an2-border);
+  background: var(--an2-bg);
+}
+
+.an-callsigns-tg .an2__seg {
+  display: inline-flex;
+  gap: 0.15rem;
+  margin-bottom: 0.45rem;
+}
+
+.an-callsigns-tg .an2__seg-btn {
+  border: 0;
+  background: transparent;
+  padding: 0.35rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--an2-muted);
+  cursor: pointer;
+}
+
+.an-callsigns-tg .an2__seg-btn.active {
+  background: var(--an2-accent-soft);
+  color: var(--an2-accent);
+}
+
+.an-callsigns-tg .an2__filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.5rem;
+  padding-bottom: 0.45rem;
+}
+
+.an-callsigns-tg .an2__filters .an2__search {
+  flex: 1 1 10rem;
+  min-width: 8rem;
+  margin: 0;
+}
+
+.an-callsigns-tg .an2__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--an2-border);
+  background: var(--an2-bg);
+  font-size: 0.75rem;
+  color: var(--an2-muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+.an-callsigns-tg .an2__chip:has(input:checked) {
+  border-color: var(--an2-accent);
+  background: var(--an2-accent-soft);
+  color: var(--an2-accent);
+}
+
+.an-callsigns-tg .an2__chip input {
+  margin: 0;
+  width: 0.85rem;
+  height: 0.85rem;
+}
+
+.an-callsigns-tg .an2__filters select {
+  max-width: 7.5rem;
+  font-size: 0.8125rem;
+  border-radius: 8px;
+}
+
+.an-callsigns-tg .an2__list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.an-callsigns-tg .an2__list-panel[hidden] {
+  display: none !important;
+}
+
+.an-callsigns-tg .an2__status {
+  flex-shrink: 0;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.75rem;
+  color: var(--an2-muted);
+  border-top: 1px solid var(--an2-border);
+  background: var(--an2-bg);
+  min-height: 1.5rem;
+}
+
+/* Строки списка */
+.an-callsigns-tg .an2-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border: 0;
+  border-bottom: 1px solid var(--an2-border);
+  background: var(--an2-bg);
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+
+.an-callsigns-tg .an2-row:hover {
+  background: var(--an2-surface);
+}
+
+.an-callsigns-tg .an2-row--active {
+  background: transparent;
+  box-shadow: none;
+}
+
+.an-callsigns-tg .an2-row--active .an2-row__title {
+  color: var(--an2-accent);
+}
+
+.an-callsigns-tg .an2-row__ava {
+  flex-shrink: 0;
+  width: 2.35rem;
+  height: 2.35rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #fff;
+  background: hsl(var(--an2-hue, 220), 48%, 46%);
+}
+
+.an-callsigns-tg .an2-row__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.an-callsigns-tg .an2-row__title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.an-callsigns-tg .an2-row__sub {
+  font-size: 0.75rem;
+  color: var(--an2-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 0.1rem;
+}
+
+.an-callsigns-tg .an2-row__side {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.2rem;
+}
+
+.an-callsigns-tg .an2-row__side .btn {
+  font-size: 0.6875rem;
+  padding: 0.1rem 0.35rem;
+  line-height: 1.2;
+}
+
+.an-callsigns-tg .an2-row__bar {
+  height: 3px;
+  width: 3.5rem;
+  border-radius: 2px;
+  background: var(--an2-accent);
+  opacity: 0.75;
+}
+
+.an-callsigns-tg .an2-empty {
+  padding: 2.5rem 1.25rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--an2-muted);
+  line-height: 1.45;
+}
+
+.an-callsigns-tg .an2-empty strong {
+  display: block;
+  color: var(--an2-text);
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+/* ─── Drawer карточки ─── */
+.an-callsigns-tg .an2__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.25);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 4;
+}
+
+.an-callsigns-tg.an-cs-drawer-open .an2__backdrop {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.an-callsigns-tg .an2__drawer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: var(--an2-drawer-w);
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--an2-bg);
+  border-left: 1px solid var(--an2-border);
+  box-shadow: -8px 0 24px rgba(15, 23, 42, 0.12);
+  transform: translateX(100%);
+  transition: transform 0.22s cubic-bezier(0.2, 0, 0, 1);
+  z-index: 5;
+}
+
+.an-callsigns-tg.an-cs-drawer-open .an2__drawer {
+  transform: translateX(0);
+}
+
+.an-callsigns-tg .an2__drawer-head {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.65rem;
+  border-bottom: 1px solid var(--an2-border);
+}
+
+.an-callsigns-tg .an2__drawer-title {
+  flex: 1;
+  font-weight: 700;
+  font-size: 0.9375rem;
+}
+
+.an-callsigns-tg .an2__drawer-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  padding: 0.75rem;
+}
+
+.an-callsigns-tg .an2__duty-block {
+  margin-bottom: 1rem;
+  padding: 0.65rem;
+  border-radius: var(--an2-radius);
+  background: var(--an2-surface);
+  border: 1px solid var(--an2-border);
+}
+
+.an-callsigns-tg .an2__duty-label {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--an2-muted);
+  margin-bottom: 0.35rem;
+}
+
+.an-callsigns-tg .an2__profile-hero {
+  text-align: center;
+  padding: 0.5rem 0 0.75rem;
+}
+
+.an-callsigns-tg .an2__profile-ava {
+  width: 3.5rem;
+  height: 3.5rem;
+  margin: 0 auto 0.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: #fff;
+  background: hsl(var(--an2-hue, 220), 48%, 46%);
+}
+
+.an-callsigns-tg .an2__profile-name {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.an-callsigns-tg .an2__info-card {
+  border-radius: var(--an2-radius);
+  border: 1px solid var(--an2-border);
+  overflow: hidden;
+  background: var(--an2-surface);
+  margin-bottom: 0.75rem;
+}
+
+.an-callsigns-tg .an2__info-row {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.55rem 0.65rem;
+  border-bottom: 1px solid var(--an2-border);
+  font-size: 0.8125rem;
+}
+
+.an-callsigns-tg .an2__info-row:last-child {
+  border-bottom: 0;
+}
+
+.an-callsigns-tg .an2__info-row i {
+  color: var(--an2-accent);
+  margin-top: 0.1rem;
+}
+
+.an-callsigns-tg .an2__drawer-actions {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.an-callsigns-tg .assignment-badge.duty {
+  font-size: 0.65rem;
+  padding: 0.05rem 0.3rem;
+  border-radius: 4px;
+  background: var(--an2-accent-soft);
+  color: var(--an2-accent);
+}
+
+/* Скрытые legacy-контейнеры (если JS ещё пишет в них) */
+.an-callsigns-tg #units-side,
+.an-callsigns-tg #pairs-side {
+  display: none !important;
+}
+
+/* Мобильная навигация */
+@media (max-width: 991.98px) {
+  .an-callsigns-tg .an2__body.an2--panel-main .an2__nav,
+  .an-callsigns-tg .an2__body.an2--panel-drawer .an2__main {
+    display: none;
+  }
+
+  .an-callsigns-tg .an2__nav {
+    flex: 1 1 auto;
+    width: 100%;
+    border-right: 0;
+  }
+
+  .an-callsigns-tg .an2__main {
+    flex: 1 1 auto;
+    width: 100%;
+  }
+
+  .an-callsigns-tg .an2__drawer {
+    width: 100%;
+  }
+}

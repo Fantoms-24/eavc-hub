@@ -1,0 +1,500 @@
+/**
+ * Intercepts Mobile App — полный редизайн страницы «Перехваты» для телефонов (≤767.98px).
+ * Не затрагивает планшет/десктоп. Загружать после intercepts-messenger.css и intercepts-modern.css.
+ */
+
+@media (max-width: 767.98px) {
+  body.eavc-page-intercepts.ix-mobile-intercepts {
+    --ix-m-bg: var(--eavc-bg, #eef2f8);
+    --ix-m-surface: var(--eavc-card, #fff);
+    --ix-m-border: var(--eavc-border, rgba(15, 23, 42, 0.1));
+    --ix-m-accent: var(--eavc-accent, #2563eb);
+    --ix-m-accent-soft: rgba(37, 99, 235, 0.1);
+    --ix-m-topbar: var(--eavc-topbar-h, 52px);
+    --ix-m-dock: calc(56px + env(safe-area-inset-bottom, 0px));
+    --ix-m-radius: 16px;
+    --ix-m-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  /* ─── Shell: убрать лишние обёртки ─── */
+  body.eavc-page-intercepts.ix-mobile-intercepts .eavc-content,
+  body.eavc-page-intercepts.ix-mobile-intercepts main.container-fluid {
+    padding: 0 !important;
+    overflow: hidden;
+  }
+
+  body.eavc-page-intercepts.ix-mobile-intercepts .md3-intercepts.ix-messenger-ui.ix-mobile-ui {
+    height: 100%;
+    max-height: none;
+    background: var(--ix-m-bg);
+  }
+
+  body.eavc-page-intercepts.ix-mobile-intercepts .md3-intercepts.ix-messenger-ui.ix-mobile-ui .sessions-main,
+  body.eavc-page-intercepts.ix-mobile-intercepts .md3-intercepts.ix-messenger-ui.ix-mobile-ui .sessions-main > .card,
+  body.eavc-page-intercepts.ix-mobile-intercepts .md3-intercepts.ix-messenger-ui.ix-mobile-ui .sessions-main > .card > .card-body {
+    height: 100%;
+    min-height: 0;
+    padding: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  body.eavc-page-intercepts.ix-mobile-intercepts .md3-intercepts.ix-messenger-ui.ix-mobile-ui .md3-intercepts-workspace,
+  body.eavc-page-intercepts.ix-mobile-intercepts .md3-intercepts.ix-messenger-ui.ix-mobile-ui .ix-mobile-workspace {
+    margin: 0 !important;
+    height: 100%;
+    min-height: 0;
+  }
+
+  body.eavc-page-intercepts.ix-mobile-intercepts .md3-intercepts.ix-messenger-ui.ix-mobile-ui .tg-layout {
+    height: 100%;
+    max-height: none !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: var(--ix-m-surface) !important;
+  }
+
+  body.eavc-page-intercepts.ix-mobile-intercepts .md3-intercepts.ix-messenger-ui.ix-mobile-ui .tg-sidebar,
+  body.eavc-page-intercepts.ix-mobile-intercepts .md3-intercepts.ix-messenger-ui.ix-mobile-ui .tg-chat {
+    height: 100%;
+    min-height: 0;
+    background: var(--ix-m-surface);
+  }
+
+  /* ─── Сегменты Чаты / Позывные (вместо ☰) ─── */
+  body.eavc-page-intercepts.ix-mobile-intercepts .ix-mobile-segments {
+    display: flex;
+    gap: 4px;
+    padding: 0.5rem 0.75rem 0.35rem;
+    background: var(--ix-m-surface);
+  }
+
+  body.eavc-page-intercepts.ix-mobile-intercepts .ix-mobile-segments__btn {
+    flex: 1 1 0;
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    border: 1px solid var(--ix-m-border);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--ix-m-surface) 92%, var(--ix-m-accent) 8%);
+    color: var(--eavc-text-muted, #64748b);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    transition:
+      background 0.2s var(--ix-m-ease),
+      color 0.2s var(--ix-m-ease),
+      border-color 0.2s var(--ix-m-ease),
+      box-shadow 0.2s var(--ix-m-ease);
+  }
+
+  body.eavc-page-intercepts.ix-mobile-intercepts .ix-mobile-segments__btn i {
+    font-size: 1rem;
+    opacity: 0.85;
+  }
+
+  body.eavc-page-intercepts.ix-mobile-intercepts .ix-mobile-segments__btn.active,
+  body.eavc-page-intercepts.ix-mobile-intercepts .ix-mobile-segments__btn[aria-selected="true"] {
+    color: #fff;
+    border-color: transparent;
+    background: linear-gradient(145deg, var(--ix-m-accent), color-mix(in srgb, var(--ix-m-accent) 78%, #1d4ed8));
+    box-shadow: 0 4px 14px color-mix(in srgb, var(--ix-m-accent) 32%, transparent);
+  }
+
+  body.eavc-page-intercepts.ix-mobile-intercepts .tg-sidebar__menu-wrap,
+  body.eavc-page-intercepts.ix-mobile-intercepts .tg-sidebar__head-top .tg-sidebar__title {
+    display: none !important;
+  }
+
+  body.eavc-page-intercepts.ix-mobile-intercepts .tg-sidebar__head-top {
+    min-height: 0;
+    padding: 0 0.75rem 0.35rem;
+  }
+
+  body.eavc-page-intercepts.ix-mobile-intercepts .tg-sidebar__head {
+    padding: 0;
+    border-bottom: 1px solid var(--ix-m-border);
+    background: var(--ix-m-surface);
+  }
+
+  body.eavc-page-intercepts.ix-mobile-intercepts .tg-sidebar__head--callsigns .ix-mobile-segments {
+    padding-bottom: 0.5rem;
+  }
+
+  body.eavc-page-intercepts.ix-mobile-intercepts .tg-sidebar__head-row {
+    padding: 0 0.75rem 0.5rem;
+    gap: 0.45rem;
+  }
+
+  body.eavc-page-intercepts.ix-mobile-intercepts .tg-sidebar__head-row .md3-intercepts-shift-select {
+    min-height: 40px;
+    border-radius: 12px;
+    font-size: 0.8125rem;
+    border-color: var(--ix-m-border);
+    background: color-mix(in srgb, var(--ix-m-surface) 90%, var(--ix-m-accent) 10%);
+  }
+
+  body.eavc-page-intercepts.ix-mobile-intercepts .tg-sidebar__head-row #start-new-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    border-color: var(--ix-m-border);
+  }
+
+  /* ─── Поиск ─── */
+  body.eavc-page-intercepts.ix-mobile-intercepts .tg-sidebar__search {
+    padding: 0.35rem 0.75rem 0.5rem;
+    border-bottom: none;
+    background: var(--ix-m-surface);
+  }
+
+  body.eavc-page-intercepts.ix-mobile-intercepts .tg-search-field {
+    min-height: 42px;
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--ix-m-bg) 65%, var(--ix-m-surface));
+    border: 1px solid var(--ix-m-border);
+  }
+
+  body.eavc-page-intercepts.ix-mobile-intercepts .tg-search-field:focus-within {
+    border-color: color-mix(in srgb, var(--ix-m-accent) 45%, var(--ix-m-border));
+    box-shadow: 0 0 0 3px var(--ix-m-accent-soft);
+  }
+
+  /* ─── Список чатов ─── */
+  body.eavc-page-intercepts.ix-mobile-intercepts .tg-chat-list,
+  body.eavc-page-intercepts.ix-mobile-intercepts .groups-list-resizable {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  body.eavc-page-intercepts.ix-mobile-intercepts .groups-list-scroll,
+  body.eavc-page-intercepts.ix-mobile-intercepts .tg-chat-list__scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none !important;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    content-visibility: auto;
+    contain-intrinsic-size: auto 320px;
+  }
+
+  body.eavc-page-intercepts.ix-mobile-intercepts .groups-list-resizer {
+    display: none !important;
+  }
+
+  body.eavc-page-intercepts.ix-mobile-intercepts #groups-list .tg-chat-item__btn {
+    min-height: 58px;
+    border-radius: 14px;
+    margin: 0 0.75rem 0.35rem;
+    padding-inline: 0.75rem;
+  }
+
+  body.eavc-page-intercepts.ix-mobile-intercepts #groups-list .unit-header {
+    padding-inline: 0.75rem !important;
+    min-height: 2.25rem;
+  }
+
+  body.eavc-page-intercepts.ix-mobile-intercepts .tg-sidebar__foot {
+    flex-shrink: 0;
+    padding: 0.5rem 0.75rem calc(0.35rem + var(--ix-m-dock));
+    border-top: 1px solid var(--ix-m-border);
+    background: color-mix(in srgb, var(--ix-m-surface) 88%, transparent);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  body.eavc-page-intercepts.ix-mobile-intercepts .tg-sidebar__foot .wp-add-group-btn {
+    width: 100%;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    border-radius: 14px;
+    border: 1px dashed color-mix(in srgb, var(--ix-m-accent) 35%, var(--ix-m-border));
+    background: var(--ix-m-accent-soft);
+    color: var(--ix-m-accent);
+    font-weight: 600;
+    text-decoration: none !important;
+  }
+
+  /* ─── Empty state ─── */
+  body.eavc-page-intercepts.ix-mobile-intercepts .ix-mobile-empty-state,
+  body.eavc-page-intercepts.ix-mobile-intercepts .md3-groups-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 0.35rem;
+    min-height: min(42vh, 320px);
+    margin: 1.25rem 0.75rem;
+    padding: 1.5rem 1rem;
+    border-radius: var(--ix-m-radius);
+    border: 1px dashed color-mix(in srgb, var(--ix-m-accent) 28%, var(--ix-m-border));
+    background:
+      radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--ix-m-accent) 8%, transparent), transparent 55%),
+      color-mix(in srgb, var(--ix-m-surface) 96%, var(--ix-m-accent) 4%);
+  }
+
+  body.eavc-page-intercepts.ix-mobile-intercepts .ix-mobile-empty-state__icon {
+    width: 52px;
+    height: 52px;
+    display: grid;
+    place-items: center;
+    border-radius: 16px;
+    background: var(--ix-m-accent-soft);
+    color: var(--ix-m-accent);
+    font-size: 1.35rem;
+    margin-bottom: 0.35rem;
+  }
+
+  body.eavc-page-intercepts.ix-mobile-intercepts .ix-mobile-empty-state__title {
+    margin: 0;
+    font-size: 1.0625rem;
+    font-weight: 700;
+    color: var(--eavc-text, #0f172a);
+  }
+
+  body.eavc-page-intercepts.ix-mobile-intercepts .ix-mobile-empty-state__text {
+    margin: 0;
+    max-width: 26ch;
+    font-size: 0.875rem;
+    line-height: 1.45;
+    color: var(--eavc-text-muted, #64748b);
+  }
+
+  body.eavc-page-intercepts.ix-mobile-intercepts .tg-sidebar__head--callsigns .tg-sidebar__head-top {
+    display: none !important;
+  }
+
+  body.eavc-page-intercepts.ix-mobile-intercepts #intercepts-status {
+    display: none !important;
+  }
+
+  /* ─── Позывные (моб.) ─── */
+  body.eavc-page-intercepts.ix-mobile-intercepts .tg-callsigns-toolbar {
+    padding-top: 0.35rem;
+  }
+
+  body.eavc-page-intercepts.ix-mobile-intercepts .tg-callsigns-back {
+    display: none !important;
+  }
+
+  body.eavc-page-intercepts.ix-mobile-intercepts .tg-callsign-list-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    padding-bottom: var(--ix-m-dock);
+  }
+
+  /* ─── Экран бланка / чата ─── */
+  body.eavc-page-intercepts.ix-mobile-intercepts .md3-intercepts.ix-mobile-ui[data-ix-panel="blank"] .tg-chat,
+  body.eavc-page-intercepts.ix-mobile-intercepts .md3-intercepts.ix-mobile-ui[data-ix-panel="input"] .tg-chat {
+    padding-bottom: var(--ix-m-dock);
+  }
+
+  body.eavc-page-intercepts.ix-mobile-intercepts .tg-chat__header {
+    min-height: 52px;
+    padding: 0.35rem 0.65rem;
+    gap: 0.35rem;
+    border-bottom: 1px solid var(--ix-m-border);
+    background: color-mix(in srgb, var(--ix-m-surface) 90%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  body.eavc-page-intercepts.ix-mobile-intercepts .tg-chat__back {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    border: 1px solid var(--ix-m-border);
+    background: var(--ix-m-surface);
+  }
+
+  body.eavc-page-intercepts.ix-mobile-intercepts .tg-chat__peer {
+    min-width: 0;
+    flex: 1 1 auto;
+    text-align: left;
+    border-radius: 12px;
+    padding: 0.35rem 0.5rem;
+  }
+
+  body.eavc-page-intercepts.ix-mobile-intercepts .tg-chat__title {
+    font-size: 0.9375rem;
+    font-weight: 700;
+  }
+
+  body.eavc-page-intercepts.ix-mobile-intercepts .tg-chat__status {
+    font-size: 0.75rem;
+  }
+
+  body.eavc-page-intercepts.ix-mobile-intercepts #open-callsigns-modal-btn {
+    display: none !important;
+  }
+
+  body.eavc-page-intercepts.ix-mobile-intercepts .tg-chat__body {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 0.5rem 0.65rem 0.35rem;
+  }
+
+  body.eavc-page-intercepts.ix-mobile-intercepts #intercept-text-wrapper {
+    flex: 1 1 auto;
+    min-height: 0 !important;
+    border-radius: var(--ix-m-radius);
+    border: 1px solid var(--ix-m-border);
+    background: var(--ix-m-surface);
+    overflow: hidden;
+  }
+
+  body.eavc-page-intercepts.ix-mobile-intercepts #intercept-text {
+    min-height: 100% !important;
+    height: 100% !important;
+    resize: none !important;
+    font-size: 16px !important;
+    line-height: 1.45;
+    padding: 0.85rem !important;
+    border: none !important;
+    background: transparent !important;
+  }
+
+  body.eavc-page-intercepts.ix-mobile-intercepts #intercept-text-resizer {
+    display: none !important;
+  }
+
+  body.eavc-page-intercepts.ix-mobile-intercepts .tg-chat__service {
+    padding: 0.25rem 0.65rem;
+    font-size: 0.75rem;
+  }
+
+  body.eavc-page-intercepts.ix-mobile-intercepts .tg-composer {
+    flex-shrink: 0;
+    margin: 0 0.65rem 0.35rem;
+    padding: 0.75rem !important;
+    border-radius: var(--ix-m-radius);
+    border: 1px solid var(--ix-m-border);
+    background: var(--ix-m-surface);
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+  }
+
+  body.eavc-page-intercepts.ix-mobile-intercepts .md3-intercepts.ix-mobile-ui[data-ix-panel="blank"] .tg-composer {
+    display: none !important;
+  }
+
+  body.eavc-page-intercepts.ix-mobile-intercepts .md3-intercepts.ix-mobile-ui[data-ix-panel="input"] #intercept-input {
+    min-height: min(34vh, 240px) !important;
+    font-size: 16px !important;
+    border-radius: 12px;
+  }
+
+  body.eavc-page-intercepts.ix-mobile-intercepts .tg-composer__send {
+    width: 100%;
+    min-height: 44px;
+    border-radius: 12px;
+    margin-top: 0.5rem;
+  }
+
+  /* ─── Bottom dock ─── */
+  body.eavc-page-intercepts.ix-mobile-intercepts .ix-mobile-dock {
+    display: flex !important;
+    left: max(12px, env(safe-area-inset-left));
+    right: max(12px, env(safe-area-inset-right));
+    bottom: max(10px, env(safe-area-inset-bottom));
+    min-height: 54px;
+    padding: 4px;
+    border-radius: 20px;
+    background: color-mix(in srgb, var(--ix-m-surface) 92%, transparent);
+    border: 1px solid var(--ix-m-border);
+    backdrop-filter: blur(18px) saturate(1.35);
+    -webkit-backdrop-filter: blur(18px) saturate(1.35);
+    box-shadow:
+      0 10px 36px rgba(15, 23, 42, 0.14),
+      inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  }
+
+  body.eavc-page-intercepts.ix-mobile-intercepts .ix-mobile-dock__pill {
+    border-radius: 15px;
+    background: linear-gradient(145deg, var(--ix-m-accent), color-mix(in srgb, var(--ix-m-accent) 75%, #1d4ed8));
+    box-shadow: 0 4px 14px color-mix(in srgb, var(--ix-m-accent) 30%, transparent);
+  }
+
+  body.eavc-page-intercepts.ix-mobile-intercepts .ix-mobile-dock__btn {
+    min-height: 46px;
+    font-size: 0.58rem;
+    letter-spacing: 0.06em;
+  }
+
+  body.eavc-page-intercepts.ix-mobile-intercepts .ix-mobile-dock__btn.active,
+  body.eavc-page-intercepts.ix-mobile-intercepts .ix-mobile-dock__btn[aria-selected="true"] {
+    color: #fff;
+  }
+
+  /* Dock всегда виден — навигация между разделами */
+  body.eavc-page-intercepts.ix-mobile-intercepts .md3-intercepts.ix-mobile-ui[data-ix-panel="groups"] .ix-mobile-dock {
+    display: flex !important;
+  }
+
+  body.eavc-page-intercepts.ix-mobile-intercepts .md3-intercepts.ix-mobile-ui[data-ix-panel="groups"] .tg-sidebar__foot {
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  }
+
+  body.eavc-page-intercepts.ix-mobile-intercepts .md3-intercepts.ix-mobile-ui[data-ix-panel="groups"] .tg-callsign-list-scroll,
+  body.eavc-page-intercepts.ix-mobile-intercepts .md3-intercepts.ix-mobile-ui[data-ix-panel="groups"] .tg-callsigns-foot {
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  }
+
+  /* Panel enter animation */
+  body.eavc-page-intercepts.ix-mobile-intercepts .md3-intercepts.ix-mobile-ui .tg-sidebar,
+  body.eavc-page-intercepts.ix-mobile-intercepts .md3-intercepts.ix-mobile-ui .tg-chat {
+    animation: ix-m-panel-in 0.28s var(--ix-m-ease);
+  }
+
+  @keyframes ix-m-panel-in {
+    from {
+      opacity: 0;
+      transform: translateX(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+}
+
+/* Desktop / tablet: скрыть мобильные сегменты */
+@media (min-width: 768px) {
+  .ix-mobile-segments {
+    display: none !important;
+  }
+}
+
+@media (max-width: 767.98px) and (prefers-reduced-motion: reduce) {
+  body.eavc-page-intercepts.ix-mobile-intercepts .md3-intercepts.ix-mobile-ui .tg-sidebar,
+  body.eavc-page-intercepts.ix-mobile-intercepts .md3-intercepts.ix-mobile-ui .tg-chat,
+  body.eavc-page-intercepts.ix-mobile-intercepts .ix-mobile-dock__pill {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  @media (max-width: 767.98px) {
+    body.eavc-page-intercepts.ix-mobile-intercepts .ix-mobile-dock,
+    body.eavc-page-intercepts.ix-mobile-intercepts .tg-sidebar__foot,
+    body.eavc-page-intercepts.ix-mobile-intercepts .tg-chat__header {
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
+  }
+}

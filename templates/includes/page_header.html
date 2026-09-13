@@ -1,0 +1,14 @@
+{# Единая шапка раздела: задайте wp_page_title; опционально wp_page_lead, wp_page_icon (класс bi, напр. bi-graph-up). #}
+<div class="wp-page-header">
+  {% if wp_page_icon %}
+  <h1 class="wp-page-title d-flex align-items-center gap-2">
+    <i class="{{ wp_page_icon }} wp-page-title-icon" aria-hidden="true"></i>
+    <span>{{ wp_page_title }}</span>
+  </h1>
+  {% else %}
+  <h1 class="wp-page-title">{{ wp_page_title }}</h1>
+  {% endif %}
+  {% if wp_page_lead %}
+  <p class="wp-page-lead">{{ wp_page_lead }}</p>
+  {% endif %}
+</div>

@@ -1,0 +1,372 @@
+{% extends "base.html" %}
+{% block title %}Авиация{% endblock %}
+{% block container_class %}container-fluid px-0 py-0{% endblock %}
+{% block styles %}
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/aviation-workbench.css') }}?v=1" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/aviation-mobile.css') }}?v=1" />
+{% endblock %}
+
+{% block content %}
+<div class="md3-aviation av-workbench-ui aviation-layout wp-workbench wp-workbench--aviation"
+  data-av-section="freq" data-av-panel="blank">
+
+  <aside class="aviation-callsigns-sidebar" id="callsigns-sidebar" style="display: none;" aria-label="Все позывные">
+    <div class="aviation-callsigns-sidebar__inner">
+      <header class="aviation-callsigns-sidebar__head">
+        <h2 class="aviation-callsigns-sidebar__title"><i class="bi bi-person-badge"></i>Все позывные</h2>
+        <button type="button" id="close-callsigns-sidebar" class="btn btn-sm btn-outline-secondary" aria-label="Закрыть">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </header>
+      <input id="callsign-search" type="search" class="form-control form-control-sm mb-2"
+        placeholder="Поиск по позывному или коду…" autocomplete="off" />
+      <div class="list-group flex-grow-1 overflow-auto" id="all-callsigns-list"></div>
+    </div>
+  </aside>
+
+  <div class="aviation-main">
+    <div class="card wp-card border-0 av-shell-card">
+      <div class="card-body p-0 av-shell-body">
+        <div class="av-layout">
+
+          <aside class="av-sidebar av-mobile-section av-mobile-section--freq" aria-label="Частоты">
+            <section class="av-sidebar__block">
+              <div class="av-sidebar__head-row">
+                <h2 class="av-sidebar__title"><i class="bi bi-broadcast"></i>Частоты</h2>
+                <button type="button" id="add-frequency-btn" class="btn btn-outline-primary btn-sm"
+                  title="Добавить частоту" aria-label="Добавить частоту">
+                  <i class="bi bi-plus-lg"></i>
+                </button>
+              </div>
+              <label class="av-label" for="work-date">Рабочий день</label>
+              <input id="work-date" type="date" class="form-control form-control-sm mb-2"
+                title="День для бланков и Word" />
+              <p class="av-hint">Текст бланка и экспорт — для выбранной даты.</p>
+              <div class="av-freq-search position-relative mb-2">
+                <label class="visually-hidden" for="freq-search-input">Поиск частоты</label>
+                <input id="freq-search-input" type="search" class="form-control form-control-sm"
+                  placeholder="Поиск частоты…" autocomplete="off" spellcheck="false"
+                  title="Фильтр списка частот" />
+              </div>
+              <div class="list-group av-freq-list" id="frequencies-list"></div>
+            </section>
+          </aside>
+
+          <main class="av-main av-mobile-section av-mobile-section--work" aria-label="Рабочая область">
+            <header class="av-main__head">
+              <button type="button" class="av-main__back d-md-none" id="av-main-back" aria-label="Назад">
+                <i class="bi bi-chevron-left"></i>
+              </button>
+              <nav class="av-main__tabs" role="tablist" aria-label="Разделы авиации">
+                <button type="button" class="av-main__tab active" role="tab" data-av-tab="blank" aria-selected="true">
+                  <i class="bi bi-file-text"></i><span>Бланк</span>
+                </button>
+                <button type="button" class="av-main__tab" role="tab" data-av-tab="callsigns" aria-selected="false">
+                  <i class="bi bi-person-badge"></i><span>Позывные</span>
+                </button>
+                <button type="button" class="av-main__tab" role="tab" data-av-tab="stats" aria-selected="false">
+                  <i class="bi bi-table"></i><span>Сводка</span>
+                </button>
+              </nav>
+              <div class="av-main__actions">
+                <button type="button" id="callsigns-panel-btn" class="btn btn-outline-primary btn-sm"
+                  title="Все позывные" aria-label="Все позывные">
+                  <i class="bi bi-people"></i>
+                </button>
+                <button type="button" id="export-aviation-btn" class="btn btn-outline-primary btn-sm" disabled
+                  title="Экспорт Word" aria-label="Экспорт Word">
+                  <i class="bi bi-file-earmark-word"></i>
+                </button>
+              </div>
+            </header>
+
+            <div class="av-status-bar">
+              <span id="aviation-status" class="av-status" role="status" aria-live="polite"></span>
+            </div>
+
+            <div class="av-main__body">
+
+              <section class="av-panel av-panel--blank" data-av-panel="blank">
+                <div class="av-panel__toolbar">
+                  <div class="av-panel__toolbar-start">
+                    <span class="av-panel__subtitle" id="editor-subtitle">Выберите частоту слева</span>
+                    <select id="editor-aviation-type" class="form-select form-select-sm av-type-select"
+                      style="display: none;" title="Тип авиации">
+                      <option value="Армейская авиация">Армейская авиация</option>
+                      <option value="Тактическая авиация">Тактическая авиация</option>
+                      <option value="н/у">н/у</option>
+                      <option value="ЯК">ЯК</option>
+                      <option value="F-16">F-16</option>
+                    </select>
+                  </div>
+                  <div class="av-panel__toolbar-end">
+                    <button type="button" id="start-new-aviation-btn" class="btn btn-outline-secondary btn-sm" disabled>
+                      <i class="bi bi-plus-circle me-1"></i>Новые записи
+                    </button>
+                    <button type="button" id="manual-save-btn" class="btn btn-primary btn-sm" disabled>
+                      <i class="bi bi-save me-1"></i>Сохранить
+                    </button>
+                  </div>
+                </div>
+                <div class="av-editor-wrap">
+                  <textarea id="aviation-text" class="form-control av-editor" rows="16"
+                    placeholder="12.12&#10;-Привет. (1231)&#10;-Привет. (1241)" disabled
+                    spellcheck="true" lang="ru" autocomplete="off" autocapitalize="off"></textarea>
+                </div>
+                <footer class="av-panel__foot">
+                  <div class="av-save-status" id="save-status">
+                    <span id="save-indicator" class="save-indicator" aria-hidden="true"></span>
+                    <span id="save-text"></span>
+                  </div>
+                </footer>
+              </section>
+
+              <section class="av-panel av-panel--callsigns av-mobile-section av-mobile-section--more" data-av-panel="callsigns" hidden>
+                <div class="av-cs-form">
+                  <div class="row g-2 mb-2">
+                    <div class="col-7">
+                      <label class="av-label" for="cs-label">Позывной</label>
+                      <input id="cs-label" class="form-control form-control-sm" placeholder="Напр. Сова" />
+                    </div>
+                    <div class="col-5">
+                      <label class="av-label" for="cs-card-type">Тип</label>
+                      <select id="cs-card-type" class="form-select form-select-sm">
+                        <option value="НПУ">НПУ</option>
+                        <option value="Борт">Борт</option>
+                      </select>
+                    </div>
+                  </div>
+                  <button id="cs-add-btn" type="button" class="btn btn-outline-primary btn-sm w-100 mb-3" disabled>
+                    <i class="bi bi-plus-lg me-1"></i>Добавить позывной
+                  </button>
+                </div>
+                <div class="list-group av-cs-list flex-grow-1 overflow-auto" id="cs-list"></div>
+              </section>
+
+              <section class="av-panel av-panel--stats av-mobile-section av-mobile-section--more" data-av-panel="stats" hidden>
+                <div class="av-stats-toolbar">
+                  <div>
+                    <h2 class="av-panel__title mb-0"><i class="bi bi-table"></i>Сводка по частотам</h2>
+                    <p class="av-hint mb-0 mt-1" id="stats-subtitle"></p>
+                  </div>
+                  <div class="av-stats-filters">
+                    <div>
+                      <label class="av-label" for="filter-aviation-type">Тип</label>
+                      <select id="filter-aviation-type" class="form-select form-select-sm">
+                        <option value="">Все типы</option>
+                        <option value="Армейская авиация">Армейская авиация</option>
+                        <option value="Тактическая авиация">Тактическая авиация</option>
+                        <option value="н/у">н/у</option>
+                        <option value="ЯК">ЯК</option>
+                        <option value="F-16">F-16</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="av-label" for="filter-date">Дата</label>
+                      <input id="filter-date" type="date" class="form-control form-control-sm" />
+                    </div>
+                    <button id="apply-filters-btn" type="button" class="btn btn-primary btn-sm align-self-end">
+                      <i class="bi bi-search me-1"></i>Применить
+                    </button>
+                  </div>
+                </div>
+                <div class="av-table-wrap table-responsive">
+                  <table class="table table-hover table-sm align-middle mb-0 av-stats-table" id="stats-table">
+                    <thead>
+                      <tr>
+                        <th>Частота</th>
+                        <th>Тип</th>
+                        <th title="Количество временных блоков за выбранный день">Блоков (день)</th>
+                        <th>Позывных</th>
+                        <th title="Когда в последний раз был непустой бланк по частоте">Последняя запись</th>
+                        <th class="text-end">Действия</th>
+                      </tr>
+                    </thead>
+                    <tbody id="stats-table-body"></tbody>
+                  </table>
+                </div>
+              </section>
+
+            </div>
+          </main>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="av-mobile-dock" id="av-mobile-dock" role="tablist" aria-label="Разделы авиации" hidden>
+    <span class="av-mobile-dock__pill" aria-hidden="true"></span>
+    <button type="button" class="av-mobile-dock__btn active" role="tab" data-av-section="freq" aria-selected="true">
+      <i class="bi bi-broadcast" aria-hidden="true"></i><span>Частоты</span>
+    </button>
+    <button type="button" class="av-mobile-dock__btn" role="tab" data-av-section="work" aria-selected="false">
+      <i class="bi bi-file-text" aria-hidden="true"></i><span>Бланк</span>
+    </button>
+    <button type="button" class="av-mobile-dock__btn" role="tab" data-av-section="more" aria-selected="false">
+      <i class="bi bi-pie-chart" aria-hidden="true"></i><span>Ещё</span>
+    </button>
+  </nav>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/aviation.js') }}?v=4"></script>
+{% endblock %}
+
+{% block modals %}
+<div class="modal fade md3-callsign-modal md3-aviation-modal" id="callsignStatsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
+    <div class="modal-content md3-callsign-modal-content">
+      <div class="modal-header md3-callsign-modal-header border-0 pb-2">
+        <h5 class="modal-title d-flex align-items-center gap-2">
+          <i class="bi bi-bar-chart text-primary"></i>Статистика позывного
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3" id="callsign-stats-header"></div>
+        <div class="table-responsive">
+          <table class="table table-hover table-sm align-middle">
+            <thead>
+              <tr>
+                <th>Дата</th>
+                <th>Тип авиации</th>
+                <th>Частота</th>
+                <th>Выходов</th>
+                <th class="text-end">Действия</th>
+              </tr>
+            </thead>
+            <tbody id="callsign-stats-body"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer md3-callsign-modal-footer border-0 pt-2">
+        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Закрыть</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade md3-callsign-modal md3-aviation-modal" id="dayInterceptModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable modal-dialog-centered">
+    <div class="modal-content md3-callsign-modal-content">
+      <div class="modal-header md3-callsign-modal-header border-0 pb-2">
+        <h5 class="modal-title d-flex align-items-center gap-2">
+          <i class="bi bi-file-text text-primary"></i>Перехват за день
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3" id="day-intercept-header"></div>
+        <div class="card border">
+          <div class="card-body">
+            <pre id="day-intercept-content" class="mb-0 av-pre"></pre>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer md3-callsign-modal-footer border-0 pt-2">
+        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Закрыть</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade md3-callsign-modal md3-aviation-modal" id="callsignDayDetailsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
+    <div class="modal-content md3-callsign-modal-content">
+      <div class="modal-header md3-callsign-modal-header border-0 pb-2">
+        <h5 class="modal-title d-flex align-items-center gap-2">
+          <i class="bi bi-list-ul text-primary"></i>Статистика за день
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3" id="callsign-day-details-header"></div>
+        <div class="table-responsive">
+          <table class="table table-hover table-sm align-middle">
+            <thead>
+              <tr>
+                <th>Частота</th>
+                <th>Тип</th>
+                <th>Выходов</th>
+                <th class="text-end">Действия</th>
+              </tr>
+            </thead>
+            <tbody id="callsign-day-details-body"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer md3-callsign-modal-footer border-0 pt-2">
+        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Закрыть</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade md3-callsign-modal md3-aviation-modal" id="addFrequencyModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content md3-callsign-modal-content">
+      <div class="modal-header md3-callsign-modal-header border-0 pb-2">
+        <h5 class="modal-title d-flex align-items-center gap-2">
+          <i class="bi bi-plus-circle text-primary"></i>Добавить частоту
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label small fw-semibold" for="modal-frequency">Частота</label>
+          <input id="modal-frequency" class="form-control" placeholder="123.456" />
+        </div>
+        <div class="mb-0">
+          <label class="form-label small fw-semibold" for="modal-aviation-type">Тип авиации</label>
+          <select id="modal-aviation-type" class="form-select">
+            <option value="Армейская авиация">Армейская авиация</option>
+            <option value="Тактическая авиация">Тактическая авиация</option>
+            <option value="н/у">н/у</option>
+            <option value="ЯК">ЯК</option>
+            <option value="F-16">F-16</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer md3-callsign-modal-footer border-0 pt-2">
+        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Отмена</button>
+        <button type="button" class="btn btn-primary btn-sm" id="modal-save-frequency-btn">
+          <i class="bi bi-check2 me-1"></i>Добавить
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade md3-callsign-modal md3-aviation-modal" id="callsignHistoryModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
+    <div class="modal-content md3-callsign-modal-content">
+      <div class="modal-header md3-callsign-modal-header border-0 pb-2">
+        <h5 class="modal-title d-flex align-items-center gap-2">
+          <i class="bi bi-clock-history text-primary"></i>История позывного
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3" id="callsign-history-header"></div>
+        <div class="table-responsive">
+          <table class="table table-hover table-sm align-middle">
+            <thead>
+              <tr>
+                <th>Дата и время</th>
+                <th>Частота</th>
+                <th>Фрагмент</th>
+              </tr>
+            </thead>
+            <tbody id="callsign-history-body"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer md3-callsign-modal-footer border-0 pt-2">
+        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Закрыть</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

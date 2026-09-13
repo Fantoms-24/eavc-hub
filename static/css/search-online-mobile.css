@@ -1,0 +1,303 @@
+/**
+ * Поиск онлайн — mobile-first (≤767.98px)
+ */
+
+@media (max-width: 767.98px) {
+  .md3-search-online.so-mobile-ui {
+    --so-m-bg: #eef2f8;
+    --so-m-surface: #ffffff;
+    --so-m-primary: #1d4ed8;
+    --so-m-text: #0f172a;
+    --so-m-muted: #64748b;
+    --so-m-border: rgba(148, 163, 184, 0.35);
+    --so-m-radius: 18px;
+    --so-m-shadow: 0 4px 24px rgba(15, 23, 42, 0.07);
+    --so-m-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  main.container-fluid:has(.md3-search-online.so-mobile-ui) {
+    padding: 0.35rem 0 0 !important;
+    background: var(--so-m-bg);
+  }
+
+  .md3-search-online.so-mobile-ui .md3-analysis-main-card {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  .md3-search-online.so-mobile-ui .md3-analysis-main-body {
+    padding: 0 0.85rem 1rem !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Workbench v2 mobile */
+  .md3-search-online.so-mobile-ui.so-workbench-ui {
+    background: var(--so-m-bg) !important;
+  }
+
+  .md3-search-online.so-mobile-ui.so-workbench-ui .so-topbar {
+    margin: 0.35rem 0.65rem 0.5rem;
+    padding: 1rem !important;
+    border-radius: var(--so-m-radius) !important;
+    border: none !important;
+    background: linear-gradient(145deg, #1e3a8a 0%, #2563eb 52%, #3b82f6 100%) !important;
+    box-shadow: 0 12px 40px rgba(15, 23, 42, 0.12);
+    color: #fff;
+  }
+
+  .md3-search-online.so-mobile-ui.so-workbench-ui .so-topbar__kicker,
+  .md3-search-online.so-mobile-ui.so-workbench-ui .so-topbar__title,
+  .md3-search-online.so-mobile-ui.so-workbench-ui .so-topbar__lead,
+  .md3-search-online.so-mobile-ui.so-workbench-ui .so-pager {
+    color: rgba(255, 255, 255, 0.88) !important;
+  }
+
+  .md3-search-online.so-mobile-ui.so-workbench-ui .so-topbar__title {
+    color: #fff !important;
+    font-size: 1.25rem !important;
+  }
+
+  .md3-search-online.so-mobile-ui.so-workbench-ui .so-topbar__aside {
+    align-items: flex-start;
+    width: 100%;
+  }
+
+  .md3-search-online.so-mobile-ui.so-workbench-ui .so-stat-pill {
+    background: rgba(255, 255, 255, 0.16) !important;
+    border-color: rgba(255, 255, 255, 0.28) !important;
+    color: #fff !important;
+  }
+
+  .md3-search-online.so-mobile-ui.so-workbench-ui .so-stat-pill .so-stat-value,
+  .md3-search-online.so-mobile-ui.so-workbench-ui .so-stat-pill .wp-subtle,
+  .md3-search-online.so-mobile-ui.so-workbench-ui .so-stat-pill i {
+    color: #fff !important;
+  }
+
+  .md3-search-online.so-mobile-ui.so-workbench-ui .so-deck {
+    margin: 0 0.65rem 0.5rem;
+    padding: 0.75rem !important;
+    border-radius: var(--so-m-radius) !important;
+    border: 1px solid var(--so-m-border) !important;
+    box-shadow: var(--so-m-shadow);
+  }
+
+  .md3-search-online.so-mobile-ui.so-workbench-ui .so-deck__search .form-control {
+    font-size: 16px;
+    min-height: 46px;
+  }
+
+  .md3-search-online.so-mobile-ui.so-workbench-ui .so-actions {
+    margin: 0 0.65rem 0.5rem;
+    padding: 0.55rem !important;
+    border-radius: var(--so-m-radius) !important;
+    border: 1px solid var(--so-m-border) !important;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+  }
+
+  .md3-search-online.so-mobile-ui.so-workbench-ui .so-actions__grp {
+    flex-wrap: nowrap;
+  }
+
+  .md3-search-online.so-mobile-ui.so-workbench-ui .so-actions .btn {
+    min-height: 40px;
+    white-space: nowrap;
+  }
+
+  .md3-search-online.so-mobile-ui.so-workbench-ui .so-filterbar {
+    margin: 0 0.65rem 0.5rem;
+    padding: 0.65rem !important;
+    border-radius: 12px;
+    border: 1px solid var(--so-m-border);
+  }
+
+  .md3-search-online.so-mobile-ui.so-workbench-ui .so-main {
+    padding: 0 0.65rem 1rem !important;
+  }
+
+  .md3-search-online.so-mobile-ui.so-workbench-ui .os-units-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.65rem !important;
+  }
+
+  .md3-search-online.so-mobile-ui.so-workbench-ui #pager {
+    text-align: left;
+  }
+
+  /* Legacy (если старая разметка) */
+  .md3-search-online.so-mobile-ui .so-hero {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 0.75rem !important;
+    margin: 0 0 0.65rem !important;
+    padding: 1rem !important;
+    border-radius: var(--so-m-radius) !important;
+    background: linear-gradient(145deg, #1e3a8a 0%, #2563eb 50%, #3b82f6 100%) !important;
+    box-shadow: 0 12px 40px rgba(15, 23, 42, 0.12);
+    color: #fff;
+  }
+
+  .md3-search-online.so-mobile-ui .so-hero .wp-page-header {
+    margin-bottom: 0;
+  }
+
+  .md3-search-online.so-mobile-ui .so-hero .wp-page-title {
+    color: #fff !important;
+    font-size: 1.3rem !important;
+    letter-spacing: -0.03em;
+  }
+
+  .md3-search-online.so-mobile-ui .so-hero .wp-page-lead {
+    color: rgba(255, 255, 255, 0.85) !important;
+    font-size: 0.8125rem !important;
+  }
+
+  .md3-search-online.so-mobile-ui .so-stat-pill {
+    background: rgba(255, 255, 255, 0.16) !important;
+    border-color: rgba(255, 255, 255, 0.28) !important;
+    color: #fff !important;
+    backdrop-filter: blur(6px);
+  }
+
+  .md3-search-online.so-mobile-ui .so-stat-pill .so-stat-value,
+  .md3-search-online.so-mobile-ui .so-stat-pill .wp-subtle {
+    color: #fff !important;
+  }
+
+  /* Toolbar */
+  .md3-search-online.so-mobile-ui .so-toolbar {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 0.5rem !important;
+    padding: 0.65rem !important;
+    border-radius: var(--so-m-radius) !important;
+    margin-bottom: 0.65rem !important;
+  }
+
+  .md3-search-online.so-mobile-ui .so-toolbar__grp {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 0.15rem;
+    width: 100%;
+  }
+
+  .md3-search-online.so-mobile-ui .so-toolbar__grp::-webkit-scrollbar {
+    display: none;
+  }
+
+  .md3-search-online.so-mobile-ui .so-toolbar .btn {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    min-height: 40px;
+    padding: 0 0.85rem !important;
+  }
+
+  /* Search bar */
+  .md3-search-online.so-mobile-ui .so-search-bar {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 0.55rem !important;
+    padding: 0.75rem !important;
+    border-radius: var(--so-m-radius) !important;
+    margin-bottom: 0.65rem !important;
+  }
+
+  .md3-search-online.so-mobile-ui .so-search-bar__q,
+  .md3-search-online.so-mobile-ui .so-search-bar__date,
+  .md3-search-online.so-mobile-ui .so-search-bar__tail {
+    flex: 1 1 100%;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .md3-search-online.so-mobile-ui .so-search-bar__tail {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .md3-search-online.so-mobile-ui .so-search-bar .form-control {
+    font-size: 16px;
+    min-height: 46px;
+  }
+
+  .md3-search-online.so-mobile-ui #os-search-clear {
+    min-height: 40px;
+    flex: 1 1 auto;
+  }
+
+  /* Filter head */
+  .md3-search-online.so-mobile-ui .os-filter-head-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 -0.15rem 0.5rem;
+    border-radius: 12px;
+    border: 1px solid var(--so-m-border);
+  }
+
+  .md3-search-online.so-mobile-ui .os-filter-head {
+    min-width: max-content;
+  }
+
+  .md3-search-online.so-mobile-ui .so-status-row {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 0.25rem;
+    font-size: 0.8125rem;
+  }
+
+  .md3-search-online.so-mobile-ui #pager {
+    margin-left: 0 !important;
+    text-align: left;
+  }
+
+  /* Cards grid */
+  .md3-search-online.so-mobile-ui .os-units-section__title {
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  .md3-search-online.so-mobile-ui .os-units-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.65rem !important;
+  }
+
+  .md3-search-online.so-mobile-ui .os-unit-card,
+  .md3-search-online.so-mobile-ui .os-family-card {
+    border-radius: var(--so-m-radius) !important;
+    box-shadow: var(--so-m-shadow) !important;
+  }
+
+  .md3-search-online.so-mobile-ui .column-filter-popup {
+    position: fixed !important;
+    inset: auto 0.5rem 0.5rem !important;
+    max-width: calc(100% - 1rem);
+    z-index: 1060;
+  }
+
+  .md3-search-online.so-mobile-ui .column-filter-content {
+    border-radius: 1rem 1rem 0.5rem 0.5rem;
+    max-height: 70dvh;
+    overflow-y: auto;
+  }
+}
+
+@media (max-width: 767.98px) {
+  html[data-wp-theme="dark"] .md3-search-online.so-mobile-ui {
+    --so-m-bg: #0c1018;
+    --so-m-surface: #151c28;
+    --so-m-border: rgba(148, 163, 184, 0.2);
+  }
+
+  html[data-wp-theme="dark"] main.container-fluid:has(.md3-search-online.so-mobile-ui) {
+    background: var(--so-m-bg);
+  }
+}

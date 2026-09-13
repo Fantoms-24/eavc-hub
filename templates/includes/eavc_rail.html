@@ -1,0 +1,80 @@
+{# Боковая навигация ЕАВС #}
+<aside class="eavc-rail" aria-label="Основная навигация">
+  <a class="eavc-rail__brand" href="{{ url_for('index') }}" title="ЕАВС — на главную">
+    <img class="eavc-rail__lettermark eavc-rail__lettermark--light"
+      src="{{ url_for('static', filename='images/eavs-lettermark-logo.png') }}?v=2"
+      alt="ЕАВС"
+      width="72"
+      height="24"
+      decoding="async" />
+    <img class="eavc-rail__lettermark eavc-rail__lettermark--dark"
+      src="{{ url_for('static', filename='images/eavs-lettermark-logo-dark.png') }}?v=2"
+      alt=""
+      width="72"
+      height="24"
+      decoding="async"
+      aria-hidden="true" />
+  </a>
+
+  <nav class="eavc-rail__nav" role="navigation" aria-label="Разделы">
+    {% if current_user.has_perm('tab_intercepts') %}
+    <a class="eavc-rail__link eavc-rail__link--desktop-only {{ 'eavc-rail__link--active' if ep == 'intercepts' else '' }}"
+      href="{{ url_for('intercepts') }}" title="Перехваты"{% if ep == 'intercepts' %} aria-current="page"{% endif %}>
+      <span class="eavc-rail__indicator" aria-hidden="true"></span>
+      <span class="eavc-rail__icon"><i class="bi bi-journal-text" aria-hidden="true"></i></span>
+      <span class="eavc-rail__label">Перехваты</span>
+    </a>
+    {% endif %}
+    {% if current_user.has_perm('tab_aviation') %}
+    <a class="eavc-rail__link eavc-rail__link--desktop-only {{ 'eavc-rail__link--active' if ep == 'aviation' else '' }}"
+      href="{{ url_for('aviation') }}" title="Авиация"{% if ep == 'aviation' %} aria-current="page"{% endif %}>
+      <span class="eavc-rail__indicator" aria-hidden="true"></span>
+      <span class="eavc-rail__icon"><i class="bi bi-airplane" aria-hidden="true"></i></span>
+      <span class="eavc-rail__label">Авиация</span>
+    </a>
+    {% endif %}
+    {% if current_user.has_perm('tab_sessions') %}
+    <a class="eavc-rail__link eavc-rail__link--desktop-only {{ 'eavc-rail__link--active' if ep in ['index', 'sessions'] else '' }}"
+      href="{{ url_for('sessions') }}" title="Сеансы"{% if ep in ['index', 'sessions'] %} aria-current="page"{% endif %}>
+      <span class="eavc-rail__indicator" aria-hidden="true"></span>
+      <span class="eavc-rail__icon"><i class="bi bi-house-door" aria-hidden="true"></i></span>
+      <span class="eavc-rail__label">Сеансы</span>
+    </a>
+    {% endif %}
+    {% if current_user.has_perm('tab_audio_intercepts') %}
+    <a class="eavc-rail__link eavc-rail__link--mobile-primary {{ 'eavc-rail__link--active' if ep == 'audio_intercepts' else '' }}"
+      href="{{ url_for('audio_intercepts') }}" title="Аудио"{% if ep == 'audio_intercepts' %} aria-current="page"{% endif %}>
+      <span class="eavc-rail__indicator" aria-hidden="true"></span>
+      <span class="eavc-rail__icon"><i class="bi bi-headphones" aria-hidden="true"></i></span>
+      <span class="eavc-rail__label">Аудио</span>
+    </a>
+    {% endif %}
+    {% if current_user.has_perm('tab_analysis') %}
+    <a class="eavc-rail__link eavc-rail__link--desktop-only {{ 'eavc-rail__link--active' if ep == 'analysis' else '' }}"
+      href="{{ url_for('analysis') }}" title="Анализ"{% if ep == 'analysis' %} aria-current="page"{% endif %}>
+      <span class="eavc-rail__indicator" aria-hidden="true"></span>
+      <span class="eavc-rail__icon"><i class="bi bi-graph-up" aria-hidden="true"></i></span>
+      <span class="eavc-rail__label">Анализ</span>
+    </a>
+    {% endif %}
+    {% if current_user.has_perm('tab_search_online') %}
+    <a class="eavc-rail__link eavc-rail__link--desktop-only {{ 'eavc-rail__link--active' if ep == 'search_online' else '' }}"
+      href="{{ url_for('search_online') }}" title="Поиск онлайн"{% if ep == 'search_online' %} aria-current="page"{% endif %}>
+      <span class="eavc-rail__indicator" aria-hidden="true"></span>
+      <span class="eavc-rail__icon"><i class="bi bi-globe2" aria-hidden="true"></i></span>
+      <span class="eavc-rail__label">Поиск</span>
+    </a>
+    {% endif %}
+  </nav>
+
+  <div class="eavc-rail__foot">
+    {% if current_user.has_perm('tab_admin') %}
+    <a class="eavc-rail__link eavc-rail__link--desktop-only {{ 'eavc-rail__link--active' if ep == 'admin_users' else '' }}"
+      href="{{ url_for('admin_users') }}" title="Администрирование"{% if ep == 'admin_users' %} aria-current="page"{% endif %}>
+      <span class="eavc-rail__indicator" aria-hidden="true"></span>
+      <span class="eavc-rail__icon"><i class="bi bi-gear" aria-hidden="true"></i></span>
+      <span class="eavc-rail__label">Админ</span>
+    </a>
+    {% endif %}
+  </div>
+</aside>

@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block title %}Подразделение — ЕАВС{% endblock %}
+{% block container_class %}container-fluid px-0{% endblock %}
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/analysis-group-md3.css') }}" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/unit-portal-parent-v2.css') }}?v=1" />
+{% endblock %}
+{% block content %}
+<div class="unit-portal up2-page" id="up-parent-root">
+  <div class="up2">
+    <nav class="up2__top" aria-label="Навигация">
+      <a class="up2-back" href="{{ url_for('search_online') }}">
+        <span class="up2-back__ic" aria-hidden="true"><i class="bi bi-arrow-left"></i></span>
+        <span>Поиск онлайн</span>
+      </a>
+      <span class="up2__crumb" id="up2-crumb" hidden></span>
+    </nav>
+
+    <p class="up2-skel" id="up-parent-loading">Загрузка…</p>
+
+    <div id="up-parent-body" class="d-none">
+      <header class="up-hero up2-hero" id="up-hero">
+        <div class="up-hero__stack" id="up-hero-stack" aria-hidden="true">
+          <div class="up-hero__bg" id="up-hero-bg"></div>
+          <div class="up-hero__scrim" id="up-hero-scrim" hidden></div>
+          <div class="up-hero__tint" id="up-hero-tint" hidden></div>
+        </div>
+        <div class="up-hero__aurora" id="up-hero-aurora" aria-hidden="true"></div>
+        <div class="up-hero__actions">
+          {% if current_user.is_authenticated and current_user.has_perm('edit_search') %}
+          <button type="button" class="up-settings-btn" id="up-btn-settings" title="Настройки подразделения" aria-label="Настройки подразделения">
+            <i class="bi bi-gear" aria-hidden="true"></i>
+          </button>
+          {% endif %}
+        </div>
+        <div class="up2-hero__bar">
+          <div class="up2-hero__main">
+            <p class="up-hero__kicker" id="up-ph-sub">Объединение подразделений</p>
+            <h1 class="up-hero__title" id="up-ph-title">—</h1>
+            <div class="up-hero__stats" id="up-ph-meta" aria-label="Сводка"></div>
+          </div>
+          <div class="up-hero__patch up2-hero__patch" id="up-ph-patch" aria-hidden="true">
+            <i class="bi bi-shield-shaded" aria-hidden="true"></i>
+          </div>
+        </div>
+      </header>
+
+      <div class="up2__layout">
+        <section class="up2-panel" aria-labelledby="up2-about-title">
+          <h2 class="up2-panel__title" id="up2-about-title">О подразделении</h2>
+          <div class="up-about__text" id="up-ph-history">—</div>
+        </section>
+        <details class="up2-aside">
+          <summary>Справка</summary>
+          <div class="up2-aside__body">
+            <ul class="up-tl" id="up-ph-tl" aria-label="События"></ul>
+          </div>
+        </details>
+      </div>
+
+      <section class="up2-section" aria-labelledby="up2-struct-title">
+        <header class="up2-section__head">
+          <h2 class="up2-section__title" id="up2-struct-title">Варианты в базе</h2>
+          <p class="up2-section__lead">Батальоны и записи без префикса. Откройте вариант для частот, архива и эмблемы.</p>
+        </header>
+        <div class="up2-variant-grid" id="up-children" role="list"></div>
+      </section>
+    </div>
+
+    <p class="up2-skel text-danger d-none" id="up-parent-err"></p>
+  </div>
+</div>
+{% if current_user.is_authenticated and current_user.has_perm('edit_search') %}
+<div class="modal fade" id="up-settings-modal" tabindex="-1" aria-labelledby="up-settings-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content up2-settings-modal__box border-0">
+      <div class="modal-header up2-settings-modal__head border-0">
+        <h2 class="modal-title h5" id="up-settings-title">Настройки подразделения</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+      </div>
+      <div class="modal-body">
+        <p class="small text-secondary mb-2">Эмблема, оформление шапки и описание сохраняются по ключу объединения (до 4000 символов в <code>note</code>).</p>
+        <h3 class="h6 text-secondary text-uppercase small mb-2 mt-1">Шапка</h3>
+        <div class="row g-2 align-items-end mb-3 p-2 rounded-3 bg-light-subtle">
+          <div class="col-12 col-sm-auto">
+            <label class="form-label small text-secondary mb-0">Режим</label>
+            <div class="btn-group flex-wrap" role="group" aria-label="Режим шапки">
+              <input type="radio" class="btn-check" name="up-hero-mode" id="up-hm-def" value="default" checked autocomplete="off" />
+              <label class="btn btn-sm btn-outline-secondary" for="up-hm-def">Стандарт</label>
+              <input type="radio" class="btn-check" name="up-hero-mode" id="up-hm-tint" value="tint" autocomplete="off" />
+              <label class="btn btn-sm btn-outline-secondary" for="up-hm-tint">Оттенок</label>
+              <input type="radio" class="btn-check" name="up-hero-mode" id="up-hm-ban" value="banner" autocomplete="off" />
+              <label class="btn btn-sm btn-outline-secondary" for="up-hm-ban">Баннер</label>
+            </div>
+          </div>
+          <div class="col-12 col-sm-auto" id="up-hero-tint-wrap">
+            <label class="form-label small text-secondary mb-0" for="up-set-hero-tint">Цвет оттенка</label>
+            <input type="color" class="form-control form-control-color" id="up-set-hero-tint" value="#2563eb" title="Цвет тона" />
+          </div>
+          <div class="col-12" id="up-hero-banner-wrap">
+            <label class="form-label small text-secondary mb-0" for="up-set-hero-banner">Фоновое фото</label>
+            <input type="file" id="up-set-hero-banner" class="form-control form-control-sm" accept="image/jpeg,image/png,image/gif,image/webp" />
+            <p class="form-text small mb-0" id="up-hero-banner-hint">Широкое изображение; обрезается по ширине шапки.</p>
+          </div>
+        </div>
+        <h3 class="h6 text-secondary text-uppercase small mb-2">Эмблема и текст</h3>
+        <div class="row g-3">
+          <div class="col-12 col-md-4">
+            <label class="form-label small text-secondary mb-1">Эмблема</label>
+            <div class="up-settings-av rounded border d-flex align-items-center justify-content-center overflow-hidden" id="up-set-av-wrap" style="width:96px;height:96px;background:var(--bs-secondary-bg)">
+              <i class="bi bi-shield-shaded fs-2 text-secondary" aria-hidden="true"></i>
+            </div>
+            <input type="file" id="up-set-avatar" class="form-control form-control-sm mt-2" accept="image/jpeg,image/png,image/gif,image/webp" />
+          </div>
+          <div class="col-12 col-md-8 d-flex flex-column">
+            <label class="form-label small text-secondary mb-1" for="up-set-history">Описание</label>
+            <textarea class="form-control" id="up-set-history" rows="8" placeholder="Краткое описание, история, заметки…"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer up2-settings-modal__foot border-0">
+        <button type="button" class="btn btn-link text-secondary" id="up-set-hero-reset">Сброс шапки</button>
+        <div class="ms-auto d-flex gap-2">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
+          <button type="button" class="btn btn-primary" id="up-set-save">Сохранить</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+<script>
+  window.__UP_PARENT_P__ = new URLSearchParams(window.location.search).get("p") || "";
+  window.__UP_CAN_EDIT__ = {{ 'true' if (current_user.is_authenticated and current_user.has_perm('edit_search')) else 'false' }};
+</script>
+<script src="{{ url_for('static', filename='js/unit_parent_page.js') }}?v=6-up2"></script>
+{% endblock %}

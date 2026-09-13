@@ -1,0 +1,434 @@
+{% extends "base.html" %}
+{% block title %}Вход{% endblock %}
+{% block container_class %}container-fluid px-0 py-0 login-page{% endblock %}
+
+{% block content %}
+<style>
+  /* Vibrant Mesh Background */
+  html,
+  body {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+  }
+
+  :root {
+    --auth-bg: #050a18;
+    --auth-mesh-1: rgba(37, 99, 235, 0.3);
+    --auth-mesh-2: rgba(79, 70, 229, 0.25);
+    --auth-mesh-3: rgba(30, 58, 138, 0.3);
+    --auth-card-bg: rgba(255, 255, 255, 0.05);
+    --auth-card-border: rgba(255, 255, 255, 0.18);
+    --auth-card-shadow:
+      0 10px 40px -10px rgba(0, 0, 0, 0.5),
+      0 20px 80px -20px rgba(0, 0, 0, 0.6),
+      inset 0 1px 1px rgba(255, 255, 255, 0.1);
+    --auth-card-shadow-hover:
+      0 15px 50px -10px rgba(0, 0, 0, 0.6),
+      0 30px 100px -20px rgba(0, 0, 0, 0.7),
+      inset 0 1px 1px rgba(255, 255, 255, 0.15);
+    --auth-title-grad-from: #ffffff;
+    --auth-title-grad-to: rgba(255, 255, 255, 0.7);
+    --auth-subtitle: rgba(255, 255, 255, 0.6);
+    --auth-label: rgba(255, 255, 255, 0.55);
+    --auth-input-bg: rgba(255, 255, 255, 0.06);
+    --auth-input-border: rgba(255, 255, 255, 0.12);
+    --auth-input-text: #fff;
+    --auth-input-placeholder: rgba(255, 255, 255, 0.35);
+    --auth-input-focus-bg: rgba(255, 255, 255, 0.1);
+    --auth-toggle: rgba(255, 255, 255, 0.4);
+    --auth-toggle-hover: #fff;
+    --auth-alert-danger-bg: rgba(239, 68, 68, 0.15);
+    --auth-alert-danger-border: rgba(239, 68, 68, 0.3);
+    --auth-alert-danger-text: #fca5a5;
+    --auth-alert-success-bg: rgba(34, 197, 94, 0.15);
+    --auth-alert-success-border: rgba(34, 197, 94, 0.3);
+    --auth-alert-success-text: #86efac;
+    --auth-glow-opacity: 1;
+  }
+
+  html[data-wp-theme="light"] {
+    --auth-bg: #eef2f9;
+    --auth-mesh-1: rgba(59, 130, 246, 0.16);
+    --auth-mesh-2: rgba(99, 102, 241, 0.12);
+    --auth-mesh-3: rgba(37, 99, 235, 0.1);
+    --auth-card-bg: rgba(255, 255, 255, 0.85);
+    --auth-card-border: rgba(15, 23, 42, 0.08);
+    --auth-card-shadow:
+      0 10px 40px -12px rgba(15, 23, 42, 0.18),
+      0 24px 70px -30px rgba(37, 99, 235, 0.25);
+    --auth-card-shadow-hover:
+      0 14px 48px -12px rgba(15, 23, 42, 0.22),
+      0 30px 90px -30px rgba(37, 99, 235, 0.32);
+    --auth-title-grad-from: #0f172a;
+    --auth-title-grad-to: rgba(15, 23, 42, 0.72);
+    --auth-subtitle: rgba(15, 23, 42, 0.6);
+    --auth-label: rgba(15, 23, 42, 0.55);
+    --auth-input-bg: rgba(15, 23, 42, 0.04);
+    --auth-input-border: rgba(15, 23, 42, 0.14);
+    --auth-input-text: #0f172a;
+    --auth-input-placeholder: rgba(15, 23, 42, 0.38);
+    --auth-input-focus-bg: #fff;
+    --auth-toggle: rgba(15, 23, 42, 0.4);
+    --auth-toggle-hover: #0f172a;
+    --auth-alert-danger-bg: rgba(220, 38, 38, 0.08);
+    --auth-alert-danger-border: rgba(220, 38, 38, 0.25);
+    --auth-alert-danger-text: #b91c1c;
+    --auth-alert-success-bg: rgba(22, 163, 74, 0.1);
+    --auth-alert-success-border: rgba(22, 163, 74, 0.3);
+    --auth-alert-success-text: #15803d;
+    --auth-glow-opacity: 0.45;
+  }
+
+  body {
+    background-color: var(--auth-bg);
+    background-image: 
+      radial-gradient(at 0% 0%, var(--auth-mesh-1) 0px, transparent 55%),
+      radial-gradient(at 100% 0%, var(--auth-mesh-2) 0px, transparent 55%),
+      radial-gradient(at 100% 100%, var(--auth-mesh-3) 0px, transparent 55%),
+      radial-gradient(at 0% 100%, var(--auth-mesh-2) 0px, transparent 55%),
+      radial-gradient(at 50% 50%, var(--auth-mesh-3) 0px, transparent 60%),
+      url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.6' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 180px 180px;
+    background-blend-mode: overlay;
+    animation: mesh-fade 25s ease-in-out infinite alternate;
+    accent-color: #3b82f6;
+  }
+
+  @keyframes mesh-fade {
+    0% { background-position: 0% 0%; }
+    100% { background-position: 100% 100%; }
+  }
+
+  /* Hide navbar on login */
+  .navbar.wp-nav {
+    display: none !important;
+  }
+
+  main.login-page {
+    height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    perspective: 1200px;
+  }
+
+  /* Card Entrance Animation */
+  .login-card-container {
+    animation: card-enter 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    opacity: 0;
+    transform: translateY(30px) rotateX(8deg);
+    width: 100%;
+    max-width: 460px;
+    padding: 1.5rem;
+  }
+
+  @keyframes card-enter {
+    to {
+      opacity: 1;
+      transform: translateY(0) rotateX(0);
+    }
+  }
+
+  .login-card {
+    background: var(--auth-card-bg);
+    backdrop-filter: blur(32px) saturate(2);
+    -webkit-backdrop-filter: blur(32px) saturate(2);
+    border: 1px solid var(--auth-card-border);
+    border-radius: 32px;
+    box-shadow: var(--auth-card-shadow);
+    padding: 3rem 2.5rem;
+    color: var(--auth-input-text);
+    transition: transform 0.4s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.4s ease;
+  }
+
+  .login-card:hover {
+    box-shadow: var(--auth-card-shadow-hover);
+  }
+
+  /* Logo & Text */
+  .login-header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .login-logo {
+    width: 140px;
+    height: auto;
+    margin-bottom: 2rem;
+    filter: drop-shadow(0 8px 24px rgba(37, 99, 235, 0.5));
+    animation: float 8s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0) rotate(0); }
+    50% { transform: translateY(-12px) rotate(1deg); }
+  }
+
+  .login-title {
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 0.75rem;
+    letter-spacing: -0.03em;
+    background: linear-gradient(180deg, var(--auth-title-grad-from) 0%, var(--auth-title-grad-to) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-wrap: balance;
+  }
+
+  .login-subtitle {
+    font-size: 0.9375rem;
+    color: var(--auth-subtitle);
+    font-weight: 450;
+    letter-spacing: 0.01em;
+  }
+
+  /* Form Fields */
+  .form-group-modern {
+    margin-bottom: 1.5rem;
+    position: relative;
+  }
+
+  .form-label-modern {
+    display: block;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--auth-label);
+    margin-bottom: 0.5rem;
+    margin-left: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition: color 0.2s ease;
+  }
+
+  .form-control-modern {
+    background: var(--auth-input-bg);
+    border: 1px solid var(--auth-input-border);
+    border-radius: 18px;
+    color: var(--auth-input-text);
+    padding: 1rem 1.25rem;
+    width: 100%;
+    font-size: 1rem;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .form-control-modern::placeholder {
+    color: var(--auth-input-placeholder);
+  }
+
+  .form-control-modern:focus {
+    background: var(--auth-input-focus-bg);
+    border-color: rgba(59, 130, 246, 0.6);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+    outline: none;
+  }
+
+  .form-group-modern:focus-within .form-label-modern {
+    color: #60a5fa;
+  }
+
+  /* Password Toggle */
+  .password-field-wrap {
+    position: relative;
+  }
+
+  .password-toggle {
+    position: absolute;
+    right: 1.25rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--auth-toggle);
+    cursor: pointer;
+    padding: 0.5rem;
+    z-index: 10;
+    transition: all 0.2s ease;
+  }
+
+  .password-toggle:hover {
+    color: var(--auth-toggle-hover);
+    transform: translateY(-50%) scale(1.1);
+  }
+
+  /* Button */
+  .btn-login {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    border: none;
+    border-radius: 20px;
+    color: #fff;
+    font-weight: 700;
+    padding: 1.125rem;
+    font-size: 1.125rem;
+    margin-top: 1.5rem;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 8px 24px rgba(37, 99, 235, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    cursor: pointer;
+  }
+
+  .btn-login:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 12px 32px rgba(37, 99, 235, 0.5);
+    background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+  }
+
+  .btn-login:active {
+    transform: translateY(-1px) scale(0.98);
+  }
+
+  /* Alert Styling */
+  .login-alert {
+    background: var(--auth-alert-danger-bg);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--auth-alert-danger-border);
+    border-radius: 20px;
+    color: var(--auth-alert-danger-text);
+    padding: 1rem 1.25rem;
+    font-size: 0.9375rem;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+  }
+
+  @keyframes shake {
+    10%, 90% { transform: translate3d(-1px, 0, 0); }
+    20%, 80% { transform: translate3d(2px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+    40%, 60% { transform: translate3d(4px, 0, 0); }
+  }
+
+  .login-alert-success {
+    background: var(--auth-alert-success-bg);
+    border: 1px solid var(--auth-alert-success-border);
+    color: var(--auth-alert-success-text);
+  }
+
+  /* Decorative Background Elements */
+  .bg-glow {
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.2) 0%, transparent 75%);
+    border-radius: 50%;
+    z-index: -1;
+    filter: blur(80px);
+    pointer-events: none;
+    opacity: var(--auth-glow-opacity);
+  }
+
+  .bg-glow-1 { top: -15%; left: -10%; animation: pulse 12s infinite alternate; }
+  .bg-glow-2 { bottom: -15%; right: -10%; animation: pulse 10s infinite alternate-reverse; }
+
+  @keyframes pulse {
+    from { transform: scale(1) translate(0, 0); opacity: 0.4; }
+    to { transform: scale(1.3) translate(5%, 5%); opacity: 0.7; }
+  }
+
+  /* Dark Mode Adjustments */
+  html[data-wp-theme="dark"] body {
+    background-color: #020617;
+  }
+
+  /* Mobile adjustments */
+  @media (max-width: 576px) {
+    .login-card {
+      padding: 2.5rem 1.5rem;
+      border-radius: 24px;
+    }
+    .login-title {
+      font-size: 1.75rem;
+    }
+  }
+</style>
+
+<div class="bg-glow bg-glow-1"></div>
+<div class="bg-glow bg-glow-2"></div>
+
+<main class="login-page">
+  <div class="login-card-container">
+    <div class="login-card">
+      <div class="login-header">
+        <img class="login-logo"
+          src="{{ url_for('static', filename='images/eavs-lettermark-logo.png') }}?v=2"
+          alt="ЕАВС" />
+        <h1 class="login-title">Вход в систему</h1>
+        <p class="login-subtitle">Доступ к сеансам и поиску онлайн</p>
+      </div>
+
+      {% if message %}
+      <div class="login-alert {{ 'login-alert-danger' if error else 'login-alert-success' }}" role="alert">
+        <i class="bi {{ 'bi-exclamation-circle-fill' if error else 'bi-check-circle-fill' }}" style="font-size: 1.25rem;"></i>
+        <span>{{ message }}</span>
+      </div>
+      {% endif %}
+
+      <form method="post" action="{{ url_for('login') }}">
+        <div class="form-group-modern">
+          <label class="form-label-modern" for="loginInput">Логин</label>
+          <input type="text" name="username" class="form-control-modern" id="loginInput" placeholder="Введите логин" 
+            autocomplete="username" required autofocus>
+        </div>
+
+        <div class="form-group-modern">
+          <label class="form-label-modern" for="passwordInput">Пароль</label>
+          <div class="password-field-wrap">
+            <input type="password" name="password" class="form-control-modern" id="passwordInput" placeholder="Введите пароль"
+              autocomplete="current-password" required>
+            <button type="button" class="password-toggle" id="passwordToggle" aria-label="Показать пароль">
+              <i class="bi bi-eye" id="passwordIcon"></i>
+            </button>
+          </div>
+        </div>
+
+        <button class="btn btn-login w-100" type="submit">
+          <span>Войти в аккаунт</span>
+          <i class="bi bi-arrow-right" aria-hidden="true"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+</main>
+
+<script>
+  // Password Visibility Toggle
+  const passwordInput = document.getElementById('passwordInput');
+  const passwordToggle = document.getElementById('passwordToggle');
+  const passwordIcon = document.getElementById('passwordIcon');
+
+  passwordToggle.addEventListener('click', () => {
+    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+    passwordInput.setAttribute('type', type);
+    
+    passwordIcon.classList.toggle('bi-eye');
+    passwordIcon.classList.toggle('bi-eye-slash');
+  });
+
+  // Modern Parallax Effect for the Card
+  const card = document.querySelector('.login-card');
+  const container = document.querySelector('.login-card-container');
+  
+  container.addEventListener('mousemove', (e) => {
+    const rect = container.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    
+    const rotateX = (y - centerY) / 20;
+    const rotateY = (centerX - x) / 20;
+    
+    card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+  });
+
+  container.addEventListener('mouseleave', () => {
+    card.style.transform = `rotateX(0deg) rotateY(0deg)`;
+  });
+</script>
+{% endblock %}

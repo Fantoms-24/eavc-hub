@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+{% block title %}Поиск онлайн{% endblock %}
+{% block container_class %}container-fluid px-0 py-0{% endblock %}
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/analysis-group-md3.css') }}" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/search_online_md3.css') }}?v=11" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/search-online-workbench.css') }}?v=2" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/search-online-mobile.css') }}?v=2" />
+{% endblock %}
+
+{% block content %}
+<div class="md3-search-online so-workbench-ui">
+  <div class="so-shell">
+
+    <header class="so-topbar">
+      <div class="so-topbar__brand">
+        <span class="so-topbar__kicker">ЕАВС · Справочник связи</span>
+        <h1 class="so-topbar__title">Поиск онлайн</h1>
+        <p class="so-topbar__lead">Поиск по всем полям записи, фильтры по столбцам и карточки подразделений с детализацией.</p>
+      </div>
+      <div class="so-topbar__aside">
+        <span class="so-stat-pill" title="Всего записей по выборке">
+          <i class="bi bi-database" aria-hidden="true"></i>
+          <span class="wp-subtle">Всего</span>
+          <span class="so-stat-value" id="os-total-pill">—</span>
+        </span>
+        <div class="so-pager" id="pager" aria-live="polite"></div>
+      </div>
+    </header>
+
+    <div class="so-deck">
+      <div class="so-deck__search">
+        <label class="visually-hidden" for="q">Поиск</label>
+        <i class="bi bi-search so-deck__search-icon" aria-hidden="true"></i>
+        <input
+          id="q"
+          class="form-control"
+          placeholder="Частота, группа, ID, корреспондент, подразделение, даты…"
+          autocomplete="off"
+        />
+      </div>
+      <div class="so-deck__side">
+        <div class="so-deck__field">
+          <span class="so-deck__label" id="os-filter-confirm-label">Дата</span>
+          <input id="os-filter-confirm" type="date" class="form-control form-control-sm" aria-labelledby="os-filter-confirm-label" title="Совпадение в поле даты/подтв." />
+        </div>
+        <label class="so-deck__chip mb-0">
+          <input class="form-check-input" type="checkbox" id="os-filter-updated" />
+          <span>Новые за 24 ч</span>
+        </label>
+        <button type="button" id="os-search-clear" class="btn btn-outline-secondary btn-sm so-deck__reset">Сброс</button>
+      </div>
+    </div>
+
+    <div class="so-actions" role="toolbar" aria-label="Действия с выборкой">
+      <div class="so-actions__grp">
+        <button type="button" id="load-btn" class="btn btn-primary btn-sm">
+          <i class="bi bi-arrow-clockwise me-1" aria-hidden="true"></i>Показать
+        </button>
+        <span class="so-actions__sep" aria-hidden="true"></span>
+        <button type="button" id="prev-btn" class="btn btn-outline-secondary btn-sm" title="Предыдущая страница" aria-label="Предыдущая страница">
+          <i class="bi bi-chevron-left" aria-hidden="true"></i>
+        </button>
+        <button type="button" id="next-btn" class="btn btn-outline-secondary btn-sm" title="Следующая страница" aria-label="Следующая страница">
+          <i class="bi bi-chevron-right" aria-hidden="true"></i>
+        </button>
+        <button type="button" id="mark-all-read-btn" class="btn btn-outline-success btn-sm">
+          <i class="bi bi-check2-all me-1" aria-hidden="true"></i>Прочитано всё
+        </button>
+        {% if current_user.has_perm('edit_search') %}
+        <button type="button" id="add-row-btn" class="btn btn-outline-primary btn-sm">
+          <i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Добавить
+        </button>
+        {% endif %}
+      </div>
+      <div class="so-actions__grp">
+        {% if current_user.has_perm('edit_search') %}
+        <button type="button" id="import-btn" class="btn btn-outline-secondary btn-sm">
+          <i class="bi bi-file-earmark-arrow-up me-1" aria-hidden="true"></i>Импорт
+        </button>
+        <button type="button" id="sync-units-btn" class="btn btn-outline-secondary btn-sm">
+          <i class="bi bi-arrow-repeat me-1" aria-hidden="true"></i>Unit
+        </button>
+        {% endif %}
+        <button type="button" id="export-btn" class="btn btn-outline-secondary btn-sm">
+          <i class="bi bi-file-earmark-spreadsheet me-1" aria-hidden="true"></i>XLSX
+        </button>
+      </div>
+    </div>
+
+    <input type="file" id="import-xlsx" class="d-none" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" aria-hidden="true" />
+
+    <div class="so-filterbar" aria-label="Сортировка и фильтры по столбцам">
+      <div class="so-filterbar__head">
+        <i class="bi bi-sliders" aria-hidden="true"></i>
+        <span>Фильтры столбцов</span>
+      </div>
+      <div class="os-filter-head-wrapper">
+        <div class="os-filter-head" id="os-head" role="row">
+          <div class="os-filter-head-item th-sort th-filterable" data-sort="id" data-filter-type="none" id="th-num" role="columnheader">
+            <div class="th-content">
+              <span class="os-h-label">№</span>
+              <i class="bi bi-funnel th-filter-icon" aria-hidden="true"></i>
+            </div>
+          </div>
+          <div class="os-filter-head-item th-sort th-filterable" data-sort="frequency" data-filter-type="text" data-filter-col="frequency" id="th-freq" role="columnheader">
+            <div class="th-content">
+              <span class="os-h-label">Частота</span>
+              <i class="bi bi-funnel th-filter-icon" aria-hidden="true"></i>
+            </div>
+          </div>
+          <div class="os-filter-head-item th-filterable" data-filter-type="select" data-filter-col="group_id" id="th-gid" role="columnheader">
+            <div class="th-content">
+              <span class="os-h-label">Групповой ID</span>
+              <i class="bi bi-funnel th-filter-icon" aria-hidden="true"></i>
+            </div>
+          </div>
+          <div class="os-filter-head-item th-filterable" data-filter-type="text" data-filter-col="id" id="th-id" role="columnheader">
+            <div class="th-content">
+              <span class="os-h-label">ID</span>
+              <i class="bi bi-funnel th-filter-icon" aria-hidden="true"></i>
+            </div>
+          </div>
+          <div class="os-filter-head-item th-filterable" data-filter-type="text" data-filter-col="corr" id="th-corr" role="columnheader">
+            <div class="th-content">
+              <span class="os-h-label">Корр.</span>
+              <i class="bi bi-funnel th-filter-icon" aria-hidden="true"></i>
+            </div>
+          </div>
+          <div class="os-filter-head-item th-filterable" data-filter-type="text" data-filter-col="note" id="th-note" role="columnheader">
+            <div class="th-content">
+              <span class="os-h-label">Подразд.</span>
+              <i class="bi bi-funnel th-filter-icon" aria-hidden="true"></i>
+            </div>
+          </div>
+          <div class="os-filter-head-item th-filterable" data-filter-type="date" data-filter-col="confirm" id="th-confirm" role="columnheader">
+            <div class="th-content">
+              <span class="os-h-label">Дата</span>
+              <i class="bi bi-funnel th-filter-icon" aria-hidden="true"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="so-status" id="status" role="status" aria-live="polite"></div>
+
+    <main class="so-main">
+      <section class="os-units-section" aria-labelledby="os-units-heading">
+        <h2 class="so-main__heading" id="os-units-heading">Подразделения</h2>
+        <p class="so-main__hint">Логотип и детали — в карточке подразделения. Вложенные группы — плитками внутри карточки.</p>
+        <div class="os-cards-wrap">
+          <div id="os-units-list" class="os-units-grid" role="list" aria-label="Подразделения"></div>
+          <div id="os-empty-state" class="os-empty d-none" role="status">
+            <i class="bi bi-inbox" aria-hidden="true"></i>
+            <div>Нет записей. Измените фильтры или импортируйте таблицу.</div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div class="modal fade os-unit-modal" id="os-unit-modal" tabindex="-1" aria-labelledby="os-unit-modal-title" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
+        <div class="modal-content os-unit-modal__content">
+          <div class="modal-header os-unit-modal__header">
+            <h2 class="modal-title h5 mb-0" id="os-unit-modal-title">Подразделение</h2>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+          </div>
+          <div class="modal-body p-0" id="os-unit-modal-body"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="column-filter-popup" id="column-filter-popup" style="display: none;" role="dialog" aria-modal="true">
+      <div class="column-filter-content">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <div class="fw-semibold" id="filter-title">Фильтр</div>
+          <button type="button" class="btn btn-sm btn-close" id="filter-close" aria-label="Закрыть"></button>
+        </div>
+        <div id="filter-body"></div>
+        <div class="d-flex gap-2 mt-3">
+          <button type="button" class="btn btn-sm btn-primary" id="filter-apply">Применить</button>
+          <button type="button" class="btn btn-sm btn-outline-secondary" id="filter-clear">Очистить</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<div id="web-perms" data-edit-search="{{ '1' if current_user.has_perm('edit_search') else '0' }}" style="display:none"></div>
+<script src="{{ url_for('static', filename='js/online_search_unit_modal.js') }}?v=1"></script>
+<script src="{{ url_for('static', filename='js/search_online.js') }}?v=workbench-1"></script>
+{% endblock %}

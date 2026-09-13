@@ -1,0 +1,1714 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Перехваты — ЕАВС</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wdth,wght@8..144,75..125,100..900&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+
+  <style>
+    /* ============================================================
+       MD3 TOKEN LAYER — matches the existing project's blue brand
+       ============================================================ */
+    :root {
+      /* Primary — deep navy adapted from project --wp-brand #1d4ed8 */
+      --md-sys-color-primary:                 #4a6ee0;
+      --md-sys-color-on-primary:              #ffffff;
+      --md-sys-color-primary-container:       #dde4ff;
+      --md-sys-color-on-primary-container:    #001258;
+
+      /* Secondary */
+      --md-sys-color-secondary:               #5a5f7d;
+      --md-sys-color-on-secondary:            #ffffff;
+      --md-sys-color-secondary-container:     #dfe2ff;
+      --md-sys-color-on-secondary-container:  #161b3a;
+
+      /* Tertiary — teal accent */
+      --md-sys-color-tertiary:                #006b5d;
+      --md-sys-color-on-tertiary:             #ffffff;
+      --md-sys-color-tertiary-container:      #7ef8e5;
+      --md-sys-color-on-tertiary-container:   #00201b;
+
+      /* Error */
+      --md-sys-color-error:                   #ba1a1a;
+      --md-sys-color-on-error:                #ffffff;
+      --md-sys-color-error-container:         #ffdad6;
+      --md-sys-color-on-error-container:      #410002;
+
+      /* Surfaces */
+      --md-sys-color-surface:                 #fafafa;
+      --md-sys-color-on-surface:              #1a1c23;
+      --md-sys-color-on-surface-variant:      #44475a;
+      --md-sys-color-surface-container-lowest:  #ffffff;
+      --md-sys-color-surface-container-low:     #f4f4f9;
+      --md-sys-color-surface-container:         #eeedf4;
+      --md-sys-color-surface-container-high:    #e8e7ee;
+      --md-sys-color-surface-container-highest: #e2e1e9;
+      --md-sys-color-surface-dim:             #dad9e0;
+      --md-sys-color-surface-bright:          #fafafa;
+      --md-sys-color-inverse-surface:         #2f3038;
+      --md-sys-color-inverse-on-surface:      #f1f0f7;
+      --md-sys-color-inverse-primary:         #b2c5ff;
+
+      /* Outlines */
+      --md-sys-color-outline:                 #767891;
+      --md-sys-color-outline-variant:         #c5c6d9;
+
+      /* Scrim */
+      --md-sys-color-scrim:                   #000000;
+
+      /* ── Shape tokens ── */
+      --md-sys-shape-corner-none:             0px;
+      --md-sys-shape-corner-extra-small:      4px;
+      --md-sys-shape-corner-small:            8px;
+      --md-sys-shape-corner-medium:           12px;
+      --md-sys-shape-corner-large:            16px;
+      --md-sys-shape-corner-extra-large:      28px;
+      --md-sys-shape-corner-full:             9999px;
+
+      /* ── Typography ── */
+      --md-sys-typescale-font-family:         'Roboto Flex', sans-serif;
+      --md-sys-typescale-mono:                'Roboto Mono', monospace;
+      --md-sys-typescale-display-large-size:  3.5625rem;
+      --md-sys-typescale-headline-medium-size:1.75rem;
+      --md-sys-typescale-headline-small-size: 1.5rem;
+      --md-sys-typescale-title-large-size:    1.375rem;
+      --md-sys-typescale-title-medium-size:   1rem;
+      --md-sys-typescale-title-small-size:    0.875rem;
+      --md-sys-typescale-body-large-size:     1rem;
+      --md-sys-typescale-body-medium-size:    0.875rem;
+      --md-sys-typescale-body-small-size:     0.75rem;
+      --md-sys-typescale-label-large-size:    0.875rem;
+      --md-sys-typescale-label-medium-size:   0.75rem;
+      --md-sys-typescale-label-small-size:    0.6875rem;
+
+      /* ── Motion ── */
+      --md-motion-emphasized:          cubic-bezier(0.2, 0, 0, 1);
+      --md-motion-emphasized-decel:    cubic-bezier(0.05, 0.7, 0.1, 1);
+      --md-motion-emphasized-accel:    cubic-bezier(0.3, 0, 0.8, 0.15);
+      --md-motion-standard:            cubic-bezier(0.2, 0, 0, 1);
+      --md-motion-dur-medium2:         300ms;
+      --md-motion-dur-medium4:         400ms;
+
+      /* ── Layout ── */
+      --nav-h: 58px;
+      --drawer-w: 284px;
+      --right-panel-w: 288px;
+    }
+
+    /* ============================================================
+       RESET / BASE
+       ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      font-family: var(--md-sys-typescale-font-family);
+      font-size: var(--md-sys-typescale-body-medium-size);
+      color: var(--md-sys-color-on-surface);
+      background: var(--md-sys-color-surface-container-low);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Material Symbols */
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      vertical-align: middle;
+      font-size: 20px;
+      line-height: 1;
+      user-select: none;
+    }
+    .icon-fill { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    .icon-sm   { font-size: 18px; }
+    .icon-lg   { font-size: 24px; }
+
+    /* ============================================================
+       TOP APP BAR (Small, Center-aligned variant adapted)
+       ============================================================ */
+    .top-app-bar {
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 0 8px 0 4px;
+      height: var(--nav-h);
+      background: var(--md-sys-color-surface-container-low);
+      border-bottom: 1px solid var(--md-sys-color-outline-variant);
+      transition: background var(--md-motion-dur-medium2) var(--md-motion-standard),
+                  box-shadow var(--md-motion-dur-medium2) var(--md-motion-standard);
+    }
+    .top-app-bar.scrolled {
+      background: var(--md-sys-color-surface-container);
+      box-shadow: 0 2px 8px rgba(0,0,0,.10);
+    }
+
+    .top-app-bar__brand {
+      font-size: var(--md-sys-typescale-title-large-size);
+      font-weight: 700;
+      color: var(--md-sys-color-primary);
+      padding: 0 8px;
+      letter-spacing: -.3px;
+      white-space: nowrap;
+    }
+
+    .top-app-bar__title {
+      font-size: var(--md-sys-typescale-title-medium-size);
+      font-weight: 600;
+      color: var(--md-sys-color-on-surface);
+      padding: 0 4px;
+    }
+
+    .top-app-bar__divider {
+      width: 1px;
+      height: 22px;
+      background: var(--md-sys-color-outline-variant);
+      margin: 0 4px;
+    }
+
+    /* Nav links in top bar */
+    .top-nav {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      flex: 1;
+      overflow: hidden;
+    }
+    .top-nav-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: var(--md-sys-shape-corner-full);
+      font-size: var(--md-sys-typescale-label-large-size);
+      font-weight: 500;
+      color: var(--md-sys-color-on-surface-variant);
+      text-decoration: none;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      transition: background var(--md-motion-dur-medium2), color var(--md-motion-dur-medium2);
+      white-space: nowrap;
+    }
+    .top-nav-item:hover {
+      background: color-mix(in srgb, var(--md-sys-color-on-surface) 8%, transparent);
+      color: var(--md-sys-color-on-surface);
+    }
+    .top-nav-item.active {
+      background: var(--md-sys-color-secondary-container);
+      color: var(--md-sys-color-on-secondary-container);
+    }
+    .top-nav-item.active .material-symbols-outlined {
+      font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 20;
+    }
+
+    /* ============================================================
+       ICON BUTTON
+       ============================================================ */
+    .icon-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: var(--md-sys-shape-corner-full);
+      border: none;
+      background: transparent;
+      color: var(--md-sys-color-on-surface-variant);
+      cursor: pointer;
+      transition: background var(--md-motion-dur-medium2), color var(--md-motion-dur-medium2);
+      flex-shrink: 0;
+      text-decoration: none;
+    }
+    .icon-btn:hover {
+      background: color-mix(in srgb, var(--md-sys-color-on-surface-variant) 8%, transparent);
+      color: var(--md-sys-color-on-surface);
+    }
+    .icon-btn:active {
+      background: color-mix(in srgb, var(--md-sys-color-on-surface-variant) 12%, transparent);
+    }
+    .icon-btn.tonal {
+      background: var(--md-sys-color-surface-container-high);
+    }
+    .icon-btn.tonal:hover {
+      background: var(--md-sys-color-surface-container-highest);
+    }
+    .icon-btn--primary { color: var(--md-sys-color-primary); }
+
+    /* ============================================================
+       BUTTONS
+       ============================================================ */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 24px;
+      border-radius: var(--md-sys-shape-corner-full);
+      border: none;
+      font-family: inherit;
+      font-size: var(--md-sys-typescale-label-large-size);
+      font-weight: 500;
+      letter-spacing: .025em;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: box-shadow var(--md-motion-dur-medium2) var(--md-motion-standard),
+                  background var(--md-motion-dur-medium2) var(--md-motion-standard),
+                  opacity var(--md-motion-dur-medium2);
+      text-decoration: none;
+    }
+    .btn:disabled { opacity: .38; pointer-events: none; }
+
+    .btn-filled {
+      background: var(--md-sys-color-primary);
+      color: var(--md-sys-color-on-primary);
+    }
+    .btn-filled:hover  { box-shadow: 0 1px 3px rgba(0,0,0,.3), 0 4px 8px rgba(74,110,224,.3); }
+    .btn-filled:active { box-shadow: none; }
+
+    .btn-tonal {
+      background: var(--md-sys-color-secondary-container);
+      color: var(--md-sys-color-on-secondary-container);
+    }
+    .btn-tonal:hover { box-shadow: 0 1px 3px rgba(0,0,0,.2); }
+
+    .btn-outlined {
+      background: transparent;
+      color: var(--md-sys-color-primary);
+      border: 1px solid var(--md-sys-color-outline);
+      padding: 9px 23px;
+    }
+    .btn-outlined:hover {
+      background: color-mix(in srgb, var(--md-sys-color-primary) 8%, transparent);
+    }
+
+    .btn-text {
+      background: transparent;
+      color: var(--md-sys-color-primary);
+      padding: 10px 12px;
+    }
+    .btn-text:hover {
+      background: color-mix(in srgb, var(--md-sys-color-primary) 8%, transparent);
+    }
+
+    .btn-sm {
+      padding: 6px 16px;
+      font-size: var(--md-sys-typescale-label-medium-size);
+      gap: 6px;
+    }
+    .btn-sm .material-symbols-outlined { font-size: 16px; }
+
+    .btn-error {
+      background: var(--md-sys-color-error);
+      color: var(--md-sys-color-on-error);
+    }
+    .btn-error:hover { box-shadow: 0 1px 3px rgba(0,0,0,.3); }
+
+    /* ============================================================
+       SELECT / INPUT  (MD3 Outlined Text Field flavour)
+       ============================================================ */
+    .md3-select, .md3-input {
+      height: 40px;
+      padding: 0 12px;
+      border: 1px solid var(--md-sys-color-outline);
+      border-radius: var(--md-sys-shape-corner-extra-small);
+      background: var(--md-sys-color-surface);
+      color: var(--md-sys-color-on-surface);
+      font-family: inherit;
+      font-size: var(--md-sys-typescale-body-large-size);
+      outline: none;
+      transition: border-color var(--md-motion-dur-medium2),
+                  box-shadow var(--md-motion-dur-medium2);
+      appearance: none;
+      -webkit-appearance: none;
+    }
+    .md3-select { padding-right: 36px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2344475a'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; background-size: 20px; }
+    .md3-select:focus, .md3-input:focus {
+      border-color: var(--md-sys-color-primary);
+      box-shadow: 0 0 0 2px color-mix(in srgb, var(--md-sys-color-primary) 20%, transparent);
+    }
+    .md3-input.outlined { border-radius: var(--md-sys-shape-corner-extra-small); }
+    .md3-textarea {
+      padding: 12px;
+      border: 1px solid var(--md-sys-color-outline);
+      border-radius: var(--md-sys-shape-corner-small);
+      background: var(--md-sys-color-surface);
+      color: var(--md-sys-color-on-surface);
+      font-family: "Times New Roman", Times, serif;
+      font-size: 12pt;
+      line-height: 1.4;
+      outline: none;
+      resize: none;
+      width: 100%;
+      transition: border-color var(--md-motion-dur-medium2),
+                  box-shadow var(--md-motion-dur-medium2);
+    }
+    .md3-textarea:focus {
+      border-color: var(--md-sys-color-primary);
+      box-shadow: 0 0 0 2px color-mix(in srgb, var(--md-sys-color-primary) 20%, transparent);
+    }
+
+    /* ============================================================
+       CARD
+       ============================================================ */
+    .md3-card {
+      background: var(--md-sys-color-surface-container-lowest);
+      border-radius: var(--md-sys-shape-corner-medium);
+      border: 1px solid var(--md-sys-color-outline-variant);
+      overflow: hidden;
+    }
+    .md3-card--elevated {
+      border: none;
+      box-shadow: 0 1px 2px rgba(0,0,0,.12), 0 2px 6px rgba(0,0,0,.08);
+    }
+    .md3-card--filled {
+      background: var(--md-sys-color-surface-container-high);
+      border: none;
+    }
+    .md3-card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 16px 12px;
+      border-bottom: 1px solid var(--md-sys-color-outline-variant);
+    }
+    .md3-card-title {
+      font-size: var(--md-sys-typescale-title-small-size);
+      font-weight: 600;
+      color: var(--md-sys-color-on-surface);
+      flex: 1;
+      min-width: 0;
+    }
+    .md3-card-body { padding: 16px; }
+
+    /* ============================================================
+       CHIP
+       ============================================================ */
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 16px;
+      border-radius: var(--md-sys-shape-corner-full);
+      border: 1px solid var(--md-sys-color-outline);
+      background: transparent;
+      font-family: inherit;
+      font-size: var(--md-sys-typescale-label-large-size);
+      font-weight: 400;
+      color: var(--md-sys-color-on-surface-variant);
+      cursor: pointer;
+      transition: background var(--md-motion-dur-medium2), border-color var(--md-motion-dur-medium2);
+      white-space: nowrap;
+      line-height: 1;
+    }
+    .chip:hover {
+      background: color-mix(in srgb, var(--md-sys-color-on-surface-variant) 8%, transparent);
+    }
+    .chip.selected {
+      background: var(--md-sys-color-secondary-container);
+      color: var(--md-sys-color-on-secondary-container);
+      border-color: transparent;
+    }
+    .chip .material-symbols-outlined { font-size: 16px; }
+
+    /* ============================================================
+       BADGE
+       ============================================================ */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 16px;
+      height: 16px;
+      padding: 0 4px;
+      border-radius: var(--md-sys-shape-corner-full);
+      background: var(--md-sys-color-error);
+      color: var(--md-sys-color-on-error);
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1;
+    }
+    .badge-primary {
+      background: var(--md-sys-color-primary);
+      color: var(--md-sys-color-on-primary);
+    }
+    .badge-tonal {
+      background: var(--md-sys-color-secondary-container);
+      color: var(--md-sys-color-on-secondary-container);
+    }
+
+    /* ============================================================
+       DIVIDER
+       ============================================================ */
+    .divider { height: 1px; background: var(--md-sys-color-outline-variant); }
+
+    /* ============================================================
+       SCROLLBAR
+       ============================================================ */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb {
+      background: var(--md-sys-color-outline-variant);
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover { background: var(--md-sys-color-outline); }
+
+    /* ============================================================
+       PAGE LAYOUT
+       ============================================================ */
+    .page-shell {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .page-body {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      gap: 0;
+    }
+
+    /* ── LEFT NAVIGATION RAIL / DRAWER ── */
+    .nav-drawer {
+      width: var(--drawer-w);
+      flex-shrink: 0;
+      background: var(--md-sys-color-surface-container-low);
+      border-right: 1px solid var(--md-sys-color-outline-variant);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: width var(--md-motion-dur-medium4) var(--md-motion-emphasized);
+    }
+    .nav-drawer.collapsed { width: 0; border-right-color: transparent; }
+
+    .nav-drawer__inner {
+      width: var(--drawer-w);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .nav-drawer__section-label {
+      padding: 16px 16px 4px;
+      font-size: var(--md-sys-typescale-label-small-size);
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--md-sys-color-on-surface-variant);
+    }
+
+    .nav-drawer__scroll {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 4px 8px 16px;
+    }
+
+    /* Unit block */
+    .unit-block { margin-bottom: 4px; }
+    .unit-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 8px 8px 12px;
+      border-radius: var(--md-sys-shape-corner-large);
+      cursor: pointer;
+      user-select: none;
+      transition: background var(--md-motion-dur-medium2);
+    }
+    .unit-header:hover {
+      background: color-mix(in srgb, var(--md-sys-color-on-surface) 6%, transparent);
+    }
+    .unit-header__icon {
+      width: 28px;
+      height: 28px;
+      border-radius: var(--md-sys-shape-corner-small);
+      background: var(--md-sys-color-primary-container);
+      color: var(--md-sys-color-on-primary-container);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .unit-header__icon .material-symbols-outlined { font-size: 16px; }
+    .unit-header__name {
+      flex: 1;
+      font-size: var(--md-sys-typescale-label-large-size);
+      font-weight: 600;
+      color: var(--md-sys-color-on-surface);
+    }
+    .unit-header__chevron {
+      color: var(--md-sys-color-on-surface-variant);
+      font-size: 18px;
+      transition: transform var(--md-motion-dur-medium2) var(--md-motion-emphasized);
+    }
+    .unit-block.open .unit-header__chevron { transform: rotate(90deg); }
+
+    .unit-groups {
+      padding-left: 16px;
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height var(--md-motion-dur-medium4) var(--md-motion-emphasized-decel);
+    }
+    .unit-block.open .unit-groups { max-height: 600px; }
+
+    .group-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 8px 7px 8px;
+      border-radius: var(--md-sys-shape-corner-large);
+      cursor: pointer;
+      font-size: var(--md-sys-typescale-body-medium-size);
+      color: var(--md-sys-color-on-surface-variant);
+      transition: background var(--md-motion-dur-medium2), color var(--md-motion-dur-medium2);
+    }
+    .group-item:hover {
+      background: color-mix(in srgb, var(--md-sys-color-on-surface) 6%, transparent);
+      color: var(--md-sys-color-on-surface);
+    }
+    .group-item.active {
+      background: var(--md-sys-color-secondary-container);
+      color: var(--md-sys-color-on-secondary-container);
+      font-weight: 500;
+    }
+    .group-item__dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--md-sys-color-primary);
+      flex-shrink: 0;
+    }
+    .group-item.active .group-item__dot { background: var(--md-sys-color-on-secondary-container); }
+    .group-item__count {
+      margin-left: auto;
+      font-size: var(--md-sys-typescale-label-small-size);
+      background: var(--md-sys-color-surface-container-high);
+      color: var(--md-sys-color-on-surface-variant);
+      padding: 1px 6px;
+      border-radius: var(--md-sys-shape-corner-full);
+    }
+    .group-item.active .group-item__count {
+      background: color-mix(in srgb, var(--md-sys-color-on-secondary-container) 14%, transparent);
+      color: var(--md-sys-color-on-secondary-container);
+    }
+
+    /* ── MAIN CONTENT ── */
+    .page-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-width: 0;
+    }
+
+    /* Toolbar bar just below top-app-bar */
+    .page-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      background: var(--md-sys-color-surface-container-lowest);
+      border-bottom: 1px solid var(--md-sys-color-outline-variant);
+      flex-wrap: wrap;
+    }
+
+    .page-toolbar__title {
+      flex: 1;
+      min-width: 160px;
+    }
+    .page-toolbar__title h1 {
+      font-size: var(--md-sys-typescale-title-medium-size);
+      font-weight: 700;
+      color: var(--md-sys-color-on-surface);
+      line-height: 1.2;
+    }
+    .page-toolbar__title p {
+      font-size: var(--md-sys-typescale-label-medium-size);
+      color: var(--md-sys-color-on-surface-variant);
+      margin-top: 2px;
+    }
+
+    .page-content {
+      flex: 1;
+      overflow: auto;
+      padding: 16px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    /* ── BLANK / FORM COLUMN ── */
+    .blank-col {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* Group context badge */
+    .active-group-banner {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: var(--md-sys-shape-corner-medium);
+      background: var(--md-sys-color-primary-container);
+      color: var(--md-sys-color-on-primary-container);
+      font-size: var(--md-sys-typescale-body-medium-size);
+      font-weight: 500;
+    }
+    .active-group-banner .material-symbols-outlined { font-size: 18px; }
+
+    /* Blank card */
+    .blank-card { display: flex; flex-direction: column; gap: 0; }
+    .blank-card__toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--md-sys-color-outline-variant);
+      flex-wrap: wrap;
+    }
+    .blank-card__toolbar-label {
+      font-size: var(--md-sys-typescale-label-large-size);
+      font-weight: 600;
+      color: var(--md-sys-color-on-surface);
+      flex: 1;
+    }
+    .blank-card__body {
+      padding: 14px 14px 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .blank-meta-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 8px;
+    }
+
+    .field-wrap { display: flex; flex-direction: column; gap: 4px; }
+    .field-label {
+      font-size: var(--md-sys-typescale-label-small-size);
+      font-weight: 600;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      color: var(--md-sys-color-on-surface-variant);
+    }
+
+    .text-area-wrap { position: relative; }
+    .text-area-wrap .char-counter {
+      position: absolute;
+      bottom: 8px;
+      right: 10px;
+      font-size: 11px;
+      color: var(--md-sys-color-on-surface-variant);
+      opacity: .6;
+      pointer-events: none;
+    }
+
+    .blank-card__footer {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-top: 1px solid var(--md-sys-color-outline-variant);
+      flex-wrap: wrap;
+    }
+    .save-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: var(--md-sys-typescale-label-medium-size);
+      color: var(--md-sys-color-on-surface-variant);
+    }
+    .save-indicator__dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--md-sys-color-tertiary);
+    }
+    .save-indicator.unsaved .save-indicator__dot {
+      background: var(--md-sys-color-error);
+      animation: blink 1.2s ease-in-out infinite;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: .25; }
+    }
+
+    /* Preview mode */
+    .preview-card__body {
+      padding: 16px;
+      font-family: "Times New Roman", Times, serif;
+      font-size: 12pt;
+      line-height: 1.45;
+      min-height: 260px;
+      color: var(--md-sys-color-on-surface);
+    }
+
+    .preview-timestamp {
+      font-size: var(--md-sys-typescale-label-medium-size);
+      font-weight: 700;
+      font-family: var(--md-sys-typescale-font-family);
+      padding: 6px 0 8px;
+      margin-bottom: 4px;
+      border-bottom: 1px solid var(--md-sys-color-outline-variant);
+      color: var(--md-sys-color-on-surface);
+      position: sticky;
+      top: 0;
+      background: var(--md-sys-color-surface-container-lowest);
+      z-index: 2;
+    }
+
+    .preview-msg {
+      display: flex;
+      gap: 10px;
+      padding: 4px 0;
+      margin-bottom: 4px;
+    }
+    .preview-msg__bubble {
+      flex: 1;
+      padding: 8px 12px;
+      border-radius: var(--md-sys-shape-corner-medium);
+      background: var(--md-sys-color-surface-container-low);
+      border: 1px solid var(--md-sys-color-outline-variant);
+      border-bottom-width: 2px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .preview-msg.highlight .preview-msg__bubble {
+      background: color-mix(in srgb, var(--md-sys-color-primary) 6%, transparent);
+      border-color: color-mix(in srgb, var(--md-sys-color-primary) 30%, transparent);
+    }
+    .preview-cs-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: var(--md-sys-shape-corner-full);
+      background: var(--md-sys-color-secondary-container);
+      color: var(--md-sys-color-on-secondary-container);
+      font-family: var(--md-sys-typescale-font-family);
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    /* ── CALLSIGNS RIGHT PANEL ── */
+    .callsigns-panel {
+      width: var(--right-panel-w);
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .callsign-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: var(--md-sys-shape-corner-medium);
+      border: 1px solid var(--md-sys-color-outline-variant);
+      background: var(--md-sys-color-surface-container-lowest);
+      cursor: pointer;
+      transition: box-shadow var(--md-motion-dur-medium2), border-color var(--md-motion-dur-medium2),
+                  transform var(--md-motion-dur-medium2) var(--md-motion-emphasized);
+    }
+    .callsign-item:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0,0,0,.10);
+      border-color: color-mix(in srgb, var(--md-sys-color-primary) 40%, transparent);
+    }
+    .callsign-avatar {
+      width: 36px; height: 36px;
+      border-radius: var(--md-sys-shape-corner-full);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 13px;
+      color: #fff;
+      flex-shrink: 0;
+      box-shadow: inset 0 0 0 2px rgba(255,255,255,.35);
+    }
+    .callsign-info { flex: 1; min-width: 0; }
+    .callsign-code {
+      font-weight: 700;
+      font-size: var(--md-sys-typescale-label-large-size);
+      color: var(--md-sys-color-on-surface);
+    }
+    .callsign-label {
+      font-size: var(--md-sys-typescale-label-medium-size);
+      color: var(--md-sys-color-on-surface-variant);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .callsign-actions {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      opacity: 0;
+      transition: opacity var(--md-motion-dur-medium2);
+    }
+    .callsign-item:hover .callsign-actions { opacity: 1; }
+
+    /* Add callsign row */
+    .add-callsign-row {
+      display: grid;
+      grid-template-columns: 1fr 88px 36px;
+      gap: 6px;
+      align-items: center;
+    }
+    .add-callsign-row .md3-input { height: 36px; font-size: var(--md-sys-typescale-body-medium-size); }
+
+    /* ============================================================
+       STATUS BAR  (bottom of page)
+       ============================================================ */
+    .status-bar {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 4px 16px;
+      background: var(--md-sys-color-surface-container);
+      border-top: 1px solid var(--md-sys-color-outline-variant);
+      font-size: var(--md-sys-typescale-label-small-size);
+      color: var(--md-sys-color-on-surface-variant);
+      flex-wrap: wrap;
+    }
+    .status-bar__item { display: flex; align-items: center; gap: 4px; }
+    .status-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--md-sys-color-tertiary);
+    }
+
+    /* ============================================================
+       SWITCH  (compact toggle)
+       ============================================================ */
+    .switch-wrap { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+    .switch-track {
+      width: 52px; height: 32px;
+      border-radius: var(--md-sys-shape-corner-full);
+      background: var(--md-sys-color-surface-container-highest);
+      border: 2px solid var(--md-sys-color-outline);
+      position: relative;
+      cursor: pointer;
+      transition: background var(--md-motion-dur-medium2), border-color var(--md-motion-dur-medium2);
+      flex-shrink: 0;
+    }
+    .switch-track.on {
+      background: var(--md-sys-color-primary);
+      border-color: var(--md-sys-color-primary);
+    }
+    .switch-thumb {
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: var(--md-sys-color-outline);
+      position: absolute;
+      top: 50%; left: 6px;
+      transform: translateY(-50%);
+      transition: left var(--md-motion-dur-medium2) var(--md-motion-emphasized),
+                  width var(--md-motion-dur-medium2) var(--md-motion-emphasized),
+                  background var(--md-motion-dur-medium2);
+    }
+    .switch-track.on .switch-thumb {
+      left: 26px;
+      width: 24px; height: 24px;
+      top: 50%; left: 22px;
+      background: var(--md-sys-color-on-primary);
+    }
+    .switch-label { font-size: var(--md-sys-typescale-label-large-size); color: var(--md-sys-color-on-surface); }
+
+    /* ============================================================
+       TOOLTIP  (plain)
+       ============================================================ */
+    [data-tip] { position: relative; }
+    [data-tip]::after {
+      content: attr(data-tip);
+      position: absolute;
+      bottom: calc(100% + 4px);
+      left: 50%; transform: translateX(-50%);
+      padding: 4px 8px;
+      border-radius: var(--md-sys-shape-corner-extra-small);
+      background: var(--md-sys-color-inverse-surface);
+      color: var(--md-sys-color-inverse-on-surface);
+      font-size: var(--md-sys-typescale-label-small-size);
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity var(--md-motion-dur-medium2);
+      z-index: 1000;
+    }
+    [data-tip]:hover::after { opacity: 1; }
+
+    /* ============================================================
+       SNACKBAR
+       ============================================================ */
+    .snackbar {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--md-sys-color-inverse-surface);
+      color: var(--md-sys-color-inverse-on-surface);
+      padding: 14px 16px;
+      border-radius: var(--md-sys-shape-corner-extra-small);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 280px;
+      max-width: 560px;
+      box-shadow: 0 3px 8px rgba(0,0,0,.30);
+      font-size: var(--md-sys-typescale-body-medium-size);
+      z-index: 1200;
+      transition: transform var(--md-motion-dur-medium4) var(--md-motion-emphasized-decel),
+                  opacity var(--md-motion-dur-medium4);
+      opacity: 0;
+    }
+    .snackbar.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+    .snackbar-action {
+      background: transparent; border: none; cursor: pointer;
+      color: var(--md-sys-color-inverse-primary);
+      font-family: inherit; font-size: var(--md-sys-typescale-label-large-size);
+      font-weight: 600; padding: 4px 8px;
+      border-radius: var(--md-sys-shape-corner-extra-small);
+    }
+    .snackbar-action:hover { background: color-mix(in srgb, var(--md-sys-color-inverse-primary) 12%, transparent); }
+
+    /* ============================================================
+       LOADING INDICATOR (linear indeterminate)
+       ============================================================ */
+    .linear-progress {
+      height: 4px;
+      background: var(--md-sys-color-primary-container);
+      position: relative;
+      overflow: hidden;
+      border-radius: 0;
+    }
+    .linear-progress::after {
+      content: '';
+      position: absolute;
+      left: -50%; top: 0; bottom: 0;
+      width: 40%;
+      background: var(--md-sys-color-primary);
+      border-radius: 2px;
+      animation: indeterminate 1.5s linear infinite;
+    }
+    @keyframes indeterminate {
+      0%   { left: -50%;  width: 30%; }
+      50%  { left:  45%;  width: 40%; }
+      100% { left: 110%; width: 10%; }
+    }
+
+    /* ============================================================
+       RESPONSIVE
+       ============================================================ */
+    @media (max-width: 1200px) {
+      :root { --right-panel-w: 260px; }
+    }
+    @media (max-width: 960px) {
+      .callsigns-panel { display: none; }
+    }
+    @media (max-width: 768px) {
+      :root { --drawer-w: 260px; }
+      .nav-drawer {
+        position: fixed; left: 0; top: var(--nav-h); bottom: 0;
+        z-index: 300;
+        box-shadow: 4px 0 16px rgba(0,0,0,.18);
+      }
+      .nav-drawer.collapsed { width: 0; }
+      .scrim {
+        position: fixed; inset: 0; z-index: 299;
+        background: rgba(0,0,0,.4);
+        opacity: 0; pointer-events: none;
+        transition: opacity var(--md-motion-dur-medium4) var(--md-motion-emphasized);
+      }
+      .scrim.visible { opacity: 1; pointer-events: auto; }
+    }
+    @media (max-width: 520px) {
+      .page-content { padding: 10px; }
+      .blank-meta-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ========================================================
+     TOP APP BAR
+     ======================================================== -->
+<header class="top-app-bar" id="top-app-bar">
+  <button class="icon-btn" id="drawer-toggle-btn" aria-label="Переключить боковую панель" data-tip="Подразделения">
+    <span class="material-symbols-outlined">menu</span>
+  </button>
+
+  <a href="#" class="top-app-bar__brand">ЕАВС</a>
+  <div class="top-app-bar__divider"></div>
+
+  <nav class="top-nav">
+    <a href="#" class="top-nav-item active">
+      <span class="material-symbols-outlined icon-sm">article</span>
+      Перехваты
+    </a>
+    <a href="#" class="top-nav-item">
+      <span class="material-symbols-outlined icon-sm">headphones</span>
+      Аудиоперехваты
+    </a>
+    <a href="#" class="top-nav-item">
+      <span class="material-symbols-outlined icon-sm">folder_open</span>
+      Сеансы
+    </a>
+    <a href="#" class="top-nav-item">
+      <span class="material-symbols-outlined icon-sm">analytics</span>
+      Анализ
+    </a>
+    <a href="#" class="top-nav-item">
+      <span class="material-symbols-outlined icon-sm">map</span>
+      Карта
+    </a>
+  </nav>
+
+  <div style="display:flex;align-items:center;gap:4px;flex-shrink:0;">
+    <button class="icon-btn" data-tip="Уведомления">
+      <span class="material-symbols-outlined">notifications</span>
+    </button>
+    <button class="icon-btn tonal" data-tip="Профиль">
+      <span class="material-symbols-outlined icon-fill">account_circle</span>
+    </button>
+  </div>
+</header>
+
+<!-- Scrim for mobile drawer -->
+<div class="scrim" id="drawer-scrim"></div>
+
+<!-- Loading indicator (hidden by default) -->
+<div class="linear-progress" id="loading-bar" style="display:none;"></div>
+
+<!-- ========================================================
+     PAGE BODY
+     ======================================================== -->
+<div class="page-shell" style="height: calc(100vh - var(--nav-h));">
+  <div class="page-body">
+
+    <!-- ── LEFT DRAWER: Units & Groups ── -->
+    <aside class="nav-drawer" id="nav-drawer" aria-label="Подразделения и группы">
+      <div class="nav-drawer__inner">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 8px 4px 16px;">
+          <span style="font-size:var(--md-sys-typescale-label-large-size);font-weight:700;color:var(--md-sys-color-on-surface);">
+            Подразделения
+          </span>
+          <button class="icon-btn icon-btn--primary" data-tip="Добавить группу" style="width:32px;height:32px;">
+            <span class="material-symbols-outlined" style="font-size:18px;">add</span>
+          </button>
+        </div>
+        <div class="nav-drawer__scroll" id="groups-list">
+
+          <!-- Unit 1 -->
+          <div class="unit-block open" id="unit-1">
+            <div class="unit-header" onclick="toggleUnit('unit-1')">
+              <div class="unit-header__icon">
+                <span class="material-symbols-outlined">military_tech</span>
+              </div>
+              <span class="unit-header__name">1-й ОТБ</span>
+              <span class="badge badge-tonal" style="font-size:10px;">4</span>
+              <span class="material-symbols-outlined unit-header__chevron">chevron_right</span>
+            </div>
+            <div class="unit-groups">
+              <div class="group-item active" onclick="selectGroup(this,'КВ-1')">
+                <span class="group-item__dot"></span>
+                КВ-1 / 35.6 МГц
+                <span class="group-item__count">7</span>
+              </div>
+              <div class="group-item" onclick="selectGroup(this,'КВ-2')">
+                <span class="group-item__dot"></span>
+                КВ-2 / 38.2 МГц
+                <span class="group-item__count">2</span>
+              </div>
+              <div class="group-item" onclick="selectGroup(this,'УКВ-1')">
+                <span class="group-item__dot"></span>
+                УКВ-1 / 148.5 МГц
+                <span class="group-item__count">11</span>
+              </div>
+              <div class="group-item" onclick="selectGroup(this,'УКВ-2')">
+                <span class="group-item__dot"></span>
+                УКВ-2 / 155.0 МГц
+                <span class="group-item__count">3</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Unit 2 -->
+          <div class="unit-block" id="unit-2">
+            <div class="unit-header" onclick="toggleUnit('unit-2')">
+              <div class="unit-header__icon" style="background:var(--md-sys-color-tertiary-container);color:var(--md-sys-color-on-tertiary-container);">
+                <span class="material-symbols-outlined">radio</span>
+              </div>
+              <span class="unit-header__name">2-й МСБ</span>
+              <span class="badge badge-tonal" style="font-size:10px;">3</span>
+              <span class="material-symbols-outlined unit-header__chevron">chevron_right</span>
+            </div>
+            <div class="unit-groups">
+              <div class="group-item" onclick="selectGroup(this,'Р-159')">
+                <span class="group-item__dot"></span>
+                Р-159 / 52.1 МГц
+                <span class="group-item__count">5</span>
+              </div>
+              <div class="group-item" onclick="selectGroup(this,'Р-168')">
+                <span class="group-item__dot"></span>
+                Р-168 / 54.7 МГц
+                <span class="group-item__count">0</span>
+              </div>
+              <div class="group-item" onclick="selectGroup(this,'Р-187')">
+                <span class="group-item__dot"></span>
+                Р-187 / 61.3 МГц
+                <span class="group-item__count">8</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Unit 3 -->
+          <div class="unit-block" id="unit-3">
+            <div class="unit-header" onclick="toggleUnit('unit-3')">
+              <div class="unit-header__icon" style="background:var(--md-sys-color-error-container);color:var(--md-sys-color-on-error-container);">
+                <span class="material-symbols-outlined">crisis_alert</span>
+              </div>
+              <span class="unit-header__name">Арт. бригада</span>
+              <span class="badge" style="font-size:10px;">!</span>
+              <span class="material-symbols-outlined unit-header__chevron">chevron_right</span>
+            </div>
+            <div class="unit-groups">
+              <div class="group-item" onclick="selectGroup(this,'Арт-1')">
+                <span class="group-item__dot" style="background:var(--md-sys-color-error);"></span>
+                Арт-1 / 44.4 МГц
+                <span class="group-item__count">1</span>
+              </div>
+              <div class="group-item" onclick="selectGroup(this,'Арт-2')">
+                <span class="group-item__dot" style="background:var(--md-sys-color-error);"></span>
+                Арт-2 / 47.8 МГц
+                <span class="group-item__count">4</span>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /scroll -->
+      </div>
+    </aside>
+
+    <!-- ── MAIN CONTENT ── -->
+    <main class="page-main">
+      <!-- Toolbar -->
+      <div class="page-toolbar">
+        <div class="page-toolbar__title">
+          <h1 id="page-title-text">Перехваты</h1>
+          <p id="page-lead-text">Бланк перехвата · Позиция: <strong>ОП-3</strong></p>
+        </div>
+
+        <select class="md3-select" id="shift-select" style="min-width:240px;" aria-label="Выбор смены">
+          <option value="">Смена: —</option>
+          <option value="1" selected>Смена №4 · 14.04 08:00–20:00</option>
+          <option value="2">Смена №3 · 13.04 20:00–08:00</option>
+          <option value="3">Смена №2 · 13.04 08:00–20:00</option>
+        </select>
+
+        <button class="btn btn-outlined btn-sm" id="start-new-btn">
+          <span class="material-symbols-outlined">add_circle</span>
+          Новые записи
+        </button>
+        <button class="btn btn-tonal btn-sm" id="export-intercepts-btn">
+          <span class="material-symbols-outlined">description</span>
+          Экспорт Word
+        </button>
+        <button class="btn btn-text btn-sm" id="open-callsigns-modal-btn">
+          <span class="material-symbols-outlined">badge</span>
+          Позывные
+        </button>
+      </div>
+
+      <!-- Body -->
+      <div class="page-content">
+        <!-- ── Blank column ── -->
+        <div class="blank-col">
+
+          <!-- Active group context banner -->
+          <div class="active-group-banner" id="active-group-banner">
+            <span class="material-symbols-outlined">wifi</span>
+            <span id="active-group-name">КВ-1 / 35.6 МГц</span>
+            <span style="flex:1;"></span>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <span style="font-size:var(--md-sys-typescale-label-medium-size);opacity:.75;">Последний перехват:</span>
+              <span id="last-intercept-time" style="font-size:var(--md-sys-typescale-label-medium-size);font-weight:600;">14:23</span>
+            </div>
+          </div>
+
+          <!-- Blank form card -->
+          <div class="md3-card blank-card" id="blank-card">
+            <!-- Toolbar -->
+            <div class="blank-card__toolbar">
+              <span class="blank-card__toolbar-label">Бланк перехвата</span>
+              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                <label class="switch-wrap">
+                  <div class="switch-track" id="preview-switch" onclick="togglePreview()">
+                    <div class="switch-thumb"></div>
+                  </div>
+                  <span class="switch-label">Просмотр</span>
+                </label>
+                <div class="top-app-bar__divider" style="height:20px;"></div>
+                <button class="icon-btn icon-btn--primary icon-sm" data-tip="Форматировать" style="width:32px;height:32px;">
+                  <span class="material-symbols-outlined" style="font-size:18px;">format_shapes</span>
+                </button>
+                <button class="icon-btn" data-tip="Развернуть" style="width:32px;height:32px;">
+                  <span class="material-symbols-outlined" style="font-size:18px;">open_in_full</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Edit mode -->
+            <div id="edit-mode" class="blank-card__body">
+              <!-- Meta row -->
+              <div class="blank-meta-row">
+                <div class="field-wrap">
+                  <label class="field-label" for="field-time">Время (UTC)</label>
+                  <input class="md3-input" type="text" id="field-time" placeholder="14:23" value="14:23" />
+                </div>
+                <div class="field-wrap">
+                  <label class="field-label" for="field-freq">Частота</label>
+                  <input class="md3-input" type="text" id="field-freq" placeholder="35.600" value="35.600" />
+                </div>
+                <div class="field-wrap">
+                  <label class="field-label" for="field-mode">Режим</label>
+                  <select class="md3-select" id="field-mode" style="height:40px;">
+                    <option>AM</option>
+                    <option selected>FM</option>
+                    <option>USB</option>
+                    <option>LSB</option>
+                    <option>CW</option>
+                    <option>ЦИФР</option>
+                  </select>
+                </div>
+                <div class="field-wrap">
+                  <label class="field-label" for="field-tag">Метка</label>
+                  <input class="md3-input" type="text" id="field-tag" placeholder="—" />
+                </div>
+              </div>
+
+              <!-- Editor subtitle (group / editor info) -->
+              <div id="editor-subtitle" style="font-size:var(--md-sys-typescale-label-medium-size);color:var(--md-sys-color-on-surface-variant);display:flex;align-items:center;gap:6px;">
+                <span class="material-symbols-outlined" style="font-size:14px;">edit</span>
+                Формат: Бром (124) → Гранит-А (220) · ID: 38
+              </div>
+
+              <!-- Text area -->
+              <div class="text-area-wrap">
+                <textarea
+                  class="md3-textarea"
+                  id="intercept-text"
+                  rows="10"
+                  placeholder="Введите текст перехвата…"
+                >— Гранит, я Бром, как слышно, приём.
+— Бром, слышу хорошо, продолжайте.
+— Двигаемся по маршруту, квадрат 14-Б, всё спокойно.
+— Принято, Гранит.</textarea>
+                <span class="char-counter" id="char-counter">342</span>
+              </div>
+
+              <!-- Chips: quick-insert callsigns -->
+              <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+                <span style="font-size:var(--md-sys-typescale-label-small-size);color:var(--md-sys-color-on-surface-variant);font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Позывные:</span>
+                <span class="chip selected" onclick="insertCallsign(this,'Бром')">Бром</span>
+                <span class="chip" onclick="insertCallsign(this,'Гранит-А')">Гранит-А</span>
+                <span class="chip" onclick="insertCallsign(this,'Алмаз')">Алмаз</span>
+                <span class="chip" onclick="insertCallsign(this,'Рубеж-1')">Рубеж-1</span>
+                <button class="chip" style="border-style:dashed;" data-tip="Добавить позывной">
+                  <span class="material-symbols-outlined" style="font-size:14px;">add</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Preview mode (hidden initially) -->
+            <div id="preview-mode" class="preview-card__body" style="display:none;">
+              <div class="preview-timestamp">14:23 UTC · КВ-1 · 35.600 МГц FM</div>
+              <div class="preview-msg highlight">
+                <div class="preview-msg__bubble" style="border-bottom-color: #4a6ee0;">
+                  <span class="preview-cs-chip">Бром</span> — Гранит, я Бром, как слышно, приём.
+                </div>
+              </div>
+              <div class="preview-msg">
+                <div class="preview-msg__bubble" style="border-bottom-color: #006b5d;">
+                  <span class="preview-cs-chip" style="background:var(--md-sys-color-tertiary-container);color:var(--md-sys-color-on-tertiary-container);">Гранит-А</span> — Бром, слышу хорошо, продолжайте.
+                </div>
+              </div>
+              <div class="preview-msg highlight">
+                <div class="preview-msg__bubble" style="border-bottom-color: #4a6ee0;">
+                  <span class="preview-cs-chip">Бром</span> — Двигаемся по маршруту, квадрат 14-Б, всё спокойно.
+                </div>
+              </div>
+              <div class="preview-msg">
+                <div class="preview-msg__bubble" style="border-bottom-color: #006b5d;">
+                  <span class="preview-cs-chip" style="background:var(--md-sys-color-tertiary-container);color:var(--md-sys-color-on-tertiary-container);">Гранит-А</span> — Принято, Гранит.
+                </div>
+              </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="blank-card__footer">
+              <div class="save-indicator unsaved" id="save-indicator">
+                <div class="save-indicator__dot"></div>
+                <span id="save-status-text">Несохранённые изменения</span>
+              </div>
+              <span style="flex:1;"></span>
+              <button class="btn btn-text btn-sm" onclick="clearBlank()">
+                <span class="material-symbols-outlined">clear_all</span>
+                Очистить
+              </button>
+              <button class="btn btn-filled btn-sm" id="manual-save-btn" onclick="saveIntercept()">
+                <span class="material-symbols-outlined">save</span>
+                Сохранить
+              </button>
+            </div>
+          </div><!-- /blank-card -->
+
+          <!-- Past intercepts list (mini) -->
+          <div class="md3-card">
+            <div class="md3-card-header">
+              <span class="material-symbols-outlined icon-sm" style="color:var(--md-sys-color-primary);">history</span>
+              <span class="md3-card-title">Последние перехваты · КВ-1</span>
+              <span class="badge badge-tonal">7</span>
+              <button class="icon-btn" style="width:28px;height:28px;" data-tip="Обновить">
+                <span class="material-symbols-outlined" style="font-size:16px;">refresh</span>
+              </button>
+            </div>
+            <div class="md3-card-body" style="padding:8px 12px;display:flex;flex-direction:column;gap:4px;" id="history-list">
+
+              <!-- History item -->
+              <div class="callsign-item" style="padding:8px 10px;cursor:pointer;" onclick="loadHistoryItem(0)">
+                <div style="display:flex;flex-direction:column;flex:1;min-width:0;gap:2px;">
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <span style="font-size:var(--md-sys-typescale-label-large-size);font-weight:700;font-family:var(--md-sys-typescale-mono);color:var(--md-sys-color-primary);">14:23</span>
+                    <span class="chip selected" style="padding:2px 8px;font-size:11px;">Бром → Гранит-А</span>
+                  </div>
+                  <span style="font-size:var(--md-sys-typescale-body-small-size);color:var(--md-sys-color-on-surface-variant);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                    Двигаемся по маршруту, квадрат 14-Б, всё спокойно.
+                  </span>
+                </div>
+                <div class="callsign-actions">
+                  <button class="icon-btn" style="width:28px;height:28px;" data-tip="Открыть">
+                    <span class="material-symbols-outlined" style="font-size:15px;">open_in_new</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="callsign-item" style="padding:8px 10px;">
+                <div style="display:flex;flex-direction:column;flex:1;min-width:0;gap:2px;">
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <span style="font-size:var(--md-sys-typescale-label-large-size);font-weight:700;font-family:var(--md-sys-typescale-mono);color:var(--md-sys-color-primary);">13:58</span>
+                    <span class="chip" style="padding:2px 8px;font-size:11px;">Рубеж-1 → Алмаз</span>
+                  </div>
+                  <span style="font-size:var(--md-sys-typescale-body-small-size);color:var(--md-sys-color-on-surface-variant);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                    Подтверждаю получение, ожидаю дальнейших команд.
+                  </span>
+                </div>
+                <div class="callsign-actions">
+                  <button class="icon-btn" style="width:28px;height:28px;" data-tip="Открыть">
+                    <span class="material-symbols-outlined" style="font-size:15px;">open_in_new</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="callsign-item" style="padding:8px 10px;">
+                <div style="display:flex;flex-direction:column;flex:1;min-width:0;gap:2px;">
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <span style="font-size:var(--md-sys-typescale-label-large-size);font-weight:700;font-family:var(--md-sys-typescale-mono);color:var(--md-sys-color-primary);">13:41</span>
+                    <span class="chip" style="padding:2px 8px;font-size:11px;">Бром → всем</span>
+                  </div>
+                  <span style="font-size:var(--md-sys-typescale-body-small-size);color:var(--md-sys-color-on-surface-variant);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                    Внимание, смена частоты в 14:00.
+                  </span>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div><!-- /blank-col -->
+
+        <!-- ── Callsigns Right Panel ── -->
+        <aside class="callsigns-panel" aria-label="Позывные">
+          <div class="md3-card" id="callsigns-card">
+            <div class="md3-card-header">
+              <span class="material-symbols-outlined icon-sm" style="color:var(--md-sys-color-primary);">badge</span>
+              <span class="md3-card-title">Позывные</span>
+              <span class="badge badge-tonal">4</span>
+            </div>
+
+            <!-- Add callsign -->
+            <div class="md3-card-body" style="padding:10px 12px;border-bottom:1px solid var(--md-sys-color-outline-variant);">
+              <div class="add-callsign-row">
+                <input class="md3-input" id="cs-label" type="text" placeholder="Наименование" />
+                <input class="md3-input" id="cs-code" type="text" placeholder="Код (124)" />
+                <button class="btn btn-filled" style="padding:0;width:36px;height:36px;flex-shrink:0;justify-content:center;" onclick="addCallsign()" aria-label="Добавить">
+                  <span class="material-symbols-outlined" style="font-size:18px;">add</span>
+                </button>
+              </div>
+              <p style="font-size:var(--md-sys-typescale-label-small-size);color:var(--md-sys-color-on-surface-variant);margin-top:6px;">
+                Формат: Бром (124) или Гранит-А
+              </p>
+            </div>
+
+            <!-- List -->
+            <div style="padding:8px;display:flex;flex-direction:column;gap:6px;" id="cs-list">
+
+              <div class="callsign-item">
+                <div class="callsign-avatar" style="background:linear-gradient(135deg,#4a6ee0,#1d4ed8);">Б</div>
+                <div class="callsign-info">
+                  <div class="callsign-code">Бром <span style="font-weight:400;color:var(--md-sys-color-on-surface-variant);font-size:12px;">(124)</span></div>
+                  <div class="callsign-label">Командир 1-й роты</div>
+                </div>
+                <div class="callsign-actions">
+                  <button class="icon-btn" style="width:28px;height:28px;" data-tip="Изменить">
+                    <span class="material-symbols-outlined" style="font-size:15px;">edit</span>
+                  </button>
+                  <button class="icon-btn" style="width:28px;height:28px;color:var(--md-sys-color-error);" data-tip="Удалить">
+                    <span class="material-symbols-outlined" style="font-size:15px;">delete</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="callsign-item">
+                <div class="callsign-avatar" style="background:linear-gradient(135deg,#006b5d,#004d40);">Г</div>
+                <div class="callsign-info">
+                  <div class="callsign-code">Гранит-А <span style="font-weight:400;color:var(--md-sys-color-on-surface-variant);font-size:12px;">(220)</span></div>
+                  <div class="callsign-label">НШ батальона</div>
+                </div>
+                <div class="callsign-actions">
+                  <button class="icon-btn" style="width:28px;height:28px;" data-tip="Изменить">
+                    <span class="material-symbols-outlined" style="font-size:15px;">edit</span>
+                  </button>
+                  <button class="icon-btn" style="width:28px;height:28px;color:var(--md-sys-color-error);" data-tip="Удалить">
+                    <span class="material-symbols-outlined" style="font-size:15px;">delete</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="callsign-item">
+                <div class="callsign-avatar" style="background:linear-gradient(135deg,#7b3fe4,#5a1fa8);">А</div>
+                <div class="callsign-info">
+                  <div class="callsign-code">Алмаз <span style="font-weight:400;color:var(--md-sys-color-on-surface-variant);font-size:12px;">(305)</span></div>
+                  <div class="callsign-label">КП 2-й роты</div>
+                </div>
+                <div class="callsign-actions">
+                  <button class="icon-btn" style="width:28px;height:28px;" data-tip="Изменить">
+                    <span class="material-symbols-outlined" style="font-size:15px;">edit</span>
+                  </button>
+                  <button class="icon-btn" style="width:28px;height:28px;color:var(--md-sys-color-error);" data-tip="Удалить">
+                    <span class="material-symbols-outlined" style="font-size:15px;">delete</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="callsign-item">
+                <div class="callsign-avatar" style="background:linear-gradient(135deg,#b5341e,#7f1d0a);">Р</div>
+                <div class="callsign-info">
+                  <div class="callsign-code">Рубеж-1 <span style="font-weight:400;color:var(--md-sys-color-on-surface-variant);font-size:12px;">(411)</span></div>
+                  <div class="callsign-label">Развед. группа</div>
+                </div>
+                <div class="callsign-actions">
+                  <button class="icon-btn" style="width:28px;height:28px;" data-tip="Изменить">
+                    <span class="material-symbols-outlined" style="font-size:15px;">edit</span>
+                  </button>
+                  <button class="icon-btn" style="width:28px;height:28px;color:var(--md-sys-color-error);" data-tip="Удалить">
+                    <span class="material-symbols-outlined" style="font-size:15px;">delete</span>
+                  </button>
+                </div>
+              </div>
+
+            </div><!-- /cs-list -->
+          </div>
+        </aside>
+
+      </div><!-- /page-content -->
+
+      <!-- Status bar -->
+      <div class="status-bar">
+        <div class="status-bar__item">
+          <div class="status-dot"></div>
+          Подключено
+        </div>
+        <div class="status-bar__item">
+          <span class="material-symbols-outlined" style="font-size:12px;">wifi</span>
+          КВ-1 · 35.600 МГц
+        </div>
+        <div class="status-bar__item">
+          <span class="material-symbols-outlined" style="font-size:12px;">schedule</span>
+          <span id="clock">15:04:38 UTC</span>
+        </div>
+        <span style="flex:1;"></span>
+        <div class="status-bar__item">
+          <span class="material-symbols-outlined" style="font-size:12px;">person</span>
+          Смена №4 · Иванов А.П.
+        </div>
+      </div>
+
+    </main><!-- /page-main -->
+
+  </div><!-- /page-body -->
+</div><!-- /page-shell -->
+
+<!-- ── Snackbar ── -->
+<div class="snackbar" id="snackbar" role="status" aria-live="polite">
+  <span id="snackbar-msg">Перехват сохранён</span>
+  <button class="snackbar-action" onclick="hideSnackbar()">OK</button>
+</div>
+
+<!-- ================================================================
+     JAVASCRIPT — interactions
+     ================================================================ -->
+<script>
+  /* ── Drawer toggle ── */
+  const drawer   = document.getElementById('nav-drawer');
+  const scrim    = document.getElementById('drawer-scrim');
+  const toggleBtn = document.getElementById('drawer-toggle-btn');
+
+  toggleBtn.addEventListener('click', () => {
+    const collapsed = drawer.classList.toggle('collapsed');
+    if (window.innerWidth <= 768) {
+      scrim.classList.toggle('visible', !collapsed);
+    }
+  });
+  scrim.addEventListener('click', () => {
+    drawer.classList.add('collapsed');
+    scrim.classList.remove('visible');
+  });
+
+  /* ── Unit expand / collapse ── */
+  function toggleUnit(id) {
+    document.getElementById(id).classList.toggle('open');
+  }
+
+  /* ── Group selection ── */
+  function selectGroup(el, name) {
+    document.querySelectorAll('.group-item').forEach(g => g.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('active-group-name').textContent = name;
+    document.getElementById('page-lead-text').innerHTML =
+      'Бланк перехвата · <strong>' + name + '</strong>';
+  }
+
+  /* ── Callsign chip insert ── */
+  function insertCallsign(el, name) {
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    const ta = document.getElementById('intercept-text');
+    const start = ta.selectionStart, end = ta.selectionEnd;
+    const text = ta.value;
+    ta.value = text.substring(0, start) + name + text.substring(end);
+    ta.selectionStart = ta.selectionEnd = start + name.length;
+    ta.focus();
+    markUnsaved();
+  }
+
+  /* ── Preview toggle ── */
+  function togglePreview() {
+    const sw  = document.getElementById('preview-switch');
+    const edit = document.getElementById('edit-mode');
+    const prev = document.getElementById('preview-mode');
+    const on = sw.classList.toggle('on');
+    edit.style.display = on ? 'none' : 'flex';
+    prev.style.display = on ? 'block' : 'none';
+  }
+
+  /* ── Save ── */
+  function saveIntercept() {
+    const indicator = document.getElementById('save-indicator');
+    const statusText = document.getElementById('save-status-text');
+    indicator.classList.remove('unsaved');
+    statusText.textContent = 'Сохранено только что';
+    showSnackbar('Перехват сохранён');
+  }
+
+  function clearBlank() {
+    document.getElementById('intercept-text').value = '';
+    document.getElementById('field-time').value = '';
+    document.getElementById('field-tag').value = '';
+    markUnsaved();
+    document.getElementById('intercept-text').focus();
+  }
+
+  function markUnsaved() {
+    const ind = document.getElementById('save-indicator');
+    ind.classList.add('unsaved');
+    document.getElementById('save-status-text').textContent = 'Несохранённые изменения';
+  }
+
+  document.getElementById('intercept-text').addEventListener('input', markUnsaved);
+
+  /* ── Add callsign ── */
+  function addCallsign() {
+    const label = document.getElementById('cs-label').value.trim();
+    const code  = document.getElementById('cs-code').value.trim();
+    if (!label) return;
+    showSnackbar('Позывной «' + label + '» добавлен');
+    document.getElementById('cs-label').value = '';
+    document.getElementById('cs-code').value = '';
+  }
+
+  /* ── Load history item (demo) ── */
+  function loadHistoryItem(idx) { showSnackbar('Перехват загружен'); }
+
+  /* ── Snackbar ── */
+  let snackTimer = null;
+  function showSnackbar(msg) {
+    const sb = document.getElementById('snackbar');
+    document.getElementById('snackbar-msg').textContent = msg;
+    sb.classList.add('show');
+    clearTimeout(snackTimer);
+    snackTimer = setTimeout(hideSnackbar, 3500);
+  }
+  function hideSnackbar() {
+    document.getElementById('snackbar').classList.remove('show');
+  }
+
+  /* ── Clock ── */
+  function updateClock() {
+    const now = new Date();
+    const pad = n => String(n).padStart(2,'0');
+    document.getElementById('clock').textContent =
+      pad(now.getUTCHours()) + ':' + pad(now.getUTCMinutes()) + ':' + pad(now.getUTCSeconds()) + ' UTC';
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
+
+  /* ── Char counter ── */
+  const ta = document.getElementById('intercept-text');
+  const cc = document.getElementById('char-counter');
+  function updateCounter() { cc.textContent = ta.value.length; }
+  ta.addEventListener('input', updateCounter);
+  updateCounter();
+
+  /* ── Top app bar shadow on scroll ── */
+  const mainEl = document.querySelector('.page-main');
+  if (mainEl) {
+    mainEl.addEventListener('scroll', () => {
+      document.getElementById('top-app-bar').classList.toggle('scrolled', mainEl.scrollTop > 4);
+    });
+  }
+
+  /* ── Responsive: auto-collapse drawer on small screens ── */
+  const mq = window.matchMedia('(max-width: 768px)');
+  function handleMQ(e) {
+    if (e.matches) drawer.classList.add('collapsed');
+    else { drawer.classList.remove('collapsed'); scrim.classList.remove('visible'); }
+  }
+  mq.addEventListener('change', handleMQ);
+  handleMQ(mq);
+</script>
+
+</body>
+</html>

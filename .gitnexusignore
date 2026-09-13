@@ -1,0 +1,31 @@
+# GitNexus: индексируем исходники портала, без vendored/сборок/данных
+
+# Сборки и окружения
+dist/
+build/
+.venv-build/
+**/.venv/
+**/__pycache__/
+.pytest_cache/
+node_modules/
+
+# Встроенные Python-библиотеки (PyInstaller / копии site-packages)
+static/js/Графы прикол/
+
+# Базы и тяжёлые runtime-данные
+data/
+data-hub/
+data-central/
+tmp/
+reports/
+OPK/
+
+# Артефакты и медиа
+Аудио/
+*.sqlite
+*.db
+*.mbtiles
+*.zip
+
+# Прочие большие/внешние проекты в монорепо
+Group Telegram/

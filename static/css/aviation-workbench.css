@@ -1,0 +1,519 @@
+/**
+ * Авиация — workbench UI (EAVC premium)
+ */
+
+.md3-aviation.av-workbench-ui {
+  --av-sidebar-w: min(320px, 32vw);
+  --av-pad: 0.85rem;
+  --av-radius: 14px;
+  --av-radius-sm: 10px;
+  --av-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --av-accent: var(--eavc-accent, #3d6df0);
+  --av-accent-soft: var(--eavc-accent-soft, rgba(61, 109, 240, 0.12));
+  --av-bg: var(--eavc-bg, #eef1f7);
+  --av-surface: var(--eavc-card, #fff);
+  --av-surface-2: var(--eavc-card-2, #f3f6fb);
+  --av-border: var(--eavc-border, rgba(15, 23, 42, 0.08));
+  --av-text: var(--eavc-text, #0c1222);
+  --av-muted: var(--eavc-text-muted, #5c6b82);
+  --av-shadow: var(--eavc-shadow-sm, 0 4px 20px rgba(15, 23, 42, 0.06));
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  color: var(--av-text);
+  font-family: "Roboto Flex", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+html[data-wp-theme="dark"] .md3-aviation.av-workbench-ui {
+  --av-bg: var(--eavc-bg, #06090f);
+  --av-surface: var(--eavc-card, #141c2a);
+  --av-surface-2: var(--eavc-card-2, #1a2436);
+}
+
+.av-workbench-ui .aviation-main {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.av-workbench-ui .av-shell-card {
+  flex: 1 1 auto;
+  min-height: 0;
+  margin: 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+.av-workbench-ui .av-shell-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0 !important;
+}
+
+.av-layout {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  overflow: hidden;
+}
+
+/* ─── Sidebar частот ─── */
+.av-sidebar {
+  flex: 0 0 var(--av-sidebar-w);
+  width: var(--av-sidebar-w);
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  padding: var(--av-pad);
+  background: var(--av-surface);
+  border-right: 1px solid var(--av-border);
+  overflow: hidden;
+}
+
+.av-sidebar__block {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0.75rem;
+  border-radius: var(--av-radius);
+  background: var(--av-surface-2);
+  border: 1px solid var(--av-border);
+}
+
+.av-sidebar__head-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.65rem;
+}
+
+.av-sidebar__title {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.av-sidebar__title i {
+  color: var(--av-accent);
+}
+
+.av-label {
+  font-size: 0.72rem;
+  font-weight: 650;
+  color: var(--av-muted);
+  margin-bottom: 0.2rem;
+}
+
+.av-hint {
+  margin: 0 0 0.65rem;
+  font-size: 0.7rem;
+  color: var(--av-muted);
+  line-height: 1.35;
+}
+
+.av-freq-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 0 !important;
+  background: transparent !important;
+}
+
+/* ─── Main ─── */
+.av-main {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--av-bg);
+}
+
+.av-main__head {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem var(--av-pad);
+  background: var(--av-surface);
+  border-bottom: 1px solid var(--av-border);
+}
+
+.av-main__back {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--av-border);
+  border-radius: var(--av-radius-sm);
+  background: var(--av-surface-2);
+  color: var(--av-text);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.av-main__tabs {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.2rem;
+  border-radius: 999px;
+  background: var(--av-surface-2);
+  border: 1px solid var(--av-border);
+}
+
+.av-main__tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.7rem;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--av-muted);
+  font-size: 0.78rem;
+  font-weight: 650;
+  cursor: pointer;
+  transition: background 0.2s var(--av-ease), color 0.2s var(--av-ease);
+}
+
+.av-main__tab.active,
+.av-main__tab[aria-selected="true"] {
+  background: var(--av-surface);
+  color: var(--av-accent);
+  box-shadow: var(--av-shadow);
+}
+
+.av-main__actions {
+  margin-left: auto;
+  display: flex;
+  gap: 0.35rem;
+}
+
+.av-status-bar {
+  flex-shrink: 0;
+  padding: 0.35rem var(--av-pad);
+  background: color-mix(in srgb, var(--av-accent) 6%, var(--av-surface));
+  border-bottom: 1px solid var(--av-border);
+  min-height: 1.75rem;
+}
+
+.av-status {
+  font-size: 0.78rem;
+  color: var(--av-muted);
+}
+
+.av-main__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.av-panel {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.av-workbench-ui[data-av-panel="blank"] .av-panel[data-av-panel="blank"],
+.av-workbench-ui[data-av-panel="callsigns"] .av-panel[data-av-panel="callsigns"],
+.av-workbench-ui[data-av-panel="stats"] .av-panel[data-av-panel="stats"] {
+  display: flex;
+}
+
+/* ─── Blank editor ─── */
+.av-panel__toolbar {
+  flex-shrink: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: var(--av-pad);
+  background: var(--av-surface);
+  border-bottom: 1px solid var(--av-border);
+}
+
+.av-panel__subtitle {
+  font-size: 0.8125rem;
+  font-weight: 650;
+  color: var(--av-text);
+}
+
+.av-type-select {
+  max-width: 12rem;
+  margin-top: 0.35rem;
+}
+
+.av-panel__toolbar-end {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.av-editor-wrap {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: var(--av-pad);
+  display: flex;
+}
+
+.av-editor,
+#aviation-text.av-editor {
+  flex: 1 1 auto;
+  min-height: 200px;
+  resize: none;
+  font-family: "Roboto Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.55;
+  border-radius: var(--av-radius);
+  background: var(--av-surface);
+  border-color: var(--av-border);
+}
+
+.av-editor:focus {
+  border-color: color-mix(in srgb, var(--av-accent) 45%, var(--av-border)) !important;
+  box-shadow: 0 0 0 3px var(--av-accent-soft) !important;
+}
+
+.av-panel__foot {
+  flex-shrink: 0;
+  padding: 0.45rem var(--av-pad);
+  background: var(--av-surface);
+  border-top: 1px solid var(--av-border);
+}
+
+.av-save-status {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  color: var(--av-muted);
+}
+
+.save-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--av-muted);
+  opacity: 0.4;
+}
+
+.save-indicator.saving {
+  background: #f59e0b;
+  opacity: 1;
+  animation: av-pulse 1s ease infinite;
+}
+
+.save-indicator.saved {
+  background: #22c55e;
+  opacity: 1;
+}
+
+.save-indicator.error {
+  background: #ef4444;
+  opacity: 1;
+}
+
+@keyframes av-pulse {
+  50% { opacity: 0.35; }
+}
+
+/* ─── Callsigns panel ─── */
+.av-panel--callsigns {
+  padding: var(--av-pad);
+  overflow-y: auto;
+}
+
+.av-cs-form {
+  flex-shrink: 0;
+}
+
+.av-cs-list {
+  min-height: 120px;
+}
+
+/* ─── Stats panel ─── */
+.av-panel--stats {
+  overflow: hidden;
+}
+
+.av-stats-toolbar {
+  flex-shrink: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: var(--av-pad);
+  background: var(--av-surface);
+  border-bottom: 1px solid var(--av-border);
+}
+
+.av-panel__title {
+  font-size: 0.9375rem;
+  font-weight: 750;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.av-panel__title i {
+  color: var(--av-accent);
+}
+
+.av-stats-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+.av-table-wrap {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  padding: 0 var(--av-pad) var(--av-pad);
+}
+
+.av-stats-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--av-surface-2);
+}
+
+/* ─── Frequencies list (JS) ─── */
+.md3-aviation .md3-aviation-list-header {
+  font-size: 0.68rem;
+  font-weight: 750;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--av-muted);
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0.5rem 0.35rem 0.25rem !important;
+}
+
+.md3-aviation #frequencies-list .list-group-item:not(.md3-aviation-list-header) {
+  border-radius: var(--av-radius-sm) !important;
+  margin-bottom: 0.25rem;
+  border: 1px solid var(--av-border) !important;
+  transition: transform 0.15s var(--av-ease), box-shadow 0.15s var(--av-ease);
+}
+
+.md3-aviation #frequencies-list .list-group-item:not(.md3-aviation-list-header):hover {
+  transform: translateX(2px);
+  box-shadow: var(--av-shadow);
+}
+
+.md3-aviation #frequencies-list .list-group-item.active {
+  background: var(--av-accent-soft) !important;
+  border-color: color-mix(in srgb, var(--av-accent) 30%, var(--av-border)) !important;
+  color: var(--av-accent);
+}
+
+.md3-aviation .md3-aviation-empty {
+  color: var(--av-muted);
+  font-size: 0.8rem;
+  text-align: center;
+  padding: 1rem !important;
+}
+
+.md3-aviation #cs-list .list-group-item {
+  border-radius: var(--av-radius-sm) !important;
+  margin-bottom: 0.25rem;
+}
+
+/* ─── Overlay: все позывные ─── */
+body.eavc-app .aviation-callsigns-sidebar {
+  position: fixed;
+  z-index: 1046;
+  top: 0;
+  left: var(--eavc-rail-w, 84px);
+  bottom: 0;
+  width: min(340px, calc(100vw - var(--eavc-rail-w, 84px) - 12px));
+  max-width: 100%;
+  display: none;
+  flex-direction: column;
+  background: var(--av-surface);
+  border-right: 1px solid var(--av-border);
+  box-shadow: 8px 0 32px rgba(0, 0, 0, 0.18);
+  padding: 0;
+  overflow: hidden;
+}
+
+body.eavc-app.av-callsigns-open .aviation-callsigns-sidebar,
+.av-workbench-ui.av-callsigns-open .aviation-callsigns-sidebar {
+  display: flex !important;
+}
+
+.aviation-callsigns-sidebar__inner {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: var(--av-pad);
+}
+
+.aviation-callsigns-sidebar__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.65rem;
+}
+
+.aviation-callsigns-sidebar__title {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.av-pre {
+  white-space: pre-wrap;
+  font-family: "Roboto Mono", ui-monospace, monospace;
+  font-size: 13px;
+}
+
+/* Modals */
+.md3-aviation-modal .modal-content {
+  border-radius: var(--av-radius) !important;
+  border: 1px solid var(--av-border) !important;
+}
+
+@media (min-width: 768px) {
+  .av-main__back {
+    display: none !important;
+  }
+}
+
+@media (max-width: 991.98px) {
+  .md3-aviation.av-workbench-ui {
+    --av-sidebar-w: min(280px, 40vw);
+  }
+}
+
+@media (max-width: 767.98px) {
+  body.eavc-app .aviation-callsigns-sidebar {
+    left: 0;
+    width: min(100vw, 360px);
+    z-index: 1055;
+  }
+}

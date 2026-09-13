@@ -1,0 +1,589 @@
+<!doctype html>
+<html lang="ru" data-wp-density="comfortable" data-wp-theme="light" data-bs-theme="light">
+
+<head>
+  <script>
+    (function () {
+      try {
+        var d = localStorage.getItem('wp-density');
+        document.documentElement.setAttribute('data-wp-density',
+          (d === 'compact' || d === 'comfortable') ? d : 'comfortable');
+      } catch (e) {
+        document.documentElement.setAttribute('data-wp-density', 'comfortable');
+      }
+      try {
+        var th = localStorage.getItem('wp-theme');
+        var theme = (th === 'dark' || th === 'light') ? th : 'light';
+        document.documentElement.setAttribute('data-wp-theme', theme);
+        document.documentElement.setAttribute('data-bs-theme', theme);
+      } catch (e) {
+        document.documentElement.setAttribute('data-wp-theme', 'light');
+        document.documentElement.setAttribute('data-bs-theme', 'light');
+      }
+    })();
+  </script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  {% if csrf_token %}<meta name="csrf-token" content="{{ csrf_token }}" />{% endif %}
+  <script>
+    (function () {
+      /* CSRF: добавляем X-CSRF-Token ко всем same-origin изменяющим fetch-запросам */
+      var meta = null;
+      var SAFE = { GET: 1, HEAD: 1, OPTIONS: 1, TRACE: 1 };
+      var origFetch = window.fetch;
+      window.fetch = function (input, init) {
+        try {
+          var method = ((init && init.method) || (input && input.method) || "GET").toUpperCase();
+          if (!SAFE[method]) {
+            var url = (typeof input === "string") ? input : ((input && input.url) || "");
+            var sameOrigin = !/^https?:\/\//i.test(url) || url.indexOf(window.location.origin + "/") === 0 || url === window.location.origin;
+            if (sameOrigin) {
+              if (!meta) meta = document.querySelector('meta[name="csrf-token"]');
+              var token = meta && meta.content;
+              if (token) {
+                init = init || {};
+                var h = new Headers(init.headers || (typeof input === "object" && input && input.headers) || {});
+                if (!h.has("X-CSRF-Token")) h.set("X-CSRF-Token", token);
+                init.headers = h;
+              }
+            }
+          }
+        } catch (e) { /* не блокируем запрос из-за ошибки патча */ }
+        return origFetch.call(this, input, init);
+      };
+    })();
+  </script>
+  <title>{% block title %}ЕАВС{% endblock %}</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/eavs-lettermark-logo.png') }}?v=2" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap/bootstrap.min.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap-icons/bootstrap-icons.min.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}?v=chat-dark-1" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/chat-modern.css') }}?v=2" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/mobile.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/eavc-app-shell.css') }}?v=22" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/eavc-premium.css') }}?v=40" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/eavc-mobile-app.css') }}?v=3" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/eavc-mobile-v3.css') }}?v=1" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/eavc-mobile-tactical.css') }}?v=3" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/eavc-mobile-pro.css') }}?v=2" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/targeting-v2.css') }}?v=3" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,400..700&display=swap" rel="stylesheet" />
+  {% block styles %}{% endblock %}
+</head>
+
+{% set ep = request.endpoint or '' %}
+{% set eavc_sections = {
+  'index': ('ЕАВС', 'Портал'),
+  'sessions': ('Сеансы', 'Папки и импорт'),
+  'intercepts': ('Перехваты', 'Бланки и чаты'),
+  'audio_intercepts': ('Аудиоперехваты', 'Записи'),
+  'analysis': ('Анализ', 'Позывные и сводки'),
+  'search_online': ('Поиск онлайн', 'Таблица и подразделения'),
+  'instruction': ('Инструкции', 'Руководства'),
+  'admin_users': ('Администрирование', 'Пользователи'),
+  'aviation': ('Авиация', 'Рейсы'),
+  'login': ('Вход', ''),
+} %}
+{% set eavc_section_title = eavc_sections.get(ep, ('ЕАВС', ''))[0] %}
+{% set eavc_section_sub = eavc_sections.get(ep, ('ЕАВС', ''))[1] %}
+{% set use_eavc_shell = current_user.is_authenticated and ep != 'login' %}
+{% set eavc_page_class = '' %}
+{% if ep == 'intercepts' %}{% set eavc_page_class = 'eavc-page-intercepts' %}
+{% elif ep == 'audio_intercepts' %}{% set eavc_page_class = 'eavc-page-audio' %}
+{% elif ep == 'sessions' %}{% set eavc_page_class = 'eavc-page-sessions' %}
+{% elif ep == 'aviation' %}{% set eavc_page_class = 'eavc-page-aviation' %}
+{% elif ep == 'analysis' %}{% set eavc_page_class = 'eavc-page-analysis' %}
+{% elif ep == 'search_online' %}{% set eavc_page_class = 'eavc-page-search-online' %}
+{% elif ep == 'admin_users' %}{% set eavc_page_class = 'eavc-page-admin' %}
+{% endif %}
+<body class="{% if ep != 'login' %}wp-has-app-background{% endif %}{% if use_eavc_shell %} eavc-app{% endif %} {{ eavc_page_class }}"{% if current_user.is_authenticated %} data-wp-deploy-poll="1" data-wp-id-watch-poll="1"{% endif %}>
+  {% if use_eavc_shell %}
+  <script>
+    (function () {
+      try {
+        var mq = window.matchMedia && window.matchMedia("(max-width: 767.98px)");
+        if (mq && mq.matches) {
+          document.documentElement.classList.add("eavc-mobile-shell");
+          document.body.classList.add("eavc-mobile-shell");
+        }
+      } catch (_e) {}
+    })();
+  </script>
+  {% endif %}
+  {% if use_eavc_shell %}
+  <script>
+    (function () {
+      try {
+        var raw = sessionStorage.getItem("eavc:nav");
+        if (!raw) return;
+        var nav = JSON.parse(raw);
+        if (nav && nav.path === location.pathname && Date.now() - (nav.ts || 0) < 30000) {
+          document.documentElement.classList.add("eavc-nav-pending");
+          var boot = typeof nav.progress === "number" ? Math.max(12, nav.progress) : 12;
+          document.documentElement.style.setProperty("--eavc-nav-boot-pct", Math.min(100, boot) + "%");
+        }
+      } catch (_e) {}
+    })();
+  </script>
+  {% endif %}
+  <nav class="navbar navbar-expand-lg wp-nav md3-top-app-bar border-bottom sticky-top">
+    <div class="container-fluid px-2 px-sm-3">
+      <a class="navbar-brand fw-bold" href="{{ url_for('index') }}">ЕАВС</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain"
+        aria-controls="navMain" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse wp-navbar-collapse" id="navMain">
+        <div class="wp-navbar-tabs-shell">
+        <ul class="navbar-nav mb-2 mb-lg-0 wp-navbar-primary">
+          {% if current_user.is_authenticated %}
+          {% if current_user.has_perm('tab_intercepts') %}
+          <li class="nav-item">
+            <a class="nav-link {{ 'active' if ep=='intercepts' else '' }}" href="{{ url_for('intercepts') }}"><i
+                class="bi bi-journal-text me-1"></i>Перехваты</a>
+          </li>
+          {% endif %}
+          {% if current_user.has_perm('tab_audio_intercepts') %}
+          <li class="nav-item">
+            <a class="nav-link {{ 'active' if ep=='audio_intercepts' else '' }}"
+              href="{{ url_for('audio_intercepts') }}"><i class="bi bi-headphones me-1"></i>Аудиоперехваты</a>
+          </li>
+          {% endif %}
+          {% if current_user.has_perm('tab_aviation') %}
+          <li class="nav-item">
+            <a class="nav-link {{ 'active' if ep=='aviation' else '' }}" href="{{ url_for('aviation') }}"><i
+                class="bi bi-airplane me-1"></i>Авиация</a>
+          </li>
+          {% endif %}
+          {% if current_user.has_perm('tab_sessions') %}
+          <li class="nav-item">
+            <a class="nav-link {{ 'active' if ep=='sessions' else '' }}" href="{{ url_for('sessions') }}"><i
+                class="bi bi-folder2-open me-1"></i>Сеансы</a>
+          </li>
+          {% endif %}
+          {% set has_analysis_group = current_user.has_perm('tab_analysis')
+            or current_user.has_perm('tab_search_online')
+            or current_user.has_perm('tab_admin') %}
+          {% if has_analysis_group %}
+          {% set analysis_group_active = ep in ['analysis', 'search_online', 'admin_users'] %}
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle {{ 'active' if analysis_group_active else '' }}" href="#" role="button"
+              data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-graph-up me-1"></i>Анализ
+            </a>
+            <ul class="dropdown-menu">
+              {% if current_user.has_perm('tab_analysis') %}
+              <li>
+                <a class="dropdown-item {{ 'active' if ep=='analysis' else '' }}" href="{{ url_for('analysis') }}">
+                  <i class="bi bi-graph-up me-1"></i>Анализ
+                </a>
+              </li>
+              {% endif %}
+              {% if current_user.has_perm('tab_search_online') %}
+              <li>
+                <a class="dropdown-item {{ 'active' if ep=='search_online' else '' }}" href="{{ url_for('search_online') }}">
+                  <i class="bi bi-table me-1"></i>Поиск онлайн
+                </a>
+              </li>
+              {% endif %}
+              {% if current_user.has_perm('tab_admin') %}
+              <li>
+                <a class="dropdown-item {{ 'active' if ep=='admin_users' else '' }}" href="{{ url_for('admin_users') }}">
+                  <i class="bi bi-shield-lock me-1"></i>Админ
+                </a>
+              </li>
+              {% endif %}
+            </ul>
+          </li>
+          {% endif %}
+          {% endif %}
+        </ul>
+        </div>
+        <div class="d-flex align-items-center gap-3 flex-grow-1 flex-lg-grow-0 justify-content-lg-end ms-lg-auto wp-navbar-tools">
+          {% if current_user.is_authenticated %}
+          {% if not use_eavc_shell %}
+          <div class="d-flex align-items-center gap-2 flex-shrink-0 wp-navbar-position" style="min-width: 0;">
+            <span class="small wp-subtle text-nowrap d-none d-sm-inline">Позиция</span>
+            <select class="form-select form-select-sm wp-toolbar-select" id="global-position-select"
+              style="min-width: min(100%, 210px); max-width: min(100%, 280px);"
+              onchange="if(this.value){ window.location.href = this.value; }">
+              {% if current_user.role == 'admin' %}
+              <option value="{{ url_for('set_position', pos='__all__') }}" {{ 'selected' if not selected_position else '' }}>
+                Все позиции
+              </option>
+              {% endif %}
+              {% if allowed_positions and allowed_positions|length > 0 %}
+              {% for p in allowed_positions %}
+              <option value="{{ url_for('set_position', pos=p) }}" {{ 'selected' if selected_position == p else '' }}>
+                {{ p }}
+              </option>
+              {% endfor %}
+              {% else %}
+              <option value="" selected disabled>Нет назначенных позиций</option>
+              {% endif %}
+            </select>
+          </div>
+          <button type="button" class="btn btn-link btn-sm p-0 wp-nav-icon-btn wp-theme-toggle wp-navbar-tools-icon" id="wp-theme-toggle"
+            title="Тёмная тема" aria-label="Включить тёмную тему">
+            <i class="bi bi-moon-stars fs-5" aria-hidden="true"></i>
+          </button>
+          <button type="button" class="btn btn-link btn-sm p-0 position-relative wp-nav-icon-btn wp-navbar-tools-icon" id="chat-btn"
+            onclick="typeof toggleChatModal==='function'&&toggleChatModal()" title="Чат">
+            <i class="bi bi-chat-dots fs-5"></i>
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+              id="chat-badge" style="display: none;">0</span>
+          </button>
+          <button type="button" class="btn btn-link btn-sm p-0 position-relative wp-nav-icon-btn wp-navbar-tools-icon" id="targeting-notification-btn"
+            onclick="typeof showTargetingModal==='function'&&showTargetingModal()" title="Нацеливания">
+            <i class="bi bi-bell fs-5"></i>
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+              id="targeting-badge" style="display: none;">1</span>
+          </button>
+          <div class="dropdown">
+            <button class="btn btn-sm dropdown-toggle d-flex align-items-center gap-2 wp-user-menu-btn"
+              type="button" id="wp-user-menu" data-bs-toggle="dropdown" aria-expanded="false"
+              aria-label="Меню пользователя">
+              <i class="bi bi-person-circle fs-5"></i>
+              <span class="d-none d-sm-inline text-muted small text-truncate" style="max-width: 6rem;">{{ current_user.username or current_user.role }}</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="wp-user-menu">
+              <li><h6 class="dropdown-header">Профиль</h6></li>
+              <li>
+                <span class="dropdown-item-text small d-flex align-items-center gap-2">
+                  <i class="bi bi-person-circle"></i>
+                  <span>{{ current_user.username or current_user.role }}</span>
+                </span>
+              </li>
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <a class="dropdown-item" href="{{ url_for('logout') }}">
+                  <i class="bi bi-box-arrow-right me-2"></i>Выйти
+                </a>
+              </li>
+            </ul>
+          </div>
+          {% endif %}
+          {% else %}
+          <button type="button" class="btn btn-link btn-sm p-0 wp-nav-icon-btn wp-theme-toggle" id="wp-theme-toggle"
+            title="Тёмная тема" aria-label="Включить тёмную тему">
+            <i class="bi bi-moon-stars fs-5" aria-hidden="true"></i>
+          </button>
+          {% if ep != 'login' %}
+          <a class="btn btn-outline-primary btn-sm" href="{{ url_for('login') }}"><i
+              class="bi bi-box-arrow-in-right me-1"></i>Войти</a>
+          {% endif %}
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  {% if use_eavc_shell %}
+  <div class="eavc-shell">
+    {% include 'includes/eavc_rail.html' %}
+    <div class="eavc-rail-backdrop" id="eavc-rail-backdrop" hidden aria-hidden="true"></div>
+    <div class="eavc-main">
+      {% include 'includes/eavc_topbar.html' %}
+  {% endif %}
+
+  <main class="{% if use_eavc_shell %}eavc-content {% endif %}{% block container_class %}container-fluid px-3 py-4{% endblock %}">
+    {% block content %}{% endblock %}
+  </main>
+
+  {% if use_eavc_shell %}
+    {% set mobile_primary = 'audio' if ep == 'audio_intercepts' else '' %}
+    {% if current_user.has_perm('tab_audio_intercepts') %}
+    <nav class="eavc-mobile-primary-dock" aria-label="Мобильные разделы">
+      <a class="eavc-mobile-primary-dock__item {{ 'active' if mobile_primary == 'audio' else '' }}"
+        href="{{ url_for('audio_intercepts') }}" {% if mobile_primary == 'audio' %}aria-current="page"{% endif %}>
+        <i class="bi bi-headphones" aria-hidden="true"></i>
+        <span>Аудио</span>
+      </a>
+    </nav>
+    {% endif %}
+    </div>
+  </div>
+  <div class="eavc-nav-loader" id="eavc-nav-loader" hidden aria-hidden="true" aria-live="polite">
+    <div class="eavc-nav-loader__veil" aria-hidden="true">
+      <span class="eavc-nav-loader__glow eavc-nav-loader__glow--a"></span>
+      <span class="eavc-nav-loader__glow eavc-nav-loader__glow--b"></span>
+    </div>
+    <div class="eavc-nav-loader__panel" role="status">
+      <div class="eavc-nav-loader__mark" aria-hidden="true">
+        <span class="eavc-nav-loader__orbit"></span>
+        <span class="eavc-nav-loader__core">
+          <i class="bi bi-arrow-repeat eavc-nav-loader__icon" id="eavc-nav-loader-icon" aria-hidden="true"></i>
+        </span>
+      </div>
+      <p class="eavc-nav-loader__kicker">Подготовка раздела</p>
+      <p class="eavc-nav-loader__label" id="eavc-nav-loader-label">Загрузка…</p>
+      <div class="eavc-nav-loader__progress">
+        <div class="eavc-nav-loader__track" aria-hidden="true">
+          <span class="eavc-nav-loader__bar" id="eavc-nav-loader-bar"></span>
+        </div>
+        <span class="eavc-nav-loader__pct" id="eavc-nav-loader-pct" aria-hidden="true">12%</span>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      try {
+        var raw = sessionStorage.getItem("eavc:nav");
+        if (!raw) return;
+        var nav = JSON.parse(raw);
+        if (!nav || nav.path !== location.pathname || Date.now() - (nav.ts || 0) > 30000) return;
+        var label = document.getElementById("eavc-nav-loader-label");
+        var icon = document.getElementById("eavc-nav-loader-icon");
+        if (label && nav.label) label.textContent = nav.label;
+        if (icon && nav.icon) icon.className = nav.icon + " eavc-nav-loader__icon";
+        var loaderEl = document.getElementById("eavc-nav-loader");
+        var bootPct = document.documentElement.style.getPropertyValue("--eavc-nav-boot-pct");
+        if (loaderEl) {
+          var pctNum = bootPct ? parseFloat(bootPct) : Math.max(12, nav.progress || 12);
+          var pct = (bootPct || Math.max(12, nav.progress || 12) + "%");
+          loaderEl.style.setProperty("--eavc-loader-pct", pct);
+          var pctEl = document.getElementById("eavc-nav-loader-pct");
+          if (pctEl) pctEl.textContent = Math.round(pctNum) + "%";
+        }
+      } catch (_e) {}
+    })();
+  </script>
+  {% endif %}
+
+  <div class="toast-container position-fixed bottom-0 end-0 p-3" id="app-toast-container">
+    <div id="app-toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-body" id="app-toast-body">—</div>
+    </div>
+  </div>
+
+  <!-- Общий модал: тег позывного (Анализ, Перехваты) -->
+  <div class="modal fade" id="callsignTagModal" tabindex="-1" aria-labelledby="callsignTagModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered callsign-tag-modal-dialog">
+      <div class="modal-content callsign-tag-modal-content">
+        <div class="modal-header">
+          <div>
+            <h5 class="modal-title fw-bold mb-0" id="callsignTagModalLabel">Тег позывного</h5>
+            <div class="small text-muted mt-1">Метка для быстрого распознавания в бланке</div>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label small mb-1 fw-semibold">Тег</label>
+            <input class="form-control form-control-sm" id="cs-tag-input" placeholder="например: СВОЙ" />
+            <div class="form-text">Пусто — убрать тег</div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label small mb-1 fw-semibold">Описание</label>
+            <textarea class="form-control form-control-sm" id="cs-tag-desc" rows="2" placeholder="кто это / комментарий"></textarea>
+          </div>
+          <div class="d-flex align-items-center justify-content-between gap-3 callsign-tag-color-row">
+            <div class="form-check form-switch m-0">
+              <input class="form-check-input" type="checkbox" id="cs-tag-use-color" />
+              <label class="form-check-label small fw-semibold" for="cs-tag-use-color">Использовать цвет</label>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <span class="small text-muted">Цвет</span>
+              <input type="color" id="cs-tag-color" value="#f59e0b" title="Цвет тега" class="form-control form-control-color form-control-sm" style="width:2.65rem; height:2rem;" />
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary btn-sm px-3" data-bs-dismiss="modal">Отмена</button>
+          <button type="button" class="btn btn-primary btn-sm px-3" id="cs-tag-save">Сохранить</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chat Modal -->
+  {% if current_user.is_authenticated %}
+  <div class="modal fade chat-modern-ui" id="chatModal" tabindex="-1" data-chat-user="{{ current_user.username|e }}">
+    <div class="modal-dialog modal-xl chat-modal-dialog">
+      <div class="modal-content chat-modal-content">
+        <div class="modal-header chat-modal-header">
+          <div class="d-flex align-items-center gap-2">
+            <div class="chat-modal-logo">
+              <img class="eavc-rail__lettermark eavc-rail__lettermark--light" src="{{ url_for('static', filename='images/eavs-lettermark-logo.png') }}?v=2" alt="ЕАВС" width="88" height="28" decoding="async" />
+              <img class="eavc-rail__lettermark eavc-rail__lettermark--dark" src="{{ url_for('static', filename='images/eavs-lettermark-logo-dark.png') }}?v=2" alt="" width="88" height="28" decoding="async" aria-hidden="true" />
+            </div>
+            <div>
+              <h5 class="modal-title mb-0 fw-semibold">Интеллект-хаб ЕАВС</h5>
+              <div class="small chat-modal-subtitle" id="chat-current-channel-title">Выберите канал</div>
+            </div>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+        </div>
+        <div class="modal-body p-0 chat-modal-body">
+          <button type="button" class="chat-sidebar-backdrop" id="chat-sidebar-backdrop" hidden aria-label="Закрыть каналы"></button>
+          <div class="d-flex h-100">
+            <div class="chat-sidebar" id="chat-sidebar">
+              <div class="chat-sidebar-hero">
+                <div class="chat-sidebar-kicker">Локальная нейросеть</div>
+                <div class="chat-sidebar-title-main">AI для смен и перехватов</div>
+                <div class="chat-sidebar-text">Сводки, анализ периода, подсказки оператору.</div>
+              </div>
+              <div class="chat-sidebar-title small text-uppercase text-muted px-3 py-2">Каналы</div>
+              <ul class="list-group list-group-flush chat-channel-list" id="chat-channels-list">
+                <li class="list-group-item list-group-item-action text-muted small py-2">
+                  <span class="spinner-border spinner-border-sm me-2" role="status"></span>Загрузка...
+                </li>
+              </ul>
+            </div>
+            <div class="chat-main flex-grow-1 d-flex flex-column min-w-0">
+              <div class="chat-conversation-top">
+                <div class="d-flex align-items-center gap-2 min-w-0">
+                  <button type="button" class="chat-sidebar-toggle d-lg-none" id="chat-sidebar-toggle" aria-expanded="false" aria-controls="chat-sidebar" title="Каналы">
+                    <i class="bi bi-list" aria-hidden="true"></i>
+                  </button>
+                  <div class="min-w-0">
+                    <div class="chat-conversation-title" id="chat-conversation-title">Чат</div>
+                    <div class="chat-conversation-hint">Enter — отправить, Shift+Enter — новая строка</div>
+                  </div>
+                </div>
+                <div class="chat-ai-status d-flex align-items-center gap-2">
+                  <button type="button" class="btn btn-sm btn-outline-secondary chat-clear-history-btn"
+                    id="chat-clear-history-btn" hidden title="Очистить историю чата">
+                    <i class="bi bi-trash3" aria-hidden="true"></i>
+                    <span class="d-none d-md-inline ms-1">Очистить</span>
+                  </button>
+                  <span class="chat-ai-dot"></span>
+                  Local AI
+                </div>
+              </div>
+              <div class="chat-thread-wrap">
+                <div id="chat-messages-container" class="flex-grow-1 overflow-auto">
+                  <div class="text-center text-muted py-5">
+                    <div class="small">Выберите канал слева</div>
+                  </div>
+                </div>
+                <button type="button" class="chat-scroll-bottom" id="chat-scroll-bottom" hidden title="К последнему сообщению">
+                  <i class="bi bi-arrow-down" aria-hidden="true"></i>
+                </button>
+              </div>
+              <div class="chat-bottom-stack">
+              <div class="chat-quick-prompts" id="chat-ai-quick-prompts" style="display:none;">
+                <button type="button" class="btn btn-sm btn-light chat-prompt-chip"
+                  data-prompt="Дай краткую сводку по последней смене по перехватам: что происходило по каналам, подразделение, частота, группа.">
+                  Сводка последней смены
+                </button>
+                <button type="button" class="btn btn-sm btn-light chat-prompt-chip"
+                  data-prompt="Проанализируй последние перехваты и выдели риски, аномалии и что уточнить оператору.">
+                  Риски и аномалии
+                </button>
+                <button type="button" class="btn btn-sm btn-light chat-prompt-chip"
+                  data-prompt="Сформируй короткий отчет для руководителя по данным перехватов.">
+                  Отчет руководителю
+                </button>
+                <button type="button" class="btn btn-sm btn-light chat-prompt-chip"
+                  data-prompt="Какие ID были в других подразделениях за сегодня? Покажи дату, частоту, группу и всех участников сеанса.">
+                  ID в других подразделениях
+                </button>
+                <button type="button" class="btn btn-sm btn-light chat-prompt-chip"
+                  data-prompt="Оперативные дежурные в подразделениях за сегодня.">
+                  Оперативные дежурные
+                </button>
+                <button type="button" class="btn btn-sm btn-light chat-prompt-chip"
+                  data-prompt="Покажи самые активные подразделения по сеансам за сегодня.">
+                  Активные подразделения
+                </button>
+                <button type="button" class="btn btn-sm btn-light chat-prompt-chip"
+                  data-prompt="Покажи активные задачи и нацеливания для меня.">
+                  Активные задачи
+                </button>
+                <button type="button" class="btn btn-sm btn-light chat-prompt-chip"
+                  data-prompt="Объясни последние ML-прогнозы.">
+                  ML-прогнозы
+                </button>
+              </div>
+              <div class="chat-input-area">
+                <div class="mb-2 d-flex align-items-center gap-2 chat-attachment-row">
+                  <input type="file" id="chat-file-input" class="d-none" accept=".txt,.doc,.docx,.pdf,.rtf">
+                  <button type="button" class="btn btn-sm btn-outline-secondary"
+                    onclick="document.getElementById('chat-file-input').click()" title="Прикрепить файл">
+                    <i class="bi bi-paperclip me-1"></i>Файл
+                  </button>
+                  <span id="chat-file-name" class="small text-muted ms-2"></span>
+                </div>
+                <div class="chat-composer">
+                  <textarea class="form-control" id="chat-message-input" rows="2"
+                    placeholder="Спросите менеджера ЕАВС про смену, перехваты или отчёт..."></textarea>
+                  <button class="btn btn-primary chat-send-btn" id="chat-send-btn" type="button"
+                    onclick="typeof sendChatMessage==='function'&&sendChatMessage()" title="Отправить">
+                    <i class="bi bi-send-fill"></i>
+                  </button>
+                </div>
+              </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Targeting Modal -->
+  {% if current_user.is_authenticated %}
+  <div class="modal fade tg-modal" id="targetingModal" tabindex="-1" aria-labelledby="targetingModalTitle" aria-modal="true">
+    <div class="modal-dialog modal-dialog-centered tg-modal__dialog">
+      <div class="modal-content tg-panel tg-inbox">
+        <header class="tg-inbox__head">
+          <div class="tg-inbox__brand">
+            <span class="tg-inbox__mark" aria-hidden="true"><i class="bi bi-megaphone-fill"></i></span>
+            <div class="tg-inbox__title-wrap">
+              <h2 class="tg-inbox__title" id="targetingModalTitle">Нацеливания</h2>
+              <p class="tg-inbox__subtitle">Оперативные указания для вашей позиции</p>
+            </div>
+          </div>
+          <button type="button" class="btn-close tg-inbox__close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+        </header>
+        <div class="tg-inbox__toolbar" role="toolbar" aria-label="Фильтры нацеливаний">
+          <div class="tg-seg" role="tablist" aria-label="Фильтр нацеливаний">
+            <button type="button" class="tg-filter active" data-tg-filter="all" role="tab" aria-selected="true">Все</button>
+            <button type="button" class="tg-filter" data-tg-filter="unread" role="tab" aria-selected="false">Непрочитанные</button>
+          </div>
+          <div class="tg-inbox__stats">
+            <span class="tg-stat tg-stat--new" id="targeting-stat-unread">—</span>
+            <span class="tg-stat" id="targeting-stat-total">—</span>
+          </div>
+        </div>
+        <div class="tg-inbox__body tg-panel__shell" id="targeting-panel-shell">
+          <div class="tg-inbox__list tg-panel__list" id="targeting-list-pane" role="listbox" aria-label="Список нацеливаний"></div>
+          <section class="tg-inbox__detail tg-panel__detail" id="targeting-detail-pane" aria-live="polite"></section>
+        </div>
+        <footer class="tg-inbox__foot tg-panel__foot--mobile" id="targeting-mobile-foot" hidden>
+          <button type="button" class="btn btn-outline-secondary btn-sm" id="targeting-mobile-back">
+            <i class="bi bi-arrow-left me-1" aria-hidden="true"></i>К списку
+          </button>
+        </footer>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {% block modals %}{% endblock %}
+
+  <script src="{{ url_for('static', filename='vendor/bootstrap/bootstrap.bundle.min.js') }}"></script>
+  {% if current_user.is_authenticated %}
+  <script defer src="{{ url_for('static', filename='js/deploy-notify.js') }}?v=3"></script>
+  <script defer src="{{ url_for('static', filename='js/id-watch-notify.js') }}?v=5"></script>
+  {% endif %}
+  <script defer src="{{ url_for('static', filename='js/wp-ui.js') }}"></script>
+  {% if use_eavc_shell %}
+  <script defer src="{{ url_for('static', filename='js/eavc-app-shell.js') }}?v=15"></script>
+  <script defer src="{{ url_for('static', filename='js/eavc-mobile-nav.js') }}?v=5"></script>
+  <script defer src="{{ url_for('static', filename='js/eavc-mobile-hub.js') }}?v=1"></script>
+  {% endif %}
+  <script defer src="{{ url_for('static', filename='js/api.js') }}"></script>
+  <script defer src="{{ url_for('static', filename='js/utils.js') }}"></script>
+  <script defer src="{{ url_for('static', filename='js/targeting.js') }}?v=5"></script>
+  {% if current_user.is_authenticated %}
+  <script defer src="{{ url_for('static', filename='js/chat.js') }}?v=chat-clear-shift-1"></script>
+  {% endif %}
+  {% block scripts %}{% endblock %}
+</body>
+
+</html>

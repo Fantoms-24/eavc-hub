@@ -1,0 +1,116 @@
+{# Верхняя шапка EAVC — Pro #}
+{% set eavc_user_label = current_user.username or current_user.role %}
+<header class="eavc-topbar eavc-topbar--pro">
+  <div class="eavc-topbar__inner">
+    <div class="eavc-topbar__left">
+      <button type="button" class="eavc-mobile-back" id="eavc-mobile-back" aria-label="Назад" hidden>
+        <i class="bi bi-chevron-left" aria-hidden="true"></i>
+      </button>
+      <button type="button" class="eavc-topbar__menu d-lg-none" id="eavc-rail-toggle" aria-label="Меню"
+        aria-expanded="false">
+        <i class="bi bi-list" aria-hidden="true"></i>
+      </button>
+
+      {% if allowed_positions is defined and (allowed_positions or current_user.role == 'admin') %}
+      <div class="dropdown eavc-topbar__pos">
+        <button type="button" class="eavc-topbar__pos-trigger dropdown-toggle" id="global-position-toggle"
+          data-bs-toggle="dropdown" aria-expanded="false" aria-label="Позиция">
+          <span class="eavc-topbar__pos-label">
+            {%- if selected_position -%}
+              {{ selected_position }}
+            {%- elif current_user.role == 'admin' -%}
+              Все позиции
+            {%- elif allowed_positions and allowed_positions|length > 0 -%}
+              {{ allowed_positions[0] }}
+            {%- else -%}
+              Нет позиций
+            {%- endif -%}
+          </span>
+        </button>
+        <ul class="dropdown-menu eavc-topbar__pos-menu" aria-labelledby="global-position-toggle">
+          {% if current_user.role == 'admin' %}
+          <li>
+            <a class="dropdown-item{{ ' active' if not selected_position else '' }}"
+              href="{{ url_for('set_position', pos='__all__') }}">Все позиции</a>
+          </li>
+          {% endif %}
+          {% if allowed_positions and allowed_positions|length > 0 %}
+          {% for p in allowed_positions %}
+          <li>
+            <a class="dropdown-item{{ ' active' if selected_position == p else '' }}"
+              href="{{ url_for('set_position', pos=p) }}">{{ p }}</a>
+          </li>
+          {% endfor %}
+          {% endif %}
+        </ul>
+      </div>
+      {% endif %}
+    </div>
+
+    {% set eavc_has_mobile_audio = current_user.has_perm('tab_audio_intercepts') %}
+    {% if eavc_has_mobile_audio and ep == 'audio_intercepts' %}
+    <div class="dropdown eavc-topbar__section d-md-none">
+      <button type="button" class="eavc-topbar__section-trigger dropdown-toggle" id="eavc-mobile-section-toggle"
+        data-bs-toggle="dropdown" aria-expanded="false" aria-label="Раздел">
+        <i class="bi bi-headphones" aria-hidden="true"></i>
+        <span class="eavc-topbar__section-label">{{ eavc_section_title }}</span>
+      </button>
+      <ul class="dropdown-menu eavc-topbar__section-menu" aria-labelledby="eavc-mobile-section-toggle">
+        <li>
+          <a class="dropdown-item eavc-topbar__section-link active"
+            href="{{ url_for('audio_intercepts') }}" data-eavc-section="audio">
+            <i class="bi bi-headphones me-2" aria-hidden="true"></i>Аудиоперехваты
+          </a>
+        </li>
+      </ul>
+    </div>
+    <h1 class="eavc-topbar__nav-title d-none d-md-block">{{ eavc_section_title }}</h1>
+    {% else %}
+    <h1 class="eavc-topbar__nav-title">{{ eavc_section_title }}</h1>
+    {% endif %}
+
+    <div class="eavc-topbar__actions">
+      <button type="button" class="eavc-topbar__theme-pill" id="wp-theme-toggle"
+        title="Тёмная тема" aria-label="Переключить тему">
+        <i class="bi bi-moon-fill eavc-topbar__theme-ico" aria-hidden="true"></i>
+        <span class="eavc-topbar__theme-sep" aria-hidden="true">/</span>
+        <i class="bi bi-sun-fill eavc-topbar__theme-ico" aria-hidden="true"></i>
+      </button>
+
+      <button type="button" class="eavc-topbar__round-btn eavc-topbar__ai-btn position-relative" id="chat-btn"
+        onclick="typeof toggleChatModal==='function'&&toggleChatModal()" title="Интеллект-хаб ЕАВС"
+        aria-label="Интеллект-хаб ЕАВС">
+        <i class="bi bi-stars" aria-hidden="true"></i>
+        <span class="eavc-topbar__badge" id="chat-badge" hidden>0</span>
+      </button>
+
+      <button type="button" class="eavc-topbar__round-btn position-relative" id="targeting-notification-btn"
+        onclick="typeof showTargetingModal==='function'&&showTargetingModal()" title="Нацеливания"
+        aria-label="Уведомления">
+        <i class="bi bi-bell-fill" aria-hidden="true"></i>
+        <span class="eavc-topbar__badge" id="targeting-badge" hidden>0</span>
+      </button>
+
+      <div class="dropdown eavc-topbar__profile">
+        <button class="eavc-topbar__profile-btn dropdown-toggle" type="button" id="wp-user-menu"
+          data-bs-toggle="dropdown" aria-expanded="false" aria-label="Меню пользователя">
+          <span class="eavc-topbar__avatar" aria-hidden="true">
+            {{ eavc_user_label[:1]|upper }}
+          </span>
+          <span class="eavc-topbar__profile-name">{{ eavc_user_label }}</span>
+          <i class="bi bi-chevron-down eavc-topbar__profile-chevron" aria-hidden="true"></i>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end eavc-topbar__dropdown" aria-labelledby="wp-user-menu">
+          <li><h6 class="dropdown-header">Профиль</h6></li>
+          <li>
+            <span class="dropdown-item-text small d-flex align-items-center gap-2">
+              <i class="bi bi-person-circle"></i><span>{{ current_user.username or current_user.role }}</span>
+            </span>
+          </li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item" href="{{ url_for('logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Выйти</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</header>

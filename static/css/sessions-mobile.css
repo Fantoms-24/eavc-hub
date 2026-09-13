@@ -1,0 +1,231 @@
+/**
+ * Сеансы — mobile (≤767.98px), workbench UI
+ */
+
+@media (max-width: 767.98px) {
+  .md3-sessions.sn-workbench-ui.sn-mobile-ui {
+    --sn-dock-h: 58px;
+    --sn-m-bg: var(--eavc-bg, #eef1f7);
+    --sn-m-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    padding-bottom: calc(var(--sn-dock-h) + env(safe-area-inset-bottom, 0px) + 0.35rem);
+  }
+
+  body.eavc-page-sessions main.eavc-content {
+    padding: 0 !important;
+    background: var(--sn-m-bg);
+  }
+
+  .sn-workbench-ui.sn-mobile-ui .sn-layout {
+    flex-direction: column;
+    position: relative;
+  }
+
+  .sn-workbench-ui.sn-mobile-ui .sn-sidebar,
+  .sn-workbench-ui.sn-mobile-ui .sn-main {
+    flex: 1 1 auto;
+    width: 100%;
+    max-width: none;
+    min-height: 0;
+  }
+
+  .sn-workbench-ui.sn-mobile-ui .sn-mobile-section {
+    display: none !important;
+  }
+
+  .sn-workbench-ui.sn-mobile-ui[data-sn-section="folder"] .sn-mobile-section--folder {
+    display: flex !important;
+    animation: sn-m-in 0.32s var(--sn-m-ease);
+  }
+
+  .sn-workbench-ui.sn-mobile-ui[data-sn-section="table"] .sn-mobile-section--table {
+    display: flex !important;
+    animation: sn-m-in 0.32s var(--sn-m-ease);
+  }
+
+  .sn-workbench-ui.sn-mobile-ui[data-sn-section="stats"] .sn-mobile-section--table {
+    display: flex !important;
+    animation: sn-m-in 0.32s var(--sn-m-ease);
+  }
+
+  .sn-workbench-ui.sn-mobile-ui[data-sn-section="stats"] .sn-panel[data-sn-panel="table"] {
+    display: none !important;
+  }
+
+  .sn-workbench-ui.sn-mobile-ui[data-sn-section="stats"] .sn-panel[data-sn-panel="ai"],
+  .sn-workbench-ui.sn-mobile-ui[data-sn-section="stats"] .sn-panel[data-sn-panel="overview"] {
+    display: flex !important;
+    flex: 0 0 auto;
+    min-height: auto;
+    overflow: visible;
+  }
+
+  .sn-workbench-ui.sn-mobile-ui[data-sn-section="stats"] .sn-main__body {
+    overflow-y: auto;
+    gap: 0.75rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .sn-workbench-ui.sn-mobile-ui[data-sn-section="folder"] #watch-status-card:not([style*="display: none"]),
+  .sn-workbench-ui.sn-mobile-ui[data-sn-section="folder"] #processing-status-card:not([style*="display: none"]),
+  .sn-workbench-ui.sn-mobile-ui[data-sn-section="folder"] #results-card:not([style*="display: none"]) {
+    display: block !important;
+  }
+
+  @keyframes sn-m-in {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .sn-workbench-ui.sn-mobile-ui .sn-main__back {
+    display: inline-flex;
+  }
+
+  .sn-workbench-ui.sn-mobile-ui[data-sn-section="folder"] .sn-main {
+    display: none !important;
+  }
+
+  .sn-workbench-ui.sn-mobile-ui .sn-main__tabs {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .sn-workbench-ui.sn-mobile-ui .sn-main__tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .sn-workbench-ui.sn-mobile-ui .sn-panel__toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .sn-workbench-ui.sn-mobile-ui .sn-panel__filters,
+  .sn-workbench-ui.sn-mobile-ui .sn-panel__actions {
+    width: 100%;
+  }
+
+  .sn-workbench-ui.sn-mobile-ui .sn-filter-group {
+    width: 100% !important;
+    flex-wrap: wrap;
+  }
+
+  .sn-workbench-ui.sn-mobile-ui #date-presets {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .sn-workbench-ui.sn-mobile-ui #date-presets .btn {
+    flex: 1 1 auto;
+    min-height: 38px;
+  }
+
+  .sn-workbench-ui.sn-mobile-ui .form-control,
+  .sn-workbench-ui.sn-mobile-ui .form-select {
+    font-size: max(16px, 1rem);
+    min-height: 44px;
+  }
+
+  .sn-workbench-ui.sn-mobile-ui .input-group .btn {
+    min-height: 44px;
+  }
+
+  .sn-workbench-ui.sn-mobile-ui .sn-sidebar__actions .btn {
+    min-height: 42px;
+  }
+
+  .sn-workbench-ui.sn-mobile-ui #process-folder-btn {
+    flex: 1 1 100%;
+  }
+
+  .sn-workbench-ui.sn-mobile-ui .sn-table {
+    font-size: 0.75rem;
+  }
+
+  .sn-mobile-dock {
+    display: none;
+    position: fixed;
+    left: max(10px, env(safe-area-inset-left, 0px));
+    right: max(10px, env(safe-area-inset-right, 0px));
+    bottom: max(8px, env(safe-area-inset-bottom, 0px));
+    z-index: 1045;
+    padding: 5px;
+    gap: 4px;
+    border-radius: 20px;
+    background: color-mix(in srgb, var(--eavc-card, #fff) 94%, transparent);
+    border: 1px solid var(--eavc-border, rgba(15, 23, 42, 0.1));
+    backdrop-filter: blur(14px);
+    box-shadow: 0 8px 32px rgba(15, 23, 42, 0.14);
+    --sn-dock-index: 0;
+    --sn-dock-count: 3;
+  }
+
+  .md3-sessions.sn-mobile-ui .sn-mobile-dock {
+    display: flex;
+    align-items: stretch;
+  }
+
+  .sn-mobile-dock__pill {
+    position: absolute;
+    top: 5px;
+    bottom: 5px;
+    left: 5px;
+    width: calc((100% - 10px) / var(--sn-dock-count));
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--eavc-accent, #3d6df0), var(--eavc-accent-dim, #2f5ad4));
+    box-shadow: 0 4px 14px color-mix(in srgb, var(--eavc-accent, #3d6df0) 40%, transparent);
+    transform: translateX(calc(var(--sn-dock-index, 0) * 100%));
+    transition: transform 0.35s var(--sn-m-ease);
+    pointer-events: none;
+  }
+
+  .sn-mobile-dock__btn {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    min-height: 46px;
+    border: none;
+    background: transparent;
+    color: var(--eavc-text-muted, #64748b);
+    font-size: 0.625rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.15rem;
+  }
+
+  .sn-mobile-dock__btn i {
+    font-size: 1.1rem;
+  }
+
+  .sn-mobile-dock__btn.active,
+  .sn-mobile-dock__btn[aria-selected="true"] {
+    color: #fff;
+  }
+}
+
+@media (max-width: 767.98px) {
+  html[data-wp-theme="dark"] .md3-sessions.sn-workbench-ui.sn-mobile-ui {
+    --sn-m-bg: var(--eavc-bg, #070b12);
+  }
+
+  html[data-wp-theme="dark"] body.eavc-page-sessions main.eavc-content {
+    background: var(--sn-m-bg);
+  }
+
+  html[data-wp-theme="dark"] .sn-mobile-dock {
+    background: color-mix(in srgb, var(--eavc-card, #141c2a) 94%, transparent);
+  }
+}

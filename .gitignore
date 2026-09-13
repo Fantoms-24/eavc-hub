@@ -1,0 +1,149 @@
+# ═══════════════════════════════════════════════════════════
+# web_portal — что НЕ уходит в git
+# ═══════════════════════════════════════════════════════════
+
+# ─── Python ───────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+*.egg
+.venv/
+.venv-*/
+.venv-build/
+.venv-build.bak/
+venv/
+env/
+
+# ─── Тесты / линтеры / кэш ────────────────────────────────
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+.tox/
+.hypothesis/
+*.cover
+
+# ─── Секреты и локальные конфиги ──────────────────────────
+# В репозитории только *.example.json
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+hub_config.json
+server_config.json
+telegram_receiver_config.json
+word_push_config.json
+**/config.json
+!**/config.example.json
+
+# ─── Базы и runtime-данные ────────────────────────────────
+data/
+data-hub/
+data-central/
+tmp/
+temp/
+reports/
+tiles/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+*.db
+*.db-shm
+*.db-wal
+/main.sqlite*
+
+# PostgreSQL WAL / мусор в корне
+/[0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F]*
+Tempfinder_*.xml
+
+# ─── Сборки (PyInstaller / npm) ───────────────────────────
+dist/
+build/
+*.exe
+*.dll
+*.pyd
+*.so
+*.dylib
+node_modules/
+*.spec.bak
+
+# ─── IDE / ОС ─────────────────────────────────────────────
+.cursor/
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# ─── Логи и служебный мусор ───────────────────────────────
+*.log
+*.stat
+*.tmp
+*.temp
+*.bak
+*.old
+_tmp_*.py
+*.jsonl
+activity.jsonl
+requests.jsonl
+runtime.json
+blocks_state.json
+pending_reviews.json
+state.json
+
+# ─── GitNexus индекс (бинарная БД, не исходники) ───────────
+.gitnexus/lbug
+.gitnexus/lbug.wal
+.gitnexus/*.db
+.gitnexus/*.wal
+
+# ─── Тяжёлые внешние данные / медиа ───────────────────────
+Аудио/
+Карта/
+OPK/
+Отложка/
+бланки/
+интенсивность/
+ФОН/
+*.zip
+*.7z
+*.rar
+*.mbtiles
+*.wav
+*.mp3
+*.ogg
+*.flac
+
+# Офисные файлы — только вне docs/ (внутри docs/ это документация проекта)
+*.docx
+*.xlsx
+*.rtf
+!docs/
+!docs/**
+
+# ─── Старый бот / история / vendored ──────────────────────
+Group Telegram/
+static/js/Графы прикол/
+
+# ─── Отдельный проект Telegram Bot (не часть web_portal) ──
+Telegram bot/
+InterceptServer/
+InterceptServer1/
+InterceptClient/
+
+# Возможные секреты в docs
+docs/Ключи.xlsx
+docs/**/Ключи.xlsx
+
+# ��������� ��������� �������
+.claude/settings.local.json
+.claude/settings.json
+

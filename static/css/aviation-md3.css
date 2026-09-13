@@ -1,0 +1,974 @@
+/**
+ * Material Design 3 — страница «Авиация»
+ * Область: .md3-aviation. Шрифт Roboto Mono — в шаблоне aviation.html (block styles).
+ */
+
+:root {
+  --md3-primary: #1d4ed8;
+  --md3-on-primary: #ffffff;
+  --md3-primary-container: #dbeafe;
+  --md3-on-primary-container: #1e3a8a;
+  --md3-secondary: #5b6478;
+  --md3-on-secondary: #ffffff;
+  --md3-secondary-container: #e0e7ff;
+  --md3-on-secondary-container: #1a2370;
+  --md3-surface: #f7f8fc;
+  --md3-surface-dim: #eef1f8;
+  --md3-surface-container-lowest: #ffffff;
+  --md3-surface-container-low: #f1f4fb;
+  --md3-surface-container: #e8ecf6;
+  --md3-surface-container-high: #e1e6f2;
+  --md3-surface-container-highest: #d8deeb;
+  --md3-on-surface: #1a1d26;
+  --md3-on-surface-variant: #5c6378;
+  --md3-outline: #c6ccdc;
+  --md3-outline-variant: #e0e4ef;
+  --md3-elevation-1: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.05);
+  --md3-elevation-2: 0 1px 4px rgba(15, 23, 42, 0.06), 0 2px 8px rgba(15, 23, 42, 0.04);
+  --md3-elevation-3: 0 4px 12px rgba(15, 23, 42, 0.07);
+  --md3-shape-sm: 10px;
+  --md3-shape-md: 12px;
+  --md3-shape-lg: 16px;
+  --md3-shape-xl: 20px;
+  --md3-shape-full: 9999px;
+  --md3-font: "Roboto Flex", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --md3-font-mono: "Roboto Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+html[data-wp-theme="dark"] {
+  --md3-primary: #9ecaff;
+  --md3-on-primary: #003258;
+  --md3-primary-container: #1e4972;
+  --md3-on-primary-container: #cfe4ff;
+  --md3-secondary: #bcc7e5;
+  --md3-on-secondary: #1e2838;
+  --md3-secondary-container: #3d4a63;
+  --md3-on-secondary-container: #e4e9ff;
+  --md3-surface: #0f1419;
+  --md3-surface-dim: #0a0d11;
+  --md3-surface-container-lowest: #0e131a;
+  --md3-surface-container-low: #161c26;
+  --md3-surface-container: #1e2633;
+  --md3-surface-container-high: #262f3f;
+  --md3-surface-container-highest: #303a4c;
+  --md3-on-surface: #e8eaf0;
+  --md3-on-surface-variant: #b4bccf;
+  --md3-outline: #8b93a8;
+  --md3-outline-variant: #3d4658;
+  --md3-elevation-1: 0 1px 3px rgba(0, 0, 0, 0.45);
+  --md3-elevation-2: 0 2px 10px rgba(0, 0, 0, 0.5);
+  --md3-elevation-3: 0 6px 18px rgba(0, 0, 0, 0.55);
+}
+
+.md3-aviation {
+  /* Ритм отступов: 4px шаг — проще держать баланс между колонками и секциями */
+  --av-space-1: 0.25rem;
+  --av-space-2: 0.5rem;
+  --av-space-3: 0.75rem;
+  --av-space-4: 1rem;
+  --av-space-5: 1.25rem;
+  --av-space-6: 1.5rem;
+  --av-space-section: 1.75rem;
+  --av-space-section-lg: 2.25rem;
+  font-family: var(--md3-font);
+  color: var(--md3-on-surface);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Плотнее вертикаль: сводка + рабочая зона без лишних «этажей» */
+.md3-aviation.md3-aviation--redesign {
+  --av-space-section: 1.35rem;
+  --av-space-section-lg: 1.75rem;
+}
+
+.md3-aviation.md3-aviation--redesign .md3-aviation-topbar .wp-page-lead {
+  max-width: 40ch;
+  line-height: 1.35;
+}
+
+/* ——— Компактный режим: меньше вертикаль, плотнее сетка, аккуратные кнопки ——— */
+.md3-aviation.md3-aviation--compact {
+  --av-space-3: 0.5rem;
+  --av-space-4: 0.75rem;
+  --av-space-5: 1rem;
+  --av-space-6: 1.15rem;
+  --av-space-section: 1.1rem;
+  --av-space-section-lg: 1.35rem;
+}
+
+.md3-aviation.md3-aviation--compact .md3-aviation-main-body {
+  padding: var(--av-space-4) var(--av-space-4) !important;
+  border-radius: var(--md3-shape-lg);
+}
+
+@media (min-width: 992px) {
+  .md3-aviation.md3-aviation--compact .md3-aviation-main-body {
+    padding: var(--av-space-5) var(--av-space-6) !important;
+  }
+}
+
+.md3-aviation.md3-aviation--compact .md3-aviation-topbar {
+  padding: var(--av-space-3) var(--av-space-4) !important;
+  margin: 0 0 var(--av-space-4) !important;
+  border-radius: var(--md3-shape-md);
+}
+
+.md3-aviation.md3-aviation--compact .md3-aviation-topbar .wp-page-title {
+  font-size: clamp(0.98rem, 1.6vw, 1.15rem) !important;
+  margin-bottom: 0.1rem !important;
+}
+
+.md3-aviation.md3-aviation--compact .md3-aviation-topbar .wp-page-lead {
+  font-size: 0.75rem;
+  max-width: 36ch;
+  margin-bottom: 0;
+}
+
+.md3-aviation.md3-aviation--compact .md3-aviation-toolbar-btn {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  min-height: 30px;
+}
+
+.md3-aviation.md3-aviation--compact .md3-aviation-toolbar-btn .md3-aviation-toolbar-btn-label {
+  margin-left: 0.35rem;
+}
+
+@media (max-width: 575.98px) {
+  .md3-aviation.md3-aviation--compact .md3-aviation-toolbar-btn .md3-aviation-toolbar-btn-label {
+    display: none;
+  }
+
+  .md3-aviation.md3-aviation--compact .md3-aviation-toolbar-btn {
+    padding-left: 0.45rem;
+    padding-right: 0.45rem;
+  }
+}
+
+.md3-aviation.md3-aviation--compact .md3-aviation-workspace {
+  margin-bottom: var(--av-space-3);
+}
+
+@media (min-width: 992px) {
+  .md3-aviation.md3-aviation--compact .md3-aviation-workspace {
+    margin-bottom: var(--av-space-4);
+  }
+}
+
+.md3-aviation.md3-aviation--compact .md3-aviation-workspace {
+  --bs-gutter-x: 0.65rem;
+  --bs-gutter-y: 0.65rem;
+}
+
+@media (min-width: 1200px) {
+  .md3-aviation.md3-aviation--compact .md3-aviation-workspace {
+    --bs-gutter-x: 0.85rem;
+    --bs-gutter-y: 0.85rem;
+  }
+}
+
+.md3-aviation.md3-aviation--compact .md3-aviation-editor-zone {
+  --bs-gutter-x: 0.5rem;
+  --bs-gutter-y: 0.5rem;
+}
+
+@media (min-width: 992px) {
+  .md3-aviation.md3-aviation--compact .md3-aviation-editor-zone {
+    --bs-gutter-x: 0.65rem;
+    --bs-gutter-y: 0.65rem;
+  }
+}
+
+.md3-aviation.md3-aviation--compact .md3-aviation-section-title {
+  font-size: 0.75rem;
+  gap: 0.35rem;
+  margin-bottom: var(--av-space-2);
+}
+
+.md3-aviation.md3-aviation--compact .md3-aviation-panel {
+  padding: var(--av-space-4) calc(var(--av-space-4) + 0.05rem);
+  border-radius: var(--md3-shape-md);
+}
+
+.md3-aviation.md3-aviation--compact .md3-aviation-freq-head {
+  margin-bottom: var(--av-space-1);
+  gap: var(--av-space-2);
+}
+
+.md3-aviation.md3-aviation--compact .md3-aviation-freq-hint {
+  margin-bottom: var(--av-space-2) !important;
+  font-size: 0.6875rem;
+}
+
+.md3-aviation.md3-aviation--compact .md3-aviation-freq-panel #frequencies-list {
+  max-height: min(46vh, 420px);
+}
+
+.md3-aviation.md3-aviation--compact .md3-aviation-blank-toolbar {
+  padding: var(--av-space-2) var(--av-space-3) !important;
+  margin-bottom: var(--av-space-2) !important;
+  border-radius: var(--md3-shape-sm) !important;
+}
+
+.md3-aviation.md3-aviation--compact .md3-aviation-editor-meta {
+  margin-bottom: var(--av-space-2) !important;
+}
+
+.md3-aviation.md3-aviation--compact #aviation-text {
+  padding: var(--av-space-3) var(--av-space-3) !important;
+  font-size: 0.8125rem !important;
+  line-height: 1.5 !important;
+  min-height: 220px;
+}
+
+.md3-aviation.md3-aviation--compact #editor-subtitle {
+  font-size: 0.75rem;
+}
+
+.md3-aviation.md3-aviation--compact .md3-aviation-callsign-card .card-body {
+  padding: var(--av-space-4) !important;
+}
+
+.md3-aviation.md3-aviation--compact .md3-aviation-callsign-card .md3-aviation-section-title {
+  margin-bottom: var(--av-space-2);
+}
+
+.md3-aviation.md3-aviation--compact #cs-list {
+  max-height: min(40vh, 360px);
+}
+
+.md3-aviation.md3-aviation--compact .btn-sm {
+  min-height: 30px;
+  font-size: 0.6875rem;
+  padding: 0 0.6rem;
+}
+
+.md3-aviation.md3-aviation--compact .md3-aviation-stats-toolbar {
+  gap: var(--av-space-3);
+  margin-bottom: var(--av-space-3);
+  padding-bottom: var(--av-space-3);
+}
+
+.md3-aviation.md3-aviation--compact .md3-aviation-stats-card .card-body {
+  padding: var(--av-space-4) !important;
+}
+
+.md3-aviation.md3-aviation--compact #stats-table thead th,
+.md3-aviation.md3-aviation--compact #stats-table tbody td {
+  padding: 0.4rem 0.5rem;
+}
+
+.md3-aviation.md3-aviation--compact #stats-table {
+  font-size: 0.75rem;
+}
+
+.md3-aviation.md3-aviation--compact .md3-aviation-stats-table-wrap {
+  border-radius: var(--md3-shape-sm);
+}
+
+.md3-aviation.md3-aviation--compact #aviation-status {
+  margin-top: var(--av-space-3);
+  font-size: 0.75rem;
+}
+
+@media (min-width: 1200px) {
+  .md3-aviation.md3-aviation--compact #aviation-text {
+    min-height: min(46vh, 360px);
+  }
+}
+
+.md3-aviation.md3-aviation--compact #frequencies-list .list-group-item:not(.md3-aviation-list-header) {
+  padding: 0.4rem 0.45rem;
+  margin-bottom: 4px;
+  font-size: 0.8125rem;
+}
+
+.md3-aviation.md3-aviation--compact .md3-aviation-stats-toolbar-title #stats-subtitle:not(:empty) {
+  font-size: 0.6875rem;
+  margin-top: 0.15rem !important;
+}
+
+html[data-wp-theme="dark"] .md3-aviation {
+  color-scheme: dark;
+}
+
+.md3-aviation .wp-mono {
+  font-family: var(--md3-font-mono);
+}
+
+/* Главная карта — воздух, без лишней рамки */
+.md3-aviation .md3-aviation-main-card {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  border-radius: var(--md3-shape-xl);
+}
+
+.md3-aviation .md3-aviation-main-body {
+  background: linear-gradient(
+    165deg,
+    var(--md3-surface-container-low) 0%,
+    var(--md3-surface-dim) 48%,
+    var(--md3-surface-container-high) 100%
+  );
+  border-radius: var(--md3-shape-xl);
+  border: 1px solid var(--md3-outline-variant);
+  box-shadow: var(--md3-elevation-1);
+  padding: var(--av-space-5) var(--av-space-5) !important;
+}
+
+@media (min-width: 992px) {
+  .md3-aviation .md3-aviation-main-body {
+    padding: var(--av-space-6) calc(var(--av-space-6) + 0.15rem) !important;
+  }
+}
+
+html[data-wp-theme="dark"] .md3-aviation .md3-aviation-main-body {
+  background: linear-gradient(
+    165deg,
+    var(--md3-surface-container-low) 0%,
+    var(--md3-surface-dim) 48%,
+    var(--md3-surface-container-high) 100%
+  );
+}
+
+/* Верхняя панель */
+.md3-aviation .md3-aviation-topbar {
+  border-bottom: none !important;
+  padding: var(--av-space-4) var(--av-space-5) !important;
+  margin: calc(var(--av-space-1) * -1) calc(var(--av-space-2) * -1) var(--av-space-5) !important;
+  background: var(--md3-surface-container-lowest);
+  border: 1px solid var(--md3-outline-variant) !important;
+  border-radius: var(--md3-shape-lg);
+  box-shadow: none;
+}
+
+.md3-aviation .md3-aviation-topbar .wp-page-title {
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  font-size: clamp(1.05rem, 2vw, 1.28rem);
+  margin-bottom: 0.15rem;
+}
+
+.md3-aviation .md3-aviation-topbar .wp-page-lead {
+  font-size: 0.8125rem;
+  color: var(--md3-on-surface-variant);
+  max-width: 52ch;
+}
+
+.md3-aviation .md3-aviation-topbar-actions {
+  gap: 0.5rem !important;
+}
+
+/* Основная сетка: воздух между «частоты | бланк» и нижним блоком */
+.md3-aviation .md3-aviation-workspace {
+  margin-bottom: var(--av-space-4);
+}
+
+@media (min-width: 992px) {
+  .md3-aviation .md3-aviation-workspace {
+    margin-bottom: var(--av-space-5);
+  }
+}
+
+/* Секции */
+.md3-aviation .md3-aviation-section-title {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--md3-on-surface);
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-bottom: var(--av-space-3);
+}
+
+.md3-aviation .md3-aviation-section-title .bi {
+  color: var(--md3-primary);
+  opacity: 0.92;
+}
+
+.md3-aviation .md3-aviation-hint {
+  font-size: 0.75rem;
+  color: var(--md3-on-surface-variant);
+  line-height: 1.35;
+}
+
+/*
+ * app.css задаёт для всех .list-group-item и .form-control светлые фоны (rgba(255,255,255,...)).
+ * Ниже — явные поверхности MD3 для тёмной и светлой темы (переменные уже меняются на html[data-wp-theme="dark"]).
+ */
+.md3-aviation .list-group-item:not(.md3-aviation-list-header):not(.md3-aviation-empty) {
+  background: var(--md3-surface-container-low) !important;
+  color: var(--md3-on-surface) !important;
+  border-color: var(--md3-outline-variant) !important;
+}
+
+.md3-aviation .list-group-item.active:not(.md3-aviation-list-header) {
+  background: var(--md3-primary-container) !important;
+  color: var(--md3-on-primary-container) !important;
+  border-color: color-mix(in srgb, var(--md3-primary) 32%, transparent) !important;
+}
+
+.md3-aviation .list-group-item .btn-link {
+  color: var(--md3-primary) !important;
+}
+
+.md3-aviation .form-control,
+.md3-aviation .form-select {
+  background-color: var(--md3-surface-container-lowest) !important;
+  color: var(--md3-on-surface) !important;
+  border-color: var(--md3-outline) !important;
+}
+
+.md3-aviation .form-control::placeholder {
+  color: var(--md3-on-surface-variant);
+  opacity: 0.88;
+}
+
+.md3-aviation .form-control:focus,
+.md3-aviation .form-select:focus {
+  background-color: var(--md3-surface-container-lowest) !important;
+  color: var(--md3-on-surface) !important;
+  border-color: var(--md3-primary) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--md3-primary) 28%, transparent) !important;
+}
+
+.md3-aviation .form-control:disabled,
+.md3-aviation .form-select:disabled {
+  background: var(--md3-surface-container) !important;
+  color: var(--md3-on-surface-variant) !important;
+  opacity: 0.92;
+}
+
+/* Панели колонок */
+.md3-aviation .md3-aviation-panel {
+  background: var(--md3-surface-container-lowest);
+  border: 1px solid var(--md3-outline-variant);
+  border-radius: var(--md3-shape-lg);
+  padding: var(--av-space-5) calc(var(--av-space-5) + 0.1rem);
+  box-shadow: none;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.md3-aviation .md3-aviation-freq-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--av-space-2) var(--av-space-4);
+  margin-bottom: var(--av-space-2);
+  flex-shrink: 0;
+}
+
+.md3-aviation .md3-aviation-freq-head .md3-aviation-section-title {
+  margin-bottom: 0;
+  align-self: center;
+}
+
+.md3-aviation .md3-aviation-freq-date {
+  flex: 1 1 9.5rem;
+  min-width: min(100%, 11rem);
+  max-width: 100%;
+}
+
+.md3-aviation .md3-aviation-freq-date .form-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--md3-on-surface-variant);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.md3-aviation .md3-aviation-freq-hint {
+  margin-bottom: var(--av-space-3) !important;
+  flex-shrink: 0;
+}
+
+.md3-aviation .md3-aviation-panel > .md3-aviation-section-title:first-child {
+  flex-shrink: 0;
+}
+
+.md3-aviation .md3-aviation-freq-panel #frequencies-list {
+  flex: 1;
+  min-height: 0;
+  max-height: min(52vh, 480px);
+  overflow-y: auto;
+  padding-right: 2px;
+  scrollbar-width: thin;
+  margin-top: var(--av-space-1);
+}
+
+/* Заголовки типов в списке частот */
+.md3-aviation .md3-aviation-list-header {
+  background: var(--md3-surface-container) !important;
+  color: var(--md3-on-surface-variant) !important;
+  font-size: 0.6875rem !important;
+  font-weight: 600 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.45rem 0.6rem !important;
+  margin-bottom: 0.35rem !important;
+  border-radius: var(--md3-shape-sm) !important;
+  border: 1px solid var(--md3-outline-variant) !important;
+}
+
+.md3-aviation #frequencies-list .list-group-item:not(.md3-aviation-list-header) {
+  border-radius: var(--md3-shape-sm) !important;
+  border: 1px solid var(--md3-outline-variant) !important;
+  margin-bottom: 5px;
+  padding: 0.5rem 0.55rem;
+  font-size: 0.8125rem;
+  transition: background var(--md3-motion-fast, 180ms) ease, border-color 0.18s ease;
+}
+
+.md3-aviation #frequencies-list .list-group-item:not(.md3-aviation-list-header):hover {
+  transform: none;
+  box-shadow: none;
+  background: rgba(37, 99, 235, 0.07) !important;
+}
+
+.md3-aviation #frequencies-list .list-group-item.active {
+  background: var(--md3-primary-container) !important;
+  border-color: color-mix(in srgb, var(--md3-primary) 28%, transparent) !important;
+  color: var(--md3-on-primary-container);
+}
+
+.md3-aviation .md3-aviation-empty {
+  background: transparent !important;
+  border: 1px dashed var(--md3-outline-variant) !important;
+  border-radius: var(--md3-shape-sm);
+  color: var(--md3-on-surface-variant) !important;
+  font-size: 0.75rem !important;
+  padding: 0.75rem !important;
+}
+
+/* Рабочий день */
+.md3-aviation .md3-aviation-panel .form-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--md3-on-surface-variant);
+}
+
+.md3-aviation .md3-aviation-panel .form-control,
+.md3-aviation .md3-aviation-panel .form-select {
+  border-radius: var(--md3-shape-full);
+  border: 1px solid var(--md3-outline);
+  background: var(--md3-surface-container-lowest);
+  font-size: 0.8125rem;
+  min-height: 36px;
+}
+
+.md3-aviation .md3-aviation-panel .form-control:focus,
+.md3-aviation .md3-aviation-panel .form-select:focus {
+  border-color: var(--md3-primary) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--md3-primary) 28%, transparent) !important;
+}
+
+/* Бланк: тулбар + подпись + поле — один вертикальный ритм */
+.md3-aviation .md3-aviation-blank-toolbar {
+  background: var(--md3-secondary-container) !important;
+  border: 1px solid color-mix(in srgb, var(--md3-secondary) 22%, transparent) !important;
+  border-radius: var(--md3-shape-md) !important;
+  padding: var(--av-space-3) var(--av-space-4) !important;
+  margin-bottom: var(--av-space-3) !important;
+}
+
+.md3-aviation .md3-aviation-blank-toolbar .fw-semibold {
+  font-size: 0.8125rem;
+  color: var(--md3-on-secondary-container);
+}
+
+.md3-aviation #aviation-text {
+  border-radius: var(--md3-shape-lg) !important;
+  border: 1px solid var(--md3-outline) !important;
+  background: var(--md3-surface-container-lowest) !important;
+  padding: var(--av-space-4) calc(var(--av-space-4) + 0.1rem) !important;
+  font-size: 0.8125rem !important;
+  line-height: 1.55 !important;
+  color: var(--md3-on-surface);
+  min-height: 280px;
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.md3-aviation .md3-aviation-editor-meta {
+  margin-top: 0 !important;
+  margin-bottom: var(--av-space-3) !important;
+  row-gap: var(--av-space-2) !important;
+  column-gap: var(--av-space-2) !important;
+}
+
+.md3-aviation .md3-aviation-type-inline {
+  max-width: 12rem;
+  min-width: 7.5rem;
+}
+
+.md3-aviation .md3-aviation-editor-footer {
+  min-height: 1.25rem;
+}
+
+.md3-aviation .md3-aviation-editor-footer .md3-aviation-hint {
+  font-size: 0.6875rem;
+}
+
+.md3-aviation #aviation-text:focus {
+  border-color: var(--md3-primary) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--md3-primary) 26%, transparent),
+    inset 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+  outline: none !important;
+}
+
+.md3-aviation #editor-subtitle {
+  font-size: 0.8125rem;
+  color: var(--md3-on-surface-variant);
+}
+
+.md3-aviation #save-status {
+  font-size: 0.8125rem;
+}
+
+.md3-aviation .save-indicator {
+  box-shadow: 0 0 0 2px var(--md3-surface-container-lowest);
+}
+
+/* Позывные — карточка (выровняна по панели частот) */
+.md3-aviation .md3-aviation-callsign-card {
+  border-radius: var(--md3-shape-lg) !important;
+  border: 1px solid var(--md3-outline-variant) !important;
+  background: var(--md3-surface-container-lowest) !important;
+  box-shadow: var(--md3-elevation-1) !important;
+  overflow: hidden;
+  height: 100%;
+}
+
+.md3-aviation .md3-aviation-callsign-card .card-body {
+  padding: var(--av-space-5) calc(var(--av-space-5) + 0.1rem) !important;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.md3-aviation .md3-aviation-callsign-card .md3-aviation-section-title {
+  margin-bottom: var(--av-space-3);
+}
+
+
+.md3-aviation #cs-list {
+  flex: 1;
+  min-height: 0;
+  max-height: min(48vh, 420px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.md3-aviation #cs-list .list-group-item {
+  border-radius: var(--md3-shape-sm) !important;
+  margin-bottom: 4px;
+  border: 1px solid var(--md3-outline-variant) !important;
+  font-size: 0.8125rem;
+}
+
+.md3-aviation #cs-list .list-group-item:hover {
+  transform: none;
+  background: rgba(37, 99, 235, 0.06) !important;
+}
+
+/* Кнопки MD3 */
+.md3-aviation .btn-sm {
+  border-radius: var(--md3-shape-full);
+  font-weight: 500;
+  font-size: 0.75rem;
+  min-height: 32px;
+  padding: 0 0.75rem;
+}
+
+.md3-aviation .btn-primary {
+  background: var(--md3-primary) !important;
+  border: none !important;
+  color: var(--md3-on-primary) !important;
+}
+
+.md3-aviation .btn-outline-primary {
+  border-color: color-mix(in srgb, var(--md3-primary) 55%, var(--md3-outline));
+  color: var(--md3-primary);
+  background: var(--md3-surface-container-lowest);
+}
+
+.md3-aviation .btn-outline-secondary {
+  border-color: var(--md3-outline);
+  color: var(--md3-on-surface-variant);
+  background: var(--md3-surface-container-lowest);
+}
+
+.md3-aviation .btn-outline-danger {
+  border-radius: var(--md3-shape-full);
+}
+
+/* Нижний блок: фильтры + таблица — отделён от рабочей зоны */
+.md3-aviation .md3-aviation-stats-block {
+  margin-top: 0;
+  padding-top: var(--av-space-section);
+  border-top: 1px solid var(--md3-outline-variant);
+}
+
+@media (min-width: 992px) {
+  .md3-aviation .md3-aviation-stats-block {
+    padding-top: var(--av-space-section-lg);
+  }
+}
+
+.md3-aviation .md3-aviation-stats-card {
+  background: var(--md3-surface-container-lowest);
+  border: 1px solid var(--md3-outline-variant) !important;
+  border-radius: var(--md3-shape-lg) !important;
+  box-shadow: none !important;
+}
+
+.md3-aviation .md3-aviation-stats-card .card-body {
+  padding: var(--av-space-5) calc(var(--av-space-5) + 0.15rem) !important;
+}
+
+.md3-aviation .md3-aviation-stats-card .md3-aviation-section-title {
+  margin-bottom: var(--av-space-4);
+}
+
+/* Единый блок «фильтры + таблица» */
+.md3-aviation .md3-aviation-stats-unified .md3-aviation-stats-card {
+  overflow: hidden;
+}
+
+.md3-aviation .md3-aviation-stats-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--av-space-4) var(--av-space-5);
+  margin-bottom: var(--av-space-4);
+  padding-bottom: var(--av-space-4);
+  border-bottom: 1px solid var(--md3-outline-variant);
+}
+
+.md3-aviation .md3-aviation-stats-toolbar-title {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.md3-aviation .md3-aviation-stats-toolbar-title .md3-aviation-section-title {
+  margin-bottom: 0;
+}
+
+.md3-aviation .md3-aviation-stats-toolbar-title #stats-subtitle:empty {
+  display: none;
+}
+
+.md3-aviation .md3-aviation-stats-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--av-space-3);
+}
+
+.md3-aviation .md3-aviation-stat-field {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.md3-aviation .md3-aviation-stat-field:first-of-type {
+  min-width: min(100%, 11.5rem);
+}
+
+.md3-aviation .md3-aviation-stat-field:nth-of-type(2) {
+  min-width: min(100%, 9.5rem);
+}
+
+.md3-aviation .md3-aviation-stat-field .form-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--md3-on-surface-variant);
+  margin-bottom: 0.2rem;
+}
+
+.md3-aviation .md3-aviation-apply-btn {
+  margin-bottom: 1px;
+  align-self: flex-end;
+}
+
+@media (max-width: 575.98px) {
+  .md3-aviation .md3-aviation-apply-btn {
+    width: 100%;
+  }
+}
+
+.md3-aviation .md3-aviation-stats-table-wrap {
+  border-radius: var(--md3-shape-sm);
+  border: 1px solid var(--md3-outline-variant);
+  background: var(--md3-surface-container-low);
+  overflow-x: auto;
+}
+
+.md3-aviation .md3-aviation-stats-unified .md3-aviation-stats-card .card-body {
+  padding-bottom: var(--av-space-4) !important;
+}
+
+.md3-aviation #stats-table {
+  font-size: 0.8125rem;
+  --bs-table-bg: transparent;
+}
+
+.md3-aviation #stats-table thead th {
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  color: var(--md3-on-surface-variant);
+  border-bottom: 1px solid var(--md3-outline-variant);
+  background: color-mix(in srgb, var(--md3-surface-container) 65%, var(--md3-surface-container-low));
+  padding: 0.5rem 0.65rem;
+}
+
+.md3-aviation .md3-aviation-stats-table-wrap #stats-table thead th {
+  border-top: none;
+}
+
+.md3-aviation .md3-aviation-stats-table-wrap #stats-table {
+  margin-bottom: 0;
+}
+
+.md3-aviation #stats-table tbody td {
+  border-color: var(--md3-outline-variant);
+  padding: 0.55rem 0.7rem;
+  vertical-align: middle;
+}
+
+.md3-aviation #stats-table tbody tr:hover {
+  background: rgba(37, 99, 235, 0.05);
+}
+
+/* Боковая панель «Все позывные» */
+.md3-aviation .aviation-layout .aviation-callsigns-sidebar {
+  background: var(--md3-surface-container-low);
+  border-right: 1px solid var(--md3-outline-variant);
+  box-shadow: var(--md3-elevation-3);
+}
+
+.md3-aviation .aviation-layout .aviation-callsigns-sidebar .card {
+  background: transparent;
+}
+
+.md3-aviation #all-callsigns-list .list-group-item:hover {
+  transform: none;
+  background: rgba(37, 99, 235, 0.07) !important;
+}
+
+/* Модальные окна */
+.md3-aviation-modal.md3-callsign-modal .md3-callsign-modal-content,
+.md3-aviation .modal.md3-callsign-modal .md3-callsign-modal-content {
+  border-radius: var(--md3-shape-lg) !important;
+  border: 1px solid var(--md3-outline-variant);
+  box-shadow: var(--md3-elevation-3);
+  background: var(--md3-surface-container-lowest);
+}
+
+.md3-aviation-modal.md3-callsign-modal .md3-callsign-modal-header,
+.md3-aviation .modal.md3-callsign-modal .md3-callsign-modal-header {
+  background: var(--md3-surface-container-low);
+  border-bottom: 1px solid var(--md3-outline-variant);
+}
+
+.md3-aviation-modal.md3-callsign-modal .modal-title,
+.md3-aviation .modal.md3-callsign-modal .modal-title {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.md3-aviation-modal.md3-callsign-modal .md3-callsign-modal-footer,
+.md3-aviation-modal.md3-callsign-modal .modal-footer,
+.md3-aviation .modal.md3-callsign-modal .md3-callsign-modal-footer,
+.md3-aviation .modal.md3-callsign-modal .modal-footer {
+  border-top: 1px solid var(--md3-outline-variant);
+  background: var(--md3-surface-container-low);
+}
+
+.md3-aviation-modal.md3-callsign-modal .table thead th,
+.md3-aviation .modal.md3-callsign-modal .table thead th {
+  background: var(--md3-surface-container-low);
+  color: var(--md3-on-surface-variant);
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.md3-aviation-modal.md3-callsign-modal .table td,
+.md3-aviation .modal.md3-callsign-modal .table td {
+  border-color: var(--md3-outline-variant);
+}
+
+.md3-aviation-modal.md3-callsign-modal .form-control,
+.md3-aviation-modal.md3-callsign-modal .form-select,
+.md3-aviation .modal.md3-callsign-modal .form-control,
+.md3-aviation .modal.md3-callsign-modal .form-select {
+  border-radius: var(--md3-shape-md);
+  border-color: var(--md3-outline);
+  background: var(--md3-surface-container-lowest);
+}
+
+/* Вложенные списки в модалках / детали */
+.md3-aviation .md3-aviation-day-bar {
+  background: var(--md3-surface-container) !important;
+  border: 1px solid var(--md3-outline-variant) !important;
+  border-radius: var(--md3-shape-sm) !important;
+}
+
+.md3-aviation .md3-aviation-sidebar-callout {
+  background: var(--md3-surface-container) !important;
+  border: 1px solid var(--md3-outline-variant) !important;
+  border-radius: var(--md3-shape-md) !important;
+  font-weight: 600;
+}
+
+.md3-aviation .callsign-day-item.expanded {
+  background: rgba(37, 99, 235, 0.08) !important;
+}
+
+/* Статус строка */
+.md3-aviation #aviation-status {
+  font-size: 0.8125rem;
+  color: var(--md3-on-surface-variant);
+  margin-top: var(--av-space-4);
+  padding-left: var(--av-space-1);
+}
+
+/* Плотность: чуть больше воздуха на широких экранах */
+@media (min-width: 1200px) {
+  .md3-aviation:not(.md3-aviation--compact) .md3-aviation-workspace {
+    --bs-gutter-x: 1.5rem;
+    --bs-gutter-y: 1.5rem;
+  }
+
+  .md3-aviation .md3-aviation-stats-row {
+    --bs-gutter-x: 1.5rem;
+    --bs-gutter-y: 1.5rem;
+  }
+
+  .md3-aviation:not(.md3-aviation--compact) #aviation-text {
+    min-height: min(52vh, 420px);
+  }
+}
+
+/* Колонка «Позывные» тянется по высоте ряда рядом с бланком */
+@media (min-width: 992px) {
+  .md3-aviation .md3-aviation-editor-zone > [class*="col-"] {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .md3-aviation .md3-aviation-editor-zone > [class*="col-"] > .md3-aviation-callsign-card {
+    flex: 1;
+    min-height: 0;
+  }
+}

@@ -1,0 +1,360 @@
+{% extends "base.html" %}
+{% block title %}Сеансы{% endblock %}
+{% block container_class %}container-fluid px-0 py-0{% endblock %}
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/sessions-workbench.css') }}?v=4" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/sessions-mobile.css') }}?v=3" />
+{% endblock %}
+
+{% block content %}
+<div class="md3-sessions sn-workbench-ui sessions-layout sessions-layout-no-sidebar wp-workbench wp-workbench--sessions"
+  data-sn-section="folder" data-sn-panel="table">
+
+  <div class="sessions-main">
+    <div class="card wp-card border-0 md3-sessions-shell-card">
+      <div class="card-body p-0 md3-sessions-shell-body">
+        <div class="sn-layout">
+
+          <aside class="sn-sidebar sn-mobile-section sn-mobile-section--folder" aria-label="Импорт сеансов">
+            <section class="sn-sidebar__block">
+              <h2 class="sn-sidebar__title"><i class="bi bi-folder2-open"></i>Папка импорта</h2>
+              <label class="form-label sn-label" for="folder-path">Путь к папке</label>
+              <div class="input-group input-group-sm mb-2">
+                <input type="text" class="form-control" id="folder-path"
+                  placeholder="Путь к папкам с result0.txt" />
+                <button class="btn btn-outline-secondary" type="button" id="browse-folder-btn" title="Обзор">
+                  <i class="bi bi-folder2-open"></i>
+                </button>
+              </div>
+              <p class="sn-hint">Корневая папка с подпапками и файлами <code>result0.txt</code></p>
+
+              <div class="mb-2" id="common-paths-container" style="display: none;">
+                <span class="sn-label d-block mb-1">Быстрый выбор</span>
+                <div class="sn-chips" id="common-paths-list"></div>
+              </div>
+
+              <div class="sn-sidebar__actions">
+                <button class="btn btn-primary btn-sm" id="process-folder-btn" disabled {% if not can_import_folder %}disabled{% endif %}>
+                  <i class="bi bi-play-circle me-1"></i>Обработать
+                </button>
+                <button class="btn btn-success btn-sm" id="start-watch-btn" disabled {% if not can_import_folder %}disabled{% endif %}>
+                  <i class="bi bi-eye me-1"></i>Автопоиск
+                </button>
+                <button class="btn btn-danger btn-sm" id="stop-watch-btn" style="display: none;">
+                  <i class="bi bi-eye-slash me-1"></i>Стоп
+                </button>
+                <button class="btn btn-outline-success btn-sm" id="export-excel-btn" disabled {% if not can_export_sessions %}style="display:none"{% endif %}>
+                  <i class="bi bi-file-earmark-excel"></i>
+                </button>
+              </div>
+
+              {% if not can_import_folder %}
+              <div class="alert alert-warning sn-alert py-2 px-2 small mb-0">
+                <strong>Нет доступа к импорту.</strong> Нужен доступ к разделу «Сеансы» в вашей роли.
+              </div>
+              {% endif %}
+            </section>
+
+            <section class="sn-sidebar__block" id="audio-archive-import-block">
+              <h2 class="sn-sidebar__title"><i class="bi bi-file-earmark-zip"></i>Аудио-архив</h2>
+              <label class="form-label sn-label" for="audio-archive-path">Путь к .zip</label>
+              <input type="text" class="form-control form-control-sm mb-2" id="audio-archive-path"
+                placeholder="C:\путь\Аудио.zip" {% if not can_import_folder %}disabled{% endif %} />
+              <p class="sn-hint">
+                Многотомный архив: укажите <strong>последний</strong> файл <code>.zip</code>.
+                Имена <code>.ambe.wav</code> с RAS/id/group импортируются в базу сеансов.
+              </p>
+              <div class="form-check mb-2">
+                <input class="form-check-input" type="checkbox" id="audio-archive-dry-run" {% if not can_import_folder %}disabled{% endif %} />
+                <label class="form-check-label small" for="audio-archive-dry-run">Только проверить (без записи в БД)</label>
+              </div>
+              <div class="sn-sidebar__actions">
+                <button class="btn btn-outline-primary btn-sm" id="import-audio-archive-btn" disabled {% if not can_import_folder %}disabled{% endif %}>
+                  <i class="bi bi-cloud-upload me-1"></i>Загрузить из архива
+                </button>
+              </div>
+              <div class="small text-muted mt-2" id="audio-archive-status" style="display:none;"></div>
+            </section>
+
+            <section class="sn-sidebar__block sn-sidebar__block--watch" id="watch-status-card" style="display: none;">
+              <h2 class="sn-sidebar__title"><i class="bi bi-broadcast"></i>Автопоиск</h2>
+              <dl class="sn-watch-stats small mb-2">
+                <div><dt>Папка</dt><dd id="watch-folder">—</dd></div>
+                <div><dt>Проверка</dt><dd id="watch-last-check">—</dd></div>
+                <div><dt>Файлов</dt><dd><span id="watch-files-seen">0</span> / <span id="watch-files-processed">0</span></dd></div>
+                <div><dt>Строк</dt><dd id="watch-rows-parsed">0</dd></div>
+                <div class="d-none"><span id="watch-last-message"></span><span id="watch-freq-dirs">0</span><span id="watch-time-dirs">0</span><span id="watch-cycle-ms">0</span></div>
+              </dl>
+              <div class="sn-progress-wrap">
+                <div class="d-flex justify-content-between small mb-1">
+                  <span class="text-muted">Прогресс</span>
+                  <span id="watch-progress-label" class="fw-semibold">0%</span>
+                </div>
+                <div class="progress sn-progress">
+                  <div class="progress-bar" id="watch-progress-bar" role="progressbar" style="width: 0%"></div>
+                </div>
+              </div>
+              <div class="alert alert-danger py-2 px-2 small mt-2 mb-0" id="watch-last-error-box" style="display:none;">
+                <strong>Ошибка:</strong> <span id="watch-last-error"></span>
+              </div>
+              <div class="alert alert-warning py-2 px-2 small mt-2 mb-0" id="watch-unmatched-box" style="display:none;">
+                <strong>Непонятные папки:</strong>
+                <div id="watch-unmatched" class="mt-1"></div>
+              </div>
+            </section>
+
+            <section class="sn-sidebar__block" id="id-watch-card">
+              <h2 class="sn-sidebar__title"><i class="bi bi-broadcast-pin"></i>Отслеживание ID</h2>
+              <p class="sn-hint mb-2">При появлении ID в сеансах всем операторам позиции показывается уведомление с частотой, группой, подразделением и временем выхода.</p>
+              <label class="sn-label" for="id-watch-input">ID корреспондентов</label>
+              <textarea class="form-control form-control-sm mb-2" id="id-watch-input" rows="2"
+                placeholder="1341839, 222501 или по одному в строке"></textarea>
+              <div class="sn-sidebar__actions mb-2">
+                <button type="button" class="btn btn-primary btn-sm" id="id-watch-add-btn">
+                  <i class="bi bi-plus-circle me-1"></i>Добавить
+                </button>
+              </div>
+              <div class="small text-muted mb-1">Отслеживается:</div>
+              <div id="id-watch-list" class="sn-id-watch-list small text-muted">Загрузка…</div>
+            </section>
+          </aside>
+
+          <main class="sn-main sn-mobile-section sn-mobile-section--table" aria-label="Данные сеансов">
+            <header class="sn-main__head">
+              <button type="button" class="sn-main__back d-md-none" id="sn-main-back" aria-label="Назад">
+                <i class="bi bi-chevron-left"></i>
+              </button>
+              <nav class="sn-main__tabs" role="tablist" aria-label="Разделы сеансов">
+                <button type="button" class="sn-main__tab active" role="tab" data-sn-tab="table" aria-selected="true">
+                  <i class="bi bi-table"></i><span>Таблица</span>
+                </button>
+                <button type="button" class="sn-main__tab" role="tab" data-sn-tab="ai" aria-selected="false">
+                  <i class="bi bi-stars"></i><span>AI</span>
+                </button>
+                <button type="button" class="sn-main__tab" role="tab" data-sn-tab="overview" aria-selected="false">
+                  <i class="bi bi-pie-chart"></i><span>Сводка</span>
+                </button>
+              </nav>
+              <div class="sn-main__meta d-none d-lg-flex">
+                <span class="badge text-bg-secondary" id="table-query-ms" style="display:none;"></span>
+                <span class="sn-main__count" id="table-count">—</span>
+              </div>
+            </header>
+
+            <div class="sn-main__body">
+
+              <section class="sn-panel sn-panel--table" data-sn-panel="table">
+                <div class="sn-panel__toolbar">
+                  <div class="btn-group btn-group-sm" role="group" id="date-presets">
+                    <button type="button" class="btn btn-outline-secondary" data-range="today">Сегодня</button>
+                    <button type="button" class="btn btn-outline-secondary" data-range="yesterday">Вчера</button>
+                    <button type="button" class="btn btn-outline-secondary" data-range="7">7 дн.</button>
+                    <button type="button" class="btn btn-outline-secondary" data-range="30">30 дн.</button>
+                  </div>
+                  <div class="sn-panel__filters">
+                    <div class="input-group input-group-sm sn-filter-group">
+                      <span class="input-group-text">От</span>
+                      <input type="date" class="form-control" id="date-from" />
+                      <input type="time" class="form-control" id="time-from" value="00:00" />
+                    </div>
+                    <div class="input-group input-group-sm sn-filter-group">
+                      <span class="input-group-text">До</span>
+                      <input type="date" class="form-control" id="date-to" />
+                      <input type="time" class="form-control" id="time-to" value="23:59" />
+                    </div>
+                    <div class="input-group input-group-sm sn-filter-group sn-filter-group--search">
+                      <span class="input-group-text"><i class="bi bi-search"></i></span>
+                      <input type="text" class="form-control" id="filter-all" placeholder="Поиск…" />
+                    </div>
+                    <div class="input-group input-group-sm sn-filter-group">
+                      <span class="input-group-text">Подразделение</span>
+                      <input type="text" class="form-control" id="export-unit-name" placeholder="2 еб 152 оебр" autocomplete="off" spellcheck="false" />
+                    </div>
+                  </div>
+                  <div class="sn-panel__actions">
+                    <button class="btn btn-outline-secondary btn-sm" id="clear-filters-btn">Сброс</button>
+                    <button class="btn btn-primary btn-sm" id="load-table-btn">
+                      <i class="bi bi-arrow-clockwise me-1"></i>Загрузить
+                    </button>
+                    <button class="btn btn-success btn-sm" id="export-word-btn" disabled title="Word за период" {% if not can_export_sessions %}style="display:none"{% endif %}>
+                      <i class="bi bi-file-earmark-word"></i>
+                    </button>
+                    <button class="btn btn-outline-success btn-sm" id="export-excel-btn-table" disabled title="Excel за период" {% if not can_export_sessions %}style="display:none"{% endif %}>
+                      <i class="bi bi-file-earmark-excel"></i>
+                    </button>
+                    <button class="btn btn-outline-primary btn-sm" id="export-unit-btn" disabled title="Excel только по подразделению" {% if not can_export_sessions %}style="display:none"{% endif %}>
+                      <i class="bi bi-building me-1"></i>Подразделение
+                    </button>
+                  </div>
+                </div>
+
+                <div class="sn-table-wrap table-responsive">
+                  <table class="table table-hover table-sm sn-table" id="sessions-table">
+                    <thead>
+                      <tr>
+                        <th style="width: 36px;"></th>
+                        <th>№</th>
+                        <th>
+                          <button type="button" class="btn btn-link p-0 text-decoration-none sessions-sort"
+                            data-sort="frequency" data-label="Частота">Частота</button>
+                        </th>
+                        <th>
+                          <button type="button" class="btn btn-link p-0 text-decoration-none sessions-sort"
+                            data-sort="group" data-label="Группа">Группа</button>
+                        </th>
+                        <th>
+                          <button type="button" class="btn btn-link p-0 text-decoration-none sessions-sort"
+                            data-sort="name" data-label="Подразделение">Подразделение</button>
+                        </th>
+                        <th>
+                          <button type="button" class="btn btn-link p-0 text-decoration-none sessions-sort"
+                            data-sort="count" data-label="Сеансов">Сеансов</button>
+                        </th>
+                        <th>ID</th>
+                        <th class="text-end" style="width: 72px;"></th>
+                      </tr>
+                      <tr class="sessions-filter-row">
+                        <th></th>
+                        <th></th>
+                        <th><input type="text" class="form-control form-control-sm" id="filter-frequency" placeholder="Частота" /></th>
+                        <th><input type="text" class="form-control form-control-sm" id="filter-group" placeholder="Группа" /></th>
+                        <th><input type="text" class="form-control form-control-sm" id="filter-name" placeholder="Подразделение" /></th>
+                        <th><input type="number" min="0" class="form-control form-control-sm" id="filter-count-min" placeholder="Мин." /></th>
+                        <th><input type="text" class="form-control form-control-sm" id="filter-ids" placeholder="ID" /></th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody id="sessions-table-body">
+                      <tr>
+                        <td colspan="8" class="text-center text-muted py-5">
+                          <div class="spinner-border spinner-border-sm text-primary mb-2" role="status"></div>
+                          <div>Загрузка данных…</div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <footer class="sn-panel__foot">
+                  <div class="form-check form-switch m-0">
+                    <input class="form-check-input" type="checkbox" id="show-favorites-only" />
+                    <label class="form-check-label small" for="show-favorites-only">Только избранное</label>
+                  </div>
+                </footer>
+              </section>
+
+              <section class="sn-panel sn-panel--ai sn-mobile-section sn-mobile-section--stats" data-sn-panel="ai" hidden>
+                <div class="sn-panel__intro">
+                  <h2 class="sn-panel__title"><i class="bi bi-stars"></i>AI-анализ ID</h2>
+                  <p class="sn-panel__desc">Поиск ID в других подразделениях и одновременные появления за выбранный период.</p>
+                </div>
+                <div class="btn-group btn-group-sm mb-3" role="group">
+                  <button type="button" class="btn btn-outline-secondary" id="sessions-ai-today-btn">Сегодня</button>
+                  <button type="button" class="btn btn-outline-secondary" id="sessions-ai-week-btn">Неделя</button>
+                  <button type="button" class="btn btn-outline-secondary" id="sessions-ai-month-btn">Месяц</button>
+                </div>
+                <label class="sn-label" for="sessions-ai-question">Вопрос к AI</label>
+                <textarea class="form-control form-control-sm mb-2" id="sessions-ai-question" rows="3"
+                  placeholder="Например: какие ID из 425 ошп «Скала» встречались в других подразделениях за неделю?"></textarea>
+                <button type="button" class="btn btn-primary btn-sm" id="sessions-ai-run-btn">
+                  <i class="bi bi-stars me-1"></i>Запустить анализ
+                </button>
+                <div class="small text-muted mt-2" id="sessions-ai-status">Готово к запуску.</div>
+                <div class="sn-ai-result mt-3" id="sessions-ai-result" style="display:none;"></div>
+              </section>
+
+              <section class="sn-panel sn-panel--overview sn-mobile-section sn-mobile-section--stats" data-sn-panel="overview" hidden>
+                <div class="sn-overview-grid">
+                  <article class="sn-overview-card" id="processing-status-card" style="display: none;">
+                    <h3 class="sn-overview-card__title"><i class="bi bi-arrow-repeat"></i>Обработка</h3>
+                    <div id="processing-status">
+                      <div class="d-flex align-items-center gap-2 mb-2">
+                        <div class="spinner-border spinner-border-sm text-primary" id="processing-spinner" role="status"></div>
+                        <span id="processing-message">Обработка файлов…</span>
+                      </div>
+                      <div class="progress sn-progress">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" id="processing-progress"
+                          role="progressbar" style="width: 0%">0%</div>
+                      </div>
+                    </div>
+                  </article>
+
+                  <article class="sn-overview-card" id="results-card" style="display: none;">
+                    <h3 class="sn-overview-card__title"><i class="bi bi-check-circle"></i>Результат импорта</h3>
+                    <div id="results-content">
+                      <div class="alert alert-success mb-0 py-2">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                          <i class="bi bi-check-circle-fill"></i>
+                          <strong>Обработка завершена</strong>
+                        </div>
+                        <div id="results-stats"></div>
+                        <div id="results-errors" style="display: none;"></div>
+                      </div>
+                    </div>
+                  </article>
+
+                  <article class="sn-overview-card sn-overview-card--stats">
+                    <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
+                      <h3 class="sn-overview-card__title mb-0"><i class="bi bi-bar-chart"></i>Статистика БД</h3>
+                      <button class="btn btn-outline-secondary btn-sm" id="refresh-stats-btn" type="button">
+                        <i class="bi bi-arrow-clockwise"></i>
+                      </button>
+                    </div>
+                    <div id="db-stats">
+                      <div class="text-center text-muted py-4">
+                        <div class="spinner-border spinner-border-sm text-primary mb-2" role="status"></div>
+                        <div>Загрузка…</div>
+                      </div>
+                    </div>
+                  </article>
+                </div>
+              </section>
+
+            </div>
+          </main>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="sn-mobile-dock" id="sn-mobile-dock" role="tablist" aria-label="Разделы сеансов" hidden>
+    <span class="sn-mobile-dock__pill" aria-hidden="true"></span>
+    <button type="button" class="sn-mobile-dock__btn active" role="tab" data-sn-section="folder" aria-selected="true">
+      <i class="bi bi-folder2-open" aria-hidden="true"></i><span>Папка</span>
+    </button>
+    <button type="button" class="sn-mobile-dock__btn" role="tab" data-sn-section="table" aria-selected="false">
+      <i class="bi bi-table" aria-hidden="true"></i><span>Таблица</span>
+    </button>
+    <button type="button" class="sn-mobile-dock__btn" role="tab" data-sn-section="stats" aria-selected="false">
+      <i class="bi bi-pie-chart" aria-hidden="true"></i><span>Сводка</span>
+    </button>
+  </nav>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<div id="sessions-perms"
+  data-can-edit-unit="{{ '1' if can_edit_session_unit else '0' }}"
+  data-can-export="{{ '1' if can_export_sessions else '0' }}"
+  style="display:none"></div>
+<script defer src="{{ url_for('static', filename='js/sessions.js') }}?v=audio-archive-1"></script>
+{% endblock %}
+
+{% block modals %}
+<div class="modal fade" id="unitDebugModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header border-0 pb-2">
+        <h5 class="modal-title fw-semibold">Debug привязки подразделения</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+      </div>
+      <div class="modal-body pt-0">
+        <pre class="small mb-0" id="unit-debug-body" style="white-space:pre-wrap;">—</pre>
+      </div>
+      <div class="modal-footer border-0 pt-0">
+        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Закрыть</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,2573 @@
+/**
+ * Material Design 3 — экран «Перехваты» / «Аудиоперехваты»
+ * Подключается после инлайновых стилей шаблона; область: .md3-intercepts
+ * Цвета согласованы с фирменным синим портала (--wp-brand / primary)
+ * Токены на :root — модалка позывных рендерится вне .md3-intercepts и тоже использует переменные.
+ */
+
+:root {
+  --md3-primary: #1d4ed8;
+  --md3-on-primary: #ffffff;
+  --md3-primary-container: #dbeafe;
+  --md3-on-primary-container: #1e3a8a;
+
+  --md3-secondary: #5b6478;
+  --md3-on-secondary: #ffffff;
+  --md3-secondary-container: #e0e7ff;
+  --md3-on-secondary-container: #1a2370;
+
+  --md3-surface: #f7f8fc;
+  --md3-surface-dim: #eef1f8;
+  --md3-surface-container-lowest: #ffffff;
+  --md3-surface-container-low: #f1f4fb;
+  --md3-surface-container: #e8ecf6;
+  --md3-surface-container-high: #e1e6f2;
+  --md3-surface-container-highest: #d8deeb;
+
+  --md3-on-surface: #1a1d26;
+  --md3-on-surface-variant: #5c6378;
+
+  --md3-outline: #c6ccdc;
+  --md3-outline-variant: #e0e4ef;
+
+  --md3-tertiary-container: #cfe9d4;
+  --md3-on-tertiary-container: #0d3f1a;
+
+  --md3-elevation-1: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.05);
+  --md3-elevation-2: 0 1px 4px rgba(15, 23, 42, 0.06), 0 2px 8px rgba(15, 23, 42, 0.04);
+  --md3-elevation-3: 0 4px 12px rgba(15, 23, 42, 0.07);
+
+  --md3-shape-xs: 6px;
+  --md3-shape-sm: 10px;
+  --md3-shape-md: 12px;
+  --md3-shape-lg: 16px;
+  --md3-shape-xl: 20px;
+  --md3-shape-full: 9999px;
+
+  --md3-font: "Roboto Flex", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --md3-font-mono: "Roboto Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  --md3-motion: cubic-bezier(0.2, 0, 0, 1);
+  --md3-motion-fast: 180ms;
+  --md3-motion-med: 280ms;
+}
+
+.md3-intercepts {
+  font-family: var(--md3-font);
+  color: var(--md3-on-surface);
+  -webkit-font-smoothing: antialiased;
+}
+
+.md3-intercepts .wp-mono,
+.md3-intercepts .wp-page-lead .fw-semibold {
+  font-family: var(--md3-font);
+}
+
+.md3-intercepts code,
+.md3-intercepts .wp-mono {
+  font-family: var(--md3-font-mono);
+}
+
+/* Фон страницы — мягкий контейнер */
+.md3-intercepts .sessions-main > .card.wp-card {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  border-radius: var(--md3-shape-xl);
+}
+
+.md3-intercepts .sessions-main > .card.wp-card > .card-body {
+  background: linear-gradient(
+    165deg,
+    var(--md3-surface-container-low) 0%,
+    var(--md3-surface-dim) 48%,
+    #e9eef9 100%
+  );
+  border-radius: var(--md3-shape-xl);
+  padding: 0.85rem 0.95rem 1.1rem !important;
+  border: 1px solid var(--md3-outline-variant);
+  box-shadow: var(--md3-elevation-1);
+}
+
+@media (min-width: 992px) {
+  .md3-intercepts .sessions-main > .card.wp-card > .card-body {
+    padding: 1rem 1.1rem 1.25rem !important;
+  }
+}
+
+/* Верхняя панель действий */
+.md3-intercepts .intercepts-topbar {
+  border-bottom: none !important;
+  padding-bottom: 0.65rem !important;
+  margin-bottom: 0.85rem !important;
+  background: var(--md3-surface-container-lowest);
+  border-radius: var(--md3-shape-lg);
+  padding: 0.65rem 0.8rem !important;
+  box-shadow: none;
+  border: 1px solid var(--md3-outline-variant) !important;
+}
+
+.md3-intercepts .intercepts-topbar .wp-page-title {
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  font-size: clamp(1.05rem, 2vw, 1.25rem);
+  margin-bottom: 0.1rem !important;
+}
+
+.md3-intercepts .intercepts-topbar .wp-page-lead {
+  font-size: 0.8125rem;
+  color: var(--md3-on-surface-variant);
+  max-width: 56ch;
+}
+
+.md3-intercepts .intercepts-topbar-actions {
+  gap: 0.5rem !important;
+}
+
+.md3-intercepts .intercepts-topbar-actions .form-select {
+  border-radius: var(--md3-shape-full);
+  border: 1px solid var(--md3-outline);
+  background-color: var(--md3-surface-container-low);
+  padding-left: 0.75rem;
+  padding-right: 1.75rem;
+  min-height: 34px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  max-width: min(100%, 340px);
+  transition: border-color var(--md3-motion-fast) var(--md3-motion),
+    box-shadow var(--md3-motion-fast) var(--md3-motion);
+}
+
+.md3-intercepts .intercepts-topbar-actions .form-select:focus {
+  border-color: var(--md3-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+}
+
+/* Кнопки MD3: outline / tonal / filled */
+.md3-intercepts .btn-sm {
+  min-height: 34px;
+  padding: 0 0.75rem;
+  border-radius: var(--md3-shape-full);
+  font-weight: 500;
+  font-size: 0.75rem;
+  letter-spacing: 0.01em;
+  transition: background var(--md3-motion-fast) var(--md3-motion),
+    color var(--md3-motion-fast) var(--md3-motion),
+    box-shadow var(--md3-motion-fast) var(--md3-motion),
+    border-color var(--md3-motion-fast) var(--md3-motion);
+}
+
+.md3-intercepts .btn-outline-secondary {
+  border-color: var(--md3-outline);
+  color: var(--md3-on-surface-variant);
+  background: var(--md3-surface-container-lowest);
+}
+
+.md3-intercepts .btn-outline-secondary:hover {
+  background: var(--md3-surface-container-high);
+  border-color: var(--md3-outline);
+  color: var(--md3-on-surface);
+}
+
+.md3-intercepts .btn-outline-primary {
+  border-color: var(--md3-primary);
+  color: var(--md3-primary);
+  background: var(--md3-surface-container-lowest);
+}
+
+.md3-intercepts .btn-outline-primary:hover {
+  background: var(--md3-primary-container);
+  color: var(--md3-on-primary-container);
+}
+
+.md3-intercepts .btn-primary {
+  background: var(--md3-primary) !important;
+  border: none !important;
+  color: var(--md3-on-primary) !important;
+  box-shadow: 0 1px 2px rgba(29, 78, 216, 0.35);
+}
+
+.md3-intercepts .btn-primary:hover {
+  filter: brightness(1.05);
+  box-shadow: var(--md3-elevation-2);
+}
+
+.md3-intercepts .btn-primary:disabled,
+.md3-intercepts .btn-outline-secondary:disabled,
+.md3-intercepts .btn-outline-primary:disabled {
+  opacity: 0.45;
+}
+
+/* Боковая панель групп */
+.md3-intercepts .wp-intercepts-sidebar .groups-drawer-inner {
+  background: var(--md3-surface-container-lowest) !important;
+  border: 1px solid var(--md3-outline-variant) !important;
+  border-radius: var(--md3-shape-lg) !important;
+  box-shadow: var(--md3-elevation-1);
+  padding: 0.55rem 0.65rem !important;
+}
+
+.md3-intercepts .wp-intercepts-sidebar .wp-intercepts-sidebar-head {
+  border-bottom: 1px solid var(--md3-outline-variant) !important;
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.15rem;
+}
+
+.md3-intercepts .wp-intercepts-sidebar .fw-semibold {
+  font-weight: 600;
+  font-size: 0.8125rem;
+  color: var(--md3-on-surface);
+}
+
+/* Поиск по каталогу групп (MD3 Search bar) */
+.md3-intercepts .md3-groups-search {
+  margin: 0.4rem 0 0.55rem;
+}
+
+.md3-intercepts .md3-search-field {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  min-height: 40px;
+  padding: 0 0.2rem 0 0.75rem;
+  background: var(--md3-surface-container-high);
+  border-radius: var(--md3-shape-full);
+  border: 1px solid transparent;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  transition:
+    background var(--md3-motion-fast) var(--md3-motion),
+    border-color var(--md3-motion-fast) var(--md3-motion),
+    box-shadow var(--md3-motion-fast) var(--md3-motion);
+}
+
+.md3-intercepts .md3-search-field:hover {
+  background: var(--md3-surface-container);
+}
+
+.md3-intercepts .md3-search-field:focus-within {
+  background: var(--md3-surface-container-lowest);
+  border-color: color-mix(in srgb, var(--md3-primary) 40%, var(--md3-outline));
+  box-shadow:
+    0 0 0 3px rgba(37, 99, 235, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.md3-intercepts .md3-search-field__leading {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--md3-on-surface-variant);
+  font-size: 1rem;
+  line-height: 0;
+  opacity: 0.9;
+  flex-shrink: 0;
+}
+
+.md3-intercepts .md3-search-field:focus-within .md3-search-field__leading {
+  color: var(--md3-primary);
+  opacity: 1;
+}
+
+.md3-intercepts .md3-search-field__input,
+.md3-intercepts input.md3-search-field__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  padding: 0.5rem 0.35rem;
+  color: var(--md3-on-surface);
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.md3-intercepts .md3-search-field__input::placeholder {
+  color: var(--md3-on-surface-variant);
+  font-weight: 400;
+  opacity: 0.72;
+}
+
+.md3-intercepts .md3-search-field__input:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Иконка «очистить» (MD3 icon button) */
+.md3-intercepts .md3-icon-btn.md3-search-field__clear {
+  display: none;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin-right: 0.1rem;
+  padding: 0;
+  border: none;
+  border-radius: var(--md3-shape-full);
+  background: transparent;
+  color: var(--md3-on-surface-variant);
+  transition:
+    background var(--md3-motion-fast) var(--md3-motion),
+    color var(--md3-motion-fast) var(--md3-motion);
+}
+
+.md3-intercepts .md3-icon-btn.md3-search-field__clear:hover {
+  background: color-mix(in srgb, var(--md3-on-surface) 7%, transparent);
+  color: var(--md3-on-surface);
+}
+
+.md3-intercepts .md3-icon-btn.md3-search-field__clear:active {
+  background: color-mix(in srgb, var(--md3-on-surface) 11%, transparent);
+}
+
+@supports not (background: color-mix(in srgb, white 50%, black)) {
+  .md3-intercepts .md3-icon-btn.md3-search-field__clear:hover {
+    background: rgba(15, 23, 42, 0.06);
+  }
+  .md3-intercepts .md3-icon-btn.md3-search-field__clear:active {
+    background: rgba(15, 23, 42, 0.09);
+  }
+}
+
+/* Сообщения пустого списка / нет совпадений */
+.md3-intercepts .md3-groups-empty {
+  font-size: 0.78rem;
+  line-height: 1.4;
+  padding: 0.6rem 0.65rem;
+  border-radius: var(--md3-shape-sm);
+  border: 1px dashed var(--md3-outline);
+  text-align: center;
+}
+
+.md3-intercepts .md3-groups-empty--muted {
+  color: var(--md3-on-surface-variant);
+  background: var(--md3-surface-container-low);
+}
+
+.md3-intercepts .md3-groups-empty--warn {
+  color: var(--md3-on-tertiary-container);
+  background: color-mix(in srgb, var(--md3-tertiary-container) 70%, var(--md3-surface-container-lowest));
+  border-color: color-mix(in srgb, #f59e0b 28%, var(--md3-outline));
+}
+
+@supports not (background: color-mix(in srgb, white 50%, black)) {
+  .md3-intercepts .md3-groups-empty--warn {
+    background: #fff7ed;
+    border-color: #fcd9bd;
+  }
+}
+
+/* Подразделения: карточка-аккордеон */
+.md3-intercepts .unit-block {
+  margin-bottom: 0.2rem;
+}
+
+.md3-intercepts .unit-block .unit-header {
+  background: var(--md3-surface-container-low);
+  border: 1px solid var(--md3-outline-variant);
+  border-radius: var(--md3-shape-sm);
+  padding: 0.35rem 0.4rem 0.35rem 0.35rem !important;
+  margin-top: 0.35rem;
+  box-shadow: var(--md3-elevation-1);
+  transition:
+    background var(--md3-motion-fast) var(--md3-motion),
+    border-color var(--md3-motion-fast) var(--md3-motion);
+}
+
+.md3-intercepts .unit-block .unit-header:hover {
+  background: var(--md3-surface-container);
+  border-color: color-mix(in srgb, var(--md3-primary) 15%, var(--md3-outline-variant));
+}
+
+.md3-intercepts .unit-block .unit-header .text-uppercase {
+  letter-spacing: 0.04em;
+  font-size: 0.7rem;
+}
+
+.md3-intercepts .unit-groups-container {
+  border-left: 2px solid color-mix(in srgb, var(--md3-primary) 18%, var(--md3-outline-variant)) !important;
+  margin-left: 0.6rem;
+  margin-top: 0.25rem;
+  padding-left: 0.45rem;
+  padding-bottom: 0.2rem;
+}
+
+/* Ползунок высоты списка */
+.md3-intercepts .intercepts-groups-panel .groups-list-resizer {
+  border-radius: var(--md3-shape-full);
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    color-mix(in srgb, var(--md3-primary) 18%, transparent) 50%,
+    transparent 100%
+  );
+}
+
+.md3-intercepts #groups-list .list-group-item {
+  border-radius: var(--md3-shape-sm) !important;
+  border: 1px solid transparent !important;
+  margin-bottom: 4px;
+  padding: 0.45rem 0.55rem;
+  font-size: 0.8125rem;
+  transition: background var(--md3-motion-fast) var(--md3-motion),
+    box-shadow var(--md3-motion-fast) var(--md3-motion);
+}
+
+.md3-intercepts #groups-list .list-group-item:hover {
+  background: rgba(37, 99, 235, 0.07) !important;
+}
+
+.md3-intercepts #groups-list .list-group-item.ix-catalog-row--selected,
+.md3-intercepts #groups-list .list-group-item.active,
+.md3-intercepts #groups-list .list-group-item:focus {
+  background: var(--md3-primary-container) !important;
+  border: 2px solid color-mix(in srgb, var(--md3-primary) 55%, transparent) !important;
+  color: var(--md3-on-primary-container);
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--md3-primary) 18%, transparent),
+    var(--md3-elevation-1);
+}
+
+.md3-intercepts #groups-list .unit-block--has-selection > .unit-header {
+  border-color: color-mix(in srgb, var(--md3-primary) 40%, var(--md3-outline-variant)) !important;
+  background: color-mix(in srgb, var(--md3-primary-container) 35%, var(--md3-surface-container-low)) !important;
+}
+
+/* Рабочая зона бланка */
+.md3-intercepts .wp-intercepts-blank .blank-toolbar {
+  background: var(--md3-secondary-container) !important;
+  border: 1px solid color-mix(in srgb, var(--md3-secondary) 22%, transparent) !important;
+  border-radius: var(--md3-shape-md) !important;
+  padding: 0.35rem 0.5rem !important;
+  margin-bottom: 0.45rem !important;
+  box-shadow: none;
+}
+
+@supports not (background: color-mix(in srgb, white 50%, black)) {
+  .md3-intercepts .wp-intercepts-blank .blank-toolbar {
+    background: #e8edfc !important;
+    border-color: rgba(91, 100, 120, 0.35) !important;
+  }
+}
+
+.md3-intercepts .wp-intercepts-blank .blank-toolbar .fw-semibold {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--md3-on-secondary-container);
+}
+
+.md3-intercepts .wp-intercepts-blank #editor-subtitle {
+  font-size: 0.8125rem;
+  color: var(--md3-on-surface-variant);
+  margin-top: 0.15rem;
+}
+
+.md3-intercepts .wp-intercepts-blank #intercept-text-wrapper {
+  border-radius: var(--md3-shape-lg) !important;
+  border: 1px solid var(--md3-outline) !important;
+  background: var(--md3-surface-container-lowest) !important;
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04);
+  padding: 2px !important;
+  margin-top: 0.5rem;
+}
+
+.md3-intercepts .wp-intercepts-blank #intercept-text {
+  border: 0 !important;
+  border-radius: calc(var(--md3-shape-lg) - 2px) !important;
+  background: transparent !important;
+  font-family: "Times New Roman", Times, serif !important;
+  font-size: 12pt !important;
+  line-height: 1.45 !important;
+  padding: 0.65rem 0.75rem !important;
+  min-height: 220px;
+  color: var(--md3-on-surface);
+  box-shadow: none !important;
+}
+
+.md3-intercepts .wp-intercepts-blank #intercept-text:focus {
+  outline: none;
+  box-shadow: none !important;
+}
+
+.md3-intercepts .wp-intercepts-blank #intercept-text:focus-visible {
+  outline: 2px solid var(--md3-primary);
+  outline-offset: 2px;
+}
+
+.md3-intercepts .wp-intercepts-blank #intercept-text-wrapper:focus-within {
+  border-color: var(--md3-primary) !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18), inset 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+/* Поле ввода радиоперехвата */
+.md3-intercepts #intercept-input {
+  border-radius: var(--md3-shape-md) !important;
+  border: 1px solid var(--md3-outline) !important;
+  padding: 0.5rem 0.65rem !important;
+  font-family: "Times New Roman", Times, serif !important;
+  font-size: 12pt !important;
+  background: var(--md3-surface-container-lowest) !important;
+  transition: border-color var(--md3-motion-fast) var(--md3-motion),
+    box-shadow var(--md3-motion-fast) var(--md3-motion);
+}
+
+.md3-intercepts #intercept-input:focus {
+  border-color: var(--md3-primary) !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.16) !important;
+}
+
+.md3-intercepts .border-top {
+  border-color: var(--md3-outline-variant) !important;
+}
+
+.md3-intercepts #send-input-btn.btn-primary {
+  padding-left: 0.9rem;
+  padding-right: 1rem;
+  min-height: 36px;
+  border-radius: var(--md3-shape-full);
+  font-weight: 600;
+  font-size: 0.8125rem;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Позывные — MD3 (панель, добавление, карточки, модальное окно)               */
+/* -------------------------------------------------------------------------- */
+
+.md3-intercepts .md3-callsign-panel.callsign-panel-card {
+  border-radius: var(--md3-shape-lg) !important;
+  border: 1px solid var(--md3-outline-variant) !important;
+  background: var(--md3-surface-container-lowest) !important;
+  box-shadow: var(--md3-elevation-1) !important;
+  overflow: hidden;
+}
+
+.md3-intercepts .md3-callsign-panel .card-body {
+  padding: 0.65rem 0.75rem !important;
+}
+
+.md3-intercepts .md3-callsign-head {
+  margin-bottom: 0.45rem;
+}
+
+.md3-intercepts .md3-callsign-title {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--md3-on-surface);
+}
+
+.md3-intercepts .md3-callsign-title-ic {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--md3-shape-full);
+  background: var(--md3-primary-container);
+  color: var(--md3-on-primary-container);
+  font-size: 0.95rem;
+}
+
+.md3-intercepts .md3-callsign-hint {
+  font-size: 0.6875rem;
+  line-height: 1.4;
+  color: var(--md3-on-surface-variant);
+  margin-bottom: 0.5rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: var(--md3-shape-sm);
+  background: var(--md3-surface-container-low);
+  border: 1px solid var(--md3-outline-variant);
+}
+
+.md3-intercepts .md3-callsign-duty {
+  font-size: 0.75rem;
+  padding: 0.35rem 0.5rem;
+  margin-bottom: 0.45rem;
+  border-radius: var(--md3-shape-sm);
+  background: var(--md3-tertiary-container);
+  color: var(--md3-on-tertiary-container);
+  border: 1px solid rgba(46, 125, 50, 0.22);
+}
+
+/* Строка добавления: outlined поля + filled кнопка */
+.md3-intercepts .md3-callsign-add.callsign-create-grid,
+.md3-intercepts .callsign-create-grid.md3-callsign-add {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 88px 38px;
+  gap: 6px;
+  align-items: center;
+}
+
+@media (max-width: 1200px) {
+  .md3-intercepts .md3-callsign-add.callsign-create-grid {
+    grid-template-columns: minmax(0, 1fr) 76px 38px;
+  }
+}
+
+.md3-intercepts .md3-callsign-add .form-control {
+  border-radius: var(--md3-shape-full);
+  border: 1px solid var(--md3-outline);
+  min-height: 34px;
+  font-size: 0.75rem;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+  background: var(--md3-surface-container-lowest);
+}
+
+.md3-intercepts .md3-callsign-add .form-control:focus {
+  border-color: var(--md3-primary);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+.md3-intercepts .md3-callsign-add .md3-callsign-code-field {
+  text-align: center;
+  font-family: var(--md3-font-mono);
+  letter-spacing: 0.02em;
+}
+
+.md3-intercepts .md3-callsign-add-btn.btn {
+  min-width: 38px;
+  width: 38px;
+  height: 34px;
+  padding: 0;
+  border-radius: var(--md3-shape-full);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 2px rgba(29, 78, 216, 0.25);
+}
+
+.md3-intercepts .md3-callsign-add-btn:disabled {
+  opacity: 0.45;
+}
+
+.md3-intercepts .md3-callsign-list.callsign-cards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 0.55rem;
+  max-height: min(52vh, 520px);
+  overflow-y: auto;
+  padding-right: 2px;
+  scrollbar-width: thin;
+}
+
+.md3-intercepts .md3-callsign-empty {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--md3-on-surface-variant);
+  padding: 1rem 0.5rem;
+  border-radius: var(--md3-shape-sm);
+  border: 1px dashed var(--md3-outline-variant);
+  background: var(--md3-surface-container-low);
+}
+
+/* Карточка позывного */
+.md3-intercepts .md3-callsign-card.callsign-card {
+  border-radius: var(--md3-shape-md);
+  border: 1px solid var(--md3-outline-variant);
+  background: var(--md3-surface-container-low);
+  padding: 0.45rem 0.5rem;
+  box-shadow: none;
+  transition: background var(--md3-motion-fast) var(--md3-motion),
+    box-shadow var(--md3-motion-fast) var(--md3-motion),
+    border-color var(--md3-motion-fast) var(--md3-motion);
+}
+
+.md3-intercepts .md3-callsign-card.callsign-card:hover {
+  transform: none;
+  border-color: color-mix(in srgb, var(--md3-primary) 35%, var(--md3-outline-variant));
+  background: var(--md3-surface-container-lowest);
+  box-shadow: var(--md3-elevation-1);
+}
+
+.md3-intercepts .callsign-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.md3-intercepts .callsign-card-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+  font-weight: 600;
+  font-size: 0.8125rem;
+  color: var(--md3-on-surface);
+}
+
+.md3-intercepts .callsign-card-title .bi-person-circle {
+  color: var(--md3-primary);
+  opacity: 0.9;
+}
+
+.md3-intercepts .callsign-card-meta {
+  margin-top: 2px;
+  font-size: 0.75rem;
+}
+
+.md3-intercepts .callsign-card-meta .cs-code-link {
+  color: var(--md3-primary);
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 0 2px;
+}
+
+.md3-intercepts .callsign-card-meta .cs-code-link:hover {
+  background: rgba(37, 99, 235, 0.08);
+}
+
+.md3-intercepts .callsign-card-actions .callsign-action-btn {
+  min-width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: var(--md3-shape-full);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--md3-outline);
+  background: var(--md3-surface-container-lowest);
+  color: var(--md3-primary);
+}
+
+.md3-intercepts .callsign-card-actions .callsign-action-btn:hover {
+  background: var(--md3-primary-container);
+  border-color: transparent;
+}
+
+.md3-intercepts .callsign-card-actions .callsign-action-btn.active {
+  background: var(--md3-primary-container);
+  border-color: var(--md3-primary);
+}
+
+.md3-intercepts .callsign-card-settings {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--md3-outline-variant);
+  border-radius: 0 0 var(--md3-shape-sm) var(--md3-shape-sm);
+  display: none;
+}
+
+.md3-intercepts .callsign-card-settings.is-open {
+  display: block;
+}
+
+.md3-intercepts .callsign-card-settings .form-label {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--md3-on-surface-variant);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.md3-intercepts .callsign-card-settings .input-group .form-control {
+  border-radius: var(--md3-shape-full) 0 0 var(--md3-shape-full);
+  min-height: 34px;
+  font-size: 0.8125rem;
+}
+
+.md3-intercepts .callsign-card-settings .input-group .btn-primary {
+  border-radius: 0 var(--md3-shape-full) var(--md3-shape-full) 0;
+  padding-left: 0.65rem;
+  padding-right: 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.md3-intercepts .callsign-card-settings .btn-outline-danger {
+  border-radius: var(--md3-shape-full);
+  font-size: 0.75rem;
+}
+
+.md3-intercepts .callsign-card-settings .btn-outline-secondary {
+  border-radius: var(--md3-shape-full);
+  font-size: 0.75rem;
+}
+
+/* Модальное окно карточек */
+.md3-callsign-modal .md3-callsign-modal-content {
+  border-radius: var(--md3-shape-lg) !important;
+  border: 1px solid var(--md3-outline-variant);
+  box-shadow: var(--md3-elevation-3);
+  overflow: hidden;
+}
+
+.md3-intercepts .md3-callsign-modal .md3-callsign-modal-header,
+.md3-callsign-modal .md3-callsign-modal-header {
+  background: var(--md3-surface-container-low);
+  border-bottom: 1px solid var(--md3-outline-variant);
+  padding: 0.65rem 1rem;
+}
+
+.md3-intercepts .md3-callsign-modal .modal-title,
+.md3-callsign-modal .modal-title {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.md3-intercepts .md3-callsign-modal-lead,
+.md3-callsign-modal-lead {
+  font-size: 0.8125rem;
+  color: var(--md3-on-surface-variant);
+  padding: 0.4rem 0.55rem;
+  border-radius: var(--md3-shape-sm);
+  background: var(--md3-surface-container-low);
+  border: 1px solid var(--md3-outline-variant);
+}
+
+.md3-intercepts .md3-callsign-modal-footer,
+.md3-callsign-modal-footer {
+  border-top: 1px solid var(--md3-outline-variant);
+  background: var(--md3-surface-container-low);
+  padding: 0.5rem 0.85rem;
+}
+
+.md3-intercepts .md3-callsign-modal-close.btn,
+.md3-callsign-modal-footer .md3-callsign-modal-close {
+  border-radius: var(--md3-shape-full);
+  padding-left: 1.1rem;
+  padding-right: 1.1rem;
+  font-weight: 600;
+}
+
+.md3-callsign-modal .md3-callsign-modal-card,
+.md3-intercepts .md3-callsign-modal .md3-callsign-modal-card {
+  border-radius: var(--md3-shape-md) !important;
+  border: 1px solid var(--md3-outline-variant) !important;
+  background: var(--md3-surface-container-low) !important;
+  box-shadow: none !important;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.md3-callsign-modal .md3-callsign-modal-card:hover,
+.md3-intercepts .md3-callsign-modal .md3-callsign-modal-card:hover {
+  border-color: color-mix(in srgb, var(--md3-primary) 30%, var(--md3-outline-variant)) !important;
+  box-shadow: var(--md3-elevation-1) !important;
+}
+
+.md3-callsign-modal .md3-callsign-modal-card--preferred,
+.md3-intercepts .md3-callsign-modal .md3-callsign-modal-card--preferred {
+  border-color: color-mix(in srgb, var(--md3-primary) 55%, var(--md3-outline-variant)) !important;
+  background: var(--md3-primary-container) !important;
+}
+
+.md3-callsign-modal .md3-callsign-modal-avatar,
+.md3-intercepts .md3-callsign-modal .md3-callsign-modal-avatar {
+  display: inline-flex;
+  color: var(--md3-primary);
+}
+
+.md3-callsign-modal .md3-callsign-code-badge,
+.md3-intercepts .md3-callsign-modal .md3-callsign-code-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.45rem;
+  border-radius: var(--md3-shape-full);
+  background: var(--md3-surface-container-high) !important;
+  color: var(--md3-on-surface) !important;
+  border: 1px solid var(--md3-outline-variant) !important;
+}
+
+.md3-callsign-modal .md3-callsign-badge-duty,
+.md3-intercepts .md3-callsign-modal .md3-callsign-badge-duty {
+  font-size: 0.65rem;
+  font-weight: 600;
+  background: var(--md3-primary) !important;
+}
+
+.md3-callsign-modal .md3-callsign-modal-meta,
+.md3-intercepts .md3-callsign-modal .md3-callsign-modal-meta {
+  color: var(--md3-on-surface-variant);
+  font-size: 0.75rem;
+}
+
+.md3-callsign-modal .md3-callsign-modal-actions-btn,
+.md3-intercepts .md3-callsign-modal .md3-callsign-modal-actions-btn {
+  border-radius: var(--md3-shape-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding-left: 0.85rem;
+  padding-right: 0.85rem;
+}
+
+.md3-callsign-modal .md3-callsign-dropdown,
+.md3-intercepts .md3-callsign-modal .md3-callsign-dropdown {
+  border-radius: var(--md3-shape-md);
+  border: 1px solid var(--md3-outline-variant);
+  padding: 0.35rem;
+  box-shadow: var(--md3-elevation-3);
+}
+
+.md3-callsign-modal .md3-callsign-dropdown .dropdown-item,
+.md3-intercepts .md3-callsign-modal .md3-callsign-dropdown .dropdown-item {
+  border-radius: var(--md3-shape-sm);
+  font-size: 0.8125rem;
+  padding: 0.4rem 0.6rem;
+}
+
+/* Модалка: новая группа в каталоге (подразделения слева) */
+.md3-add-group-modal .md3-add-group-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem 1rem;
+}
+
+.md3-add-group-modal .add-group-freq-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.md3-add-group-modal .md3-add-group-freq-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.md3-add-group-modal .md3-add-group-freq-row-fields {
+  flex: 1 1 240px;
+  min-width: 0;
+}
+
+.md3-add-group-modal .add-group-freq-remove {
+  flex: 0 0 auto;
+  margin-top: 1.55rem;
+  min-width: 2rem;
+  padding-left: 0.45rem;
+  padding-right: 0.45rem;
+}
+
+@media (max-width: 576px) {
+  .md3-add-group-modal .md3-add-group-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .md3-add-group-modal .add-group-freq-remove {
+    margin-top: 0;
+    align-self: flex-end;
+  }
+}
+
+.md3-add-group-modal .form-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--md3-on-surface-variant);
+  margin-bottom: 0.35rem;
+}
+
+.md3-add-group-modal .form-control {
+  border-radius: var(--md3-shape-md);
+  border: 1px solid var(--md3-outline);
+  min-height: 40px;
+  font-size: 0.875rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--md3-surface-container-lowest);
+}
+
+.md3-add-group-modal .form-control:focus {
+  border-color: var(--md3-primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--md3-primary) 22%, transparent);
+}
+
+.md3-add-group-modal .md3-add-group-mono {
+  font-family: var(--md3-font-mono);
+  letter-spacing: 0.03em;
+}
+
+.md3-add-group-modal .form-text {
+  font-size: 0.6875rem;
+  color: var(--md3-on-surface-variant);
+  margin-top: 0.25rem;
+}
+
+.md3-add-group-modal .md3-add-group-cancel {
+  border-radius: var(--md3-shape-full);
+  font-weight: 600;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.md3-add-group-modal .md3-add-group-submit {
+  border-radius: var(--md3-shape-full);
+  font-weight: 600;
+  padding-left: 1.15rem;
+  padding-right: 1.15rem;
+}
+
+/* Модалка: настройки подразделения (шестерёнка в списке групп) */
+.md3-unit-manage-modal .md3-unit-manage-name-block .form-control {
+  border-radius: var(--md3-shape-md);
+}
+
+.md3-unit-manage-modal .md3-unit-manage-danger {
+  border-color: var(--md3-outline-variant) !important;
+  border-radius: var(--md3-shape-md);
+  padding: 0.75rem !important;
+  background: rgba(179, 38, 30, 0.06);
+}
+
+html[data-wp-theme="dark"] .md3-unit-manage-modal .md3-unit-manage-danger {
+  background: rgba(179, 38, 30, 0.12);
+}
+
+.md3-intercepts .unit-manage-open-btn.md3-unit-gear-btn {
+  border-radius: var(--md3-shape-full);
+  padding: 0.15rem 0.35rem;
+  line-height: 1;
+}
+
+.md3-intercepts .unit-manage-open-btn.md3-unit-gear-btn:hover {
+  background: rgba(37, 99, 235, 0.1);
+  border-color: var(--md3-outline);
+}
+
+/* Аудиопанель */
+.md3-intercepts .audio-panel {
+  border-radius: var(--md3-shape-lg) !important;
+  border: 1px solid var(--md3-outline-variant) !important;
+  background: var(--md3-surface-container-lowest) !important;
+  box-shadow: var(--md3-elevation-2) !important;
+}
+
+.md3-intercepts .audio-panel .card-body {
+  padding: 0.75rem 0.85rem !important;
+}
+
+.md3-intercepts .audio-queue-table thead th {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+  color: var(--md3-on-surface-variant);
+  border-bottom: 1px solid var(--md3-outline-variant);
+  background: var(--md3-surface-container-low);
+}
+
+.md3-intercepts .audio-queue-table tbody td {
+  border-color: var(--md3-outline-variant);
+  font-size: 0.8125rem;
+}
+
+/* Переключатель редактирования — визуально ближе к MD3 switch */
+.md3-intercepts .edit-blank-toggle .form-check-input {
+  width: 2.15rem;
+  height: 1.15rem;
+  cursor: pointer;
+}
+
+.md3-intercepts .edit-blank-toggle .form-check-label {
+  font-size: 0.8125rem;
+  color: var(--md3-on-surface-variant);
+  cursor: pointer;
+}
+
+/* Статус сохранения */
+.md3-intercepts #save-status,
+.md3-intercepts #intercepts-status {
+  font-size: 0.8125rem;
+}
+
+.md3-intercepts .save-indicator {
+  box-shadow: 0 0 0 2px var(--md3-surface-container-lowest);
+}
+
+/* Саджест позывных */
+.md3-intercepts #cs-suggest,
+.md3-intercepts #cs-suggest-input {
+  border-radius: var(--md3-shape-md) !important;
+  border: 1px solid var(--md3-outline-variant) !important;
+  box-shadow: var(--md3-elevation-3) !important;
+  overflow: hidden;
+}
+
+.md3-intercepts #cs-suggest .list-group-item,
+.md3-intercepts #cs-suggest-input .list-group-item {
+  border: none !important;
+  border-bottom: 1px solid var(--md3-outline-variant) !important;
+}
+
+.md3-intercepts #cs-suggest .list-group-item:last-child,
+.md3-intercepts #cs-suggest-input .list-group-item:last-child {
+  border-bottom: none !important;
+}
+
+/* Режим выдвижной панели групп на узких экранах */
+body.groups-drawer-mode .md3-intercepts .intercepts-groups-panel {
+  border-radius: 0 var(--md3-shape-lg) var(--md3-shape-lg) 0 !important;
+  box-shadow: var(--md3-elevation-3) !important;
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Тёмная тема: токены MD3 на html + экран «Перехваты» (вкл. инлайн из шаблона)   */
+/* -------------------------------------------------------------------------- */
+
+html[data-wp-theme="dark"] {
+  --md3-primary: #9ecaff;
+  --md3-on-primary: #003258;
+  --md3-primary-container: #1e4972;
+  --md3-on-primary-container: #cfe4ff;
+
+  --md3-secondary: #bcc7e5;
+  --md3-on-secondary: #1e2838;
+  --md3-secondary-container: #3d4a63;
+  --md3-on-secondary-container: #e4e9ff;
+
+  --md3-surface: #0f1419;
+  --md3-surface-dim: #0a0d11;
+  --md3-surface-container-lowest: #0e131a;
+  --md3-surface-container-low: #161c26;
+  --md3-surface-container: #1e2633;
+  --md3-surface-container-high: #262f3f;
+  --md3-surface-container-highest: #303a4c;
+
+  --md3-on-surface: #e8eaf0;
+  --md3-on-surface-variant: #b4bccf;
+
+  --md3-outline: #8b93a8;
+  --md3-outline-variant: #3d4658;
+
+  --md3-tertiary-container: #2d4a38;
+  --md3-on-tertiary-container: #c8f5d5;
+
+  --md3-elevation-1: 0 1px 3px rgba(0, 0, 0, 0.45);
+  --md3-elevation-2: 0 2px 10px rgba(0, 0, 0, 0.5);
+  --md3-elevation-3: 0 6px 18px rgba(0, 0, 0, 0.55);
+}
+
+html[data-wp-theme="dark"] .md3-intercepts .sessions-main > .card.wp-card > .card-body {
+  background: linear-gradient(
+    165deg,
+    var(--md3-surface-container-low) 0%,
+    var(--md3-surface-dim) 48%,
+    var(--md3-surface-container-high) 100%
+  );
+}
+
+@supports not (background: color-mix(in srgb, white 50%, black)) {
+  html[data-wp-theme="dark"] .md3-intercepts .wp-intercepts-blank .blank-toolbar {
+    background: #2a3345 !important;
+    border-color: rgba(148, 163, 184, 0.35) !important;
+  }
+}
+
+html[data-wp-theme="dark"] .md3-intercepts .btn-primary {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+html[data-wp-theme="dark"] .md3-intercepts .intercepts-topbar-actions .form-select:focus {
+  box-shadow: 0 0 0 3px rgba(158, 202, 255, 0.22);
+}
+
+html[data-wp-theme="dark"] .md3-intercepts .wp-intercepts-blank #intercept-text-wrapper:focus-within {
+  box-shadow: 0 0 0 3px rgba(158, 202, 255, 0.2), inset 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+html[data-wp-theme="dark"] .md3-intercepts #intercept-input:focus {
+  box-shadow: 0 0 0 3px rgba(158, 202, 255, 0.18) !important;
+}
+
+/* Шаблон intercepts.html: превью бланка, выдвижная панель, аудио — тёмные поверхности */
+html[data-wp-theme="dark"] .md3-intercepts #intercept-preview {
+  border-color: var(--md3-outline-variant);
+  background: var(--md3-surface-container-low);
+  color: var(--md3-on-surface);
+}
+
+html[data-wp-theme="dark"] .md3-intercepts .ip-time {
+  background: var(--md3-surface-container-low);
+  border-bottom-color: var(--md3-outline-variant);
+  color: var(--md3-on-surface);
+}
+
+html[data-wp-theme="dark"] .md3-intercepts .ip-msg.ip-highlight {
+  background: rgba(110, 168, 255, 0.12);
+  outline-color: rgba(110, 168, 255, 0.35);
+}
+
+html[data-wp-theme="dark"] .md3-intercepts .ip-text {
+  border-color: var(--md3-outline-variant);
+  background: linear-gradient(180deg, var(--md3-surface-container-lowest) 0%, var(--md3-surface-container-low) 100%);
+  color: var(--md3-on-surface);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+html[data-wp-theme="dark"] .md3-intercepts .ip-id {
+  border-color: var(--md3-outline-variant);
+  color: var(--md3-on-surface);
+}
+
+html[data-wp-theme="dark"] .md3-intercepts .ip-callsign-chip {
+  border-color: rgba(148, 163, 184, 0.35);
+  background: rgba(30, 38, 52, 0.95);
+  color: #c8d0e0;
+}
+
+html[data-wp-theme="dark"] .md3-intercepts .ip-callsign-label-strong {
+  color: var(--md3-on-surface);
+}
+
+html[data-wp-theme="dark"] .md3-intercepts .ip-raw {
+  color: var(--md3-on-surface-variant);
+  background: linear-gradient(180deg, var(--md3-surface-container) 0%, var(--md3-surface-container-low) 100%);
+  border-color: var(--md3-outline-variant);
+}
+
+html[data-wp-theme="dark"] .md3-intercepts .ip-subtle {
+  color: var(--md3-on-surface-variant);
+}
+
+html[data-wp-theme="dark"] body.groups-drawer-mode .md3-intercepts .intercepts-groups-panel {
+  background: var(--md3-surface-container-high) !important;
+  border-color: var(--md3-outline-variant) !important;
+  box-shadow: var(--md3-elevation-3);
+}
+
+html[data-wp-theme="dark"] body.groups-drawer-mode .md3-intercepts .groups-drawer-toggle {
+  background: var(--md3-surface-container-high) !important;
+  border-color: var(--md3-outline-variant) !important;
+  color: var(--md3-on-surface) !important;
+}
+
+html[data-wp-theme="dark"] .md3-intercepts .unit-groups-container {
+  border-left-color: var(--md3-outline-variant);
+}
+
+html[data-wp-theme="dark"] .md3-intercepts .md3-search-field {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+html[data-wp-theme="dark"] .md3-intercepts .md3-search-field:hover {
+  background: var(--md3-surface-container-high);
+}
+
+html[data-wp-theme="dark"] .md3-intercepts .md3-search-field:focus-within {
+  background: var(--md3-surface-container-lowest);
+  box-shadow: 0 0 0 3px rgba(158, 202, 255, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+html[data-wp-theme="dark"] .md3-intercepts .unit-block .unit-header {
+  background: var(--md3-surface-container);
+  border-color: var(--md3-outline-variant);
+}
+
+html[data-wp-theme="dark"] .md3-intercepts .md3-groups-empty--warn {
+  color: #fde68a;
+  background: rgba(180, 83, 9, 0.14);
+  border-color: rgba(245, 158, 11, 0.4);
+}
+
+html[data-wp-theme="dark"] .md3-intercepts .unit-actions-menu {
+  background: var(--md3-surface-container-high);
+  border-color: var(--md3-outline-variant);
+}
+
+html[data-wp-theme="dark"] body.groups-panel-collapsed .md3-intercepts .groups-drawer-toggle {
+  background: var(--md3-surface-container-high) !important;
+  border-color: var(--md3-outline-variant) !important;
+  color: var(--md3-on-surface) !important;
+}
+
+html[data-wp-theme="dark"] .md3-intercepts .audio-group-row {
+  background: var(--md3-surface-container);
+}
+
+html[data-wp-theme="dark"] .md3-intercepts .audio-waveform {
+  border-color: var(--md3-outline-variant);
+  background: var(--md3-surface-container-lowest);
+}
+
+html[data-wp-theme="dark"] .md3-intercepts .audio-nowplaying {
+  border-color: var(--md3-outline-variant);
+  background: var(--md3-surface-container-low);
+  box-shadow: var(--md3-elevation-2);
+}
+
+html[data-wp-theme="dark"] .md3-intercepts .audio-queue-meta {
+  color: var(--md3-on-surface-variant);
+}
+
+html[data-wp-theme="dark"] .md3-intercepts .audio-seg-card .audio-sub {
+  color: var(--md3-on-surface-variant);
+}
+
+html[data-wp-theme="dark"] .md3-intercepts #cs-suggest-input {
+  background: var(--md3-surface-container-high) !important;
+  border-color: var(--md3-outline-variant) !important;
+}
+
+html[data-wp-theme="dark"] .md3-intercepts--redesign .intercepts-topbar {
+  border-bottom-color: rgba(148, 163, 184, 0.22) !important;
+}
+
+html[data-wp-theme="dark"] .md3-intercepts--redesign .wp-page-lead {
+  color: var(--md3-on-surface-variant) !important;
+}
+
+html[data-wp-theme="dark"] .md3-intercepts--redesign #open-callsigns-modal-btn {
+  color: var(--md3-on-surface-variant) !important;
+}
+
+html[data-wp-theme="dark"] .wp-workbench--intercepts:not(.ix-messenger-ui) .wp-intercepts-sidebar .groups-drawer-inner {
+  background: var(--md3-surface-container-low);
+  border-color: var(--md3-outline-variant);
+}
+
+html[data-wp-theme="dark"] .wp-workbench--intercepts:not(.ix-messenger-ui) .wp-intercepts-sidebar .wp-intercepts-sidebar-head {
+  border-bottom-color: rgba(148, 163, 184, 0.22);
+}
+
+html[data-wp-theme="dark"] .wp-workbench--intercepts:not(.ix-messenger-ui) .wp-intercepts-blank #intercept-text-wrapper {
+  background: var(--md3-surface-container-lowest) !important;
+  border-color: var(--md3-outline-variant) !important;
+}
+
+html[data-wp-theme="dark"] .wp-workbench--intercepts:not(.ix-messenger-ui) .callsign-panel-card {
+  background: var(--md3-surface-container-low) !important;
+  border-color: var(--md3-outline-variant) !important;
+}
+
+/* Модалки перехватов (Bootstrap + MD3) */
+html[data-wp-theme="dark"] .modal-content {
+  background: var(--md3-surface-container-low);
+  color: var(--md3-on-surface);
+  border-color: var(--md3-outline-variant);
+}
+
+html[data-wp-theme="dark"] .modal-header,
+html[data-wp-theme="dark"] .modal-footer {
+  border-color: var(--md3-outline-variant);
+}
+
+html[data-wp-theme="dark"] .modal .btn-close {
+  filter: invert(1) brightness(1.1);
+  opacity: 0.75;
+}
+
+html[data-wp-theme="dark"] .md3-callsign-modal .md3-callsign-modal-content {
+  box-shadow: var(--md3-elevation-3);
+}
+
+html[data-wp-theme="dark"] .md3-intercepts .intercepts-topbar.border-bottom {
+  border-color: rgba(148, 163, 184, 0.22) !important;
+}
+
+html[data-wp-theme="dark"] .md3-intercepts .badge.text-bg-light {
+  background: var(--md3-surface-container-high) !important;
+  color: var(--md3-on-surface) !important;
+  border-color: var(--md3-outline-variant) !important;
+}
+
+html[data-wp-theme="dark"] .md3-intercepts .form-control,
+html[data-wp-theme="dark"] .md3-intercepts .form-select {
+  background-color: var(--md3-surface-container-lowest);
+  border-color: var(--md3-outline);
+  color: var(--md3-on-surface);
+}
+
+html[data-wp-theme="dark"] .md3-intercepts .form-control::placeholder {
+  color: rgba(180, 188, 207, 0.65);
+}
+
+html[data-wp-theme="dark"] .md3-intercepts .list-group-item {
+  background-color: var(--md3-surface-container-low);
+  color: var(--md3-on-surface);
+  border-color: var(--md3-outline-variant);
+}
+
+html[data-wp-theme="dark"] .md3-intercepts .text-muted {
+  color: var(--md3-on-surface-variant) !important;
+}
+
+html[data-wp-theme="dark"] #app-toast .toast {
+  background: var(--md3-surface-container-high);
+  color: var(--md3-on-surface);
+  border: 1px solid var(--md3-outline-variant);
+}
+
+html[data-wp-theme="dark"] .md3-intercepts #asr-panel {
+  background: var(--md3-surface-container-low) !important;
+}
+
+html[data-wp-theme="dark"] .md3-intercepts #audio-settings-panel > .card {
+  background: var(--md3-surface-container-low) !important;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Редизайн: плотная сетка, бланк и позывные в одном ряду, единый топбар        */
+/* -------------------------------------------------------------------------- */
+
+.md3-intercepts.md3-intercepts--redesign {
+  --ix-space-1: 0.25rem;
+  --ix-space-2: 0.5rem;
+  --ix-space-3: 0.65rem;
+  --ix-space-4: 0.85rem;
+  --ix-space-5: 1rem;
+}
+
+.md3-intercepts.md3-intercepts--redesign .sessions-main > .card.wp-card > .card-body.md3-intercepts-main-inner {
+  padding: var(--ix-space-4) var(--ix-space-4) !important;
+  border-radius: var(--md3-shape-lg);
+}
+
+@media (min-width: 992px) {
+  .md3-intercepts.md3-intercepts--redesign .sessions-main > .card.wp-card > .card-body.md3-intercepts-main-inner {
+    padding: var(--ix-space-5) calc(var(--ix-space-5) + 0.15rem) !important;
+  }
+}
+
+.md3-intercepts.md3-intercepts--redesign .md3-intercepts-page-head,
+.md3-intercepts.md3-intercepts--redesign .intercepts-topbar {
+  padding: var(--ix-space-3) var(--ix-space-4) !important;
+  margin: 0 0 var(--ix-space-4) 0 !important;
+  border: 1px solid var(--md3-outline-variant) !important;
+  border-radius: var(--md3-shape-md);
+  background: var(--md3-surface-container-lowest) !important;
+  box-shadow: none !important;
+}
+
+.md3-intercepts.md3-intercepts--redesign .intercepts-topbar.border-bottom {
+  border-bottom: 1px solid var(--md3-outline-variant) !important;
+}
+
+.md3-intercepts.md3-intercepts--redesign .wp-page-title {
+  font-size: clamp(0.98rem, 1.5vw, 1.15rem) !important;
+  margin-bottom: 0.1rem !important;
+}
+
+.md3-intercepts.md3-intercepts--redesign .wp-page-lead {
+  font-size: 0.75rem !important;
+  max-width: 42ch;
+  line-height: 1.35;
+}
+
+.md3-intercepts.md3-intercepts--redesign .md3-intercepts-shift-select {
+  min-width: min(100%, 220px);
+  max-width: min(100%, 360px);
+}
+
+.md3-intercepts.md3-intercepts--redesign .md3-intercepts-toolbar-btn {
+  padding-left: 0.45rem;
+  padding-right: 0.45rem;
+  min-height: 30px;
+}
+
+.md3-intercepts.md3-intercepts--redesign .md3-intercepts-toolbar-btn .md3-intercepts-toolbar-label {
+  margin-left: 0.3rem;
+}
+
+@media (max-width: 575.98px) {
+  .md3-intercepts.md3-intercepts--redesign .md3-intercepts-toolbar-btn .md3-intercepts-toolbar-label {
+    display: none;
+  }
+}
+
+.md3-intercepts.md3-intercepts--redesign .md3-intercepts-workspace {
+  --bs-gutter-x: 0.65rem;
+  --bs-gutter-y: 0.65rem;
+}
+
+@media (min-width: 1200px) {
+  .md3-intercepts.md3-intercepts--redesign .md3-intercepts-workspace {
+    --bs-gutter-x: 0.85rem;
+    --bs-gutter-y: 0.85rem;
+  }
+}
+
+.md3-intercepts.md3-intercepts--redesign .wp-intercepts-blank {
+  min-width: 0;
+}
+
+.md3-intercepts.md3-intercepts--redesign .blank-toolbar {
+  margin-bottom: var(--ix-space-2) !important;
+}
+
+.md3-intercepts.md3-intercepts--redesign #editor-subtitle {
+  margin-bottom: var(--ix-space-2);
+}
+
+.md3-intercepts.md3-intercepts--redesign .wp-intercepts-blank #intercept-text-wrapper {
+  margin-top: var(--ix-space-2) !important;
+}
+
+.md3-intercepts.md3-intercepts--redesign #intercept-text {
+  min-height: 200px;
+}
+
+.md3-intercepts.md3-intercepts--redesign .md3-intercepts-input-block {
+  margin-top: var(--ix-space-4) !important;
+  padding-top: var(--ix-space-4) !important;
+}
+
+.md3-intercepts.md3-intercepts--redesign .md3-callsign-hint {
+  padding: var(--ix-space-2) var(--ix-space-3);
+  margin-bottom: var(--ix-space-3);
+}
+
+.md3-intercepts.md3-intercepts--redesign #groups-list .list-group-item {
+  padding: 0.4rem 0.45rem;
+}
+
+.md3-intercepts.md3-intercepts--redesign .groups-list-scroll {
+  max-height: var(--groups-list-height, min(52vh, 480px));
+}
+
+/* ── MD3: аудиоплеер (аудиоперехваты) ── */
+.md3-intercepts .md3-audio-player {
+  position: relative;
+  border-radius: var(--md3-shape-xl);
+  padding: 0.85rem 0.95rem 1rem;
+  background: linear-gradient(
+    165deg,
+    var(--md3-surface-container-lowest) 0%,
+    var(--md3-surface-container-low) 100%
+  );
+  border: 1px solid var(--md3-outline-variant);
+  box-shadow: var(--md3-elevation-2);
+}
+
+.md3-intercepts .md3-audio-player__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.65rem;
+  margin-bottom: 0.55rem;
+}
+
+.md3-intercepts .md3-audio-player__title {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.md3-intercepts .md3-audio-player__title-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--md3-shape-md);
+  background: var(--md3-primary-container);
+  color: var(--md3-on-primary-container);
+  flex-shrink: 0;
+}
+
+.md3-intercepts .md3-audio-player__title-text {
+  font-weight: 650;
+  font-size: 0.9rem;
+  letter-spacing: -0.01em;
+  color: var(--md3-on-surface);
+  line-height: 1.2;
+}
+
+.md3-intercepts .md3-audio-player__hint {
+  font-size: 0.7rem;
+  color: var(--md3-on-surface-variant);
+  line-height: 1.35;
+  margin-top: 0.15rem;
+  max-width: 42ch;
+}
+
+.md3-intercepts .md3-audio-player__now {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.md3-intercepts .md3-audio-current-id {
+  font-size: 1.05rem;
+  font-weight: 750;
+  letter-spacing: 0.02em;
+  line-height: 1.1;
+  padding: 0.28rem 0.65rem;
+  border-radius: var(--md3-shape-full);
+  border: 2px solid transparent;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12);
+  max-width: min(12rem, 42vw);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.md3-intercepts .md3-audio-player__time {
+  flex-shrink: 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--md3-on-surface-variant);
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--md3-shape-full);
+  background: var(--md3-surface-container-high);
+  border: 1px solid var(--md3-outline-variant);
+}
+
+.md3-intercepts .md3-audio-segment-rail-wrap {
+  margin-top: 0.4rem;
+  border-radius: var(--md3-shape-md);
+  border: 1px solid var(--md3-outline-variant);
+  background: var(--md3-surface-container-low);
+  overflow: hidden;
+}
+
+.md3-intercepts .md3-audio-asr-hint {
+  margin-top: 0.5rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: var(--md3-shape-md);
+  border: 1px solid color-mix(in srgb, var(--md3-primary) 22%, var(--md3-outline-variant));
+  background: color-mix(in srgb, var(--md3-primary-container, #e8f0fe) 42%, var(--md3-surface-container-low));
+}
+
+.md3-intercepts .md3-audio-asr-hint__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.35rem;
+}
+
+.md3-intercepts .md3-audio-asr-hint__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--md3-primary);
+}
+
+.md3-intercepts .md3-audio-asr-hint__status {
+  font-size: 0.75rem;
+}
+
+.md3-intercepts .md3-audio-asr-hint__text {
+  margin: 0;
+  padding: 0.5rem 0.55rem;
+  max-height: 140px;
+  overflow: auto;
+  white-space: pre-wrap;
+  font-family: "Times New Roman", Times, serif;
+  font-size: 12pt;
+  line-height: 1.45;
+  color: var(--md3-on-surface);
+  background: var(--md3-surface-container-lowest, #fff);
+  border: 1px solid var(--md3-outline-variant);
+  border-radius: calc(var(--md3-shape-md) - 2px);
+}
+
+.md3-intercepts .md3-audio-asr-hint__actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.4rem;
+}
+
+html[data-wp-theme="dark"] .md3-intercepts .md3-audio-asr-hint {
+  background: color-mix(in srgb, var(--md3-primary) 12%, var(--md3-surface-container-low));
+}
+
+html[data-wp-theme="dark"] .md3-intercepts .md3-audio-asr-hint__text {
+  background: var(--md3-surface-container);
+  color: var(--md3-on-surface);
+}
+
+.md3-intercepts .md3-audio-segment-rail {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 2px;
+  padding: 0.35rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+
+.md3-intercepts .md3-audio-seg-chip {
+  flex: 1 1 auto;
+  min-width: 2.85rem;
+  max-width: 8rem;
+  padding: 0.22rem 0.45rem;
+  border: 2px solid transparent;
+  border-radius: var(--md3-shape-sm);
+  font-size: 0.78rem;
+  font-weight: 700;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  line-height: 1.2;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: box-shadow var(--md3-motion-fast) var(--md3-motion),
+    transform var(--md3-motion-fast) var(--md3-motion);
+}
+
+.md3-intercepts .md3-audio-seg-chip:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.12);
+}
+
+.md3-intercepts .md3-audio-seg-chip.is-active {
+  box-shadow: 0 0 0 2px var(--md3-primary), 0 2px 8px rgba(29, 78, 216, 0.28);
+  transform: translateY(-1px);
+}
+
+.md3-intercepts .md3-audio-seg-chip.is-noise {
+  border-color: #dc2626 !important;
+  box-shadow: inset 0 0 0 1px rgba(220, 38, 38, 0.25);
+}
+
+.md3-intercepts .md3-audio-seg-chip.is-looping {
+  box-shadow: 0 0 0 2px #7c3aed, 0 2px 10px rgba(124, 58, 237, 0.3);
+}
+
+.md3-intercepts .md3-audio-waveform-wrap {
+  border-radius: var(--md3-shape-lg);
+  overflow: hidden;
+  border: 1px solid var(--md3-outline-variant);
+  background: var(--md3-surface-container-lowest);
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.md3-intercepts .md3-audio-waveform,
+.md3-intercepts .audio-waveform.md3-audio-waveform {
+  display: block;
+  width: 100%;
+  height: 128px;
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-sizing: border-box;
+}
+
+.md3-intercepts .md3-audio-transport {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  margin-top: 0.75rem;
+}
+
+.md3-intercepts .md3-audio-fab {
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: var(--md3-shape-full);
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--md3-primary) !important;
+  color: var(--md3-on-primary) !important;
+  box-shadow: 0 2px 6px rgba(29, 78, 216, 0.35);
+  transition: transform var(--md3-motion-fast) var(--md3-motion),
+    box-shadow var(--md3-motion-fast) var(--md3-motion),
+    filter var(--md3-motion-fast) var(--md3-motion);
+}
+
+.md3-intercepts .md3-audio-fab:hover {
+  filter: brightness(1.06);
+  box-shadow: var(--md3-elevation-3);
+}
+
+.md3-intercepts .md3-audio-fab:active {
+  transform: scale(0.96);
+}
+
+.md3-intercepts .md3-audio-fab:disabled {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.md3-intercepts .md3-audio-fab__icon {
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.md3-intercepts .md3-audio-icon-btn {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--md3-shape-full);
+  border: 1px solid var(--md3-outline);
+  background: var(--md3-surface-container-lowest);
+  color: var(--md3-on-surface-variant);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--md3-motion-fast) var(--md3-motion),
+    border-color var(--md3-motion-fast) var(--md3-motion),
+    color var(--md3-motion-fast) var(--md3-motion);
+}
+
+.md3-intercepts .md3-audio-icon-btn:hover:not(:disabled) {
+  background: var(--md3-surface-container-high);
+  color: var(--md3-on-surface);
+  border-color: var(--md3-outline);
+}
+
+.md3-intercepts .md3-audio-icon-btn:disabled {
+  opacity: 0.4;
+}
+
+.md3-intercepts .md3-audio-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-top: 0.75rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid var(--md3-outline-variant);
+}
+
+.md3-intercepts .md3-audio-toolbar__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.md3-intercepts .md3-audio-pill-btn {
+  border-radius: var(--md3-shape-full) !important;
+}
+
+.md3-intercepts .md3-audio-toolbar__options {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+}
+
+.md3-intercepts .md3-audio-toolbar__speed {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0;
+}
+
+.md3-intercepts .md3-audio-toolbar__speed-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.md3-intercepts .md3-audio-speed-select {
+  width: 5.5rem !important;
+  min-height: 32px;
+  border-radius: var(--md3-shape-full) !important;
+  border: 1px solid var(--md3-outline) !important;
+  background: var(--md3-surface-container-lowest) !important;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.md3-intercepts .md3-audio-speed-select:focus {
+  border-color: var(--md3-primary) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--md3-primary) 26%, transparent) !important;
+}
+
+.md3-intercepts .md3-audio-switch .form-check-label {
+  font-size: 0.78rem;
+  color: var(--md3-on-surface-variant);
+}
+
+.md3-intercepts .md3-audio-switch--seg .form-check-label {
+  font-size: 0.78rem;
+}
+
+.md3-intercepts .md3-audio-element {
+  width: 100%;
+  margin-top: 0.75rem;
+  border-radius: var(--md3-shape-lg);
+  accent-color: var(--md3-primary);
+}
+
+.md3-intercepts .md3-audio-meta {
+  font-size: 0.78rem;
+  margin-top: 0.5rem;
+  line-height: 1.45;
+  padding: 0.45rem 0.55rem;
+  border-radius: var(--md3-shape-md);
+  background: color-mix(in srgb, var(--md3-primary) 6%, var(--md3-surface-container-lowest));
+  border: 1px solid color-mix(in srgb, var(--md3-primary) 14%, var(--md3-outline-variant));
+}
+
+/* -------------------------------------------------------------------------- */
+/* MD3: список аудиосообщений (бланк) + статус в шапке панели                  */
+/* -------------------------------------------------------------------------- */
+
+.md3-intercepts .md3-audio-panel-status {
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  padding: 0.22rem 0.55rem;
+  border-radius: var(--md3-shape-full);
+  background: var(--md3-secondary-container);
+  color: var(--md3-on-secondary-container);
+  border: 1px solid color-mix(in srgb, var(--md3-secondary) 22%, transparent);
+}
+
+@supports not (background: color-mix(in srgb, white 50%, black)) {
+  .md3-intercepts .md3-audio-panel-status {
+    border-color: rgba(91, 100, 120, 0.28);
+  }
+}
+
+.md3-intercepts .md3-audio-queue-section {
+  margin-top: 0.85rem !important;
+  padding-top: 0.85rem !important;
+}
+
+.md3-intercepts .md3-audio-queue-card {
+  border-radius: var(--md3-shape-lg);
+  border: 1px solid var(--md3-outline-variant);
+  background: var(--md3-surface-container-lowest);
+  box-shadow: var(--md3-elevation-1);
+  overflow: hidden;
+}
+
+.md3-intercepts .md3-audio-queue-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  padding: 0.65rem 0.75rem 0.5rem;
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--md3-primary) 7%, var(--md3-surface-container-lowest)) 0%,
+    var(--md3-surface-container-lowest) 100%
+  );
+  border-bottom: 1px solid var(--md3-outline-variant);
+}
+
+@supports not (background: color-mix(in srgb, white 50%, black)) {
+  .md3-intercepts .md3-audio-queue-head {
+    background: linear-gradient(165deg, #eef4ff 0%, #ffffff 100%);
+  }
+}
+
+.md3-intercepts .md3-audio-queue-head__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--md3-shape-full);
+  background: var(--md3-primary-container);
+  color: var(--md3-on-primary-container);
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.md3-intercepts .md3-audio-queue-title {
+  font-size: 0.8125rem;
+  font-weight: 650;
+  letter-spacing: -0.015em;
+  color: var(--md3-on-surface);
+  line-height: 1.25;
+}
+
+.md3-intercepts .md3-audio-queue-sub {
+  font-size: 0.6875rem;
+  color: var(--md3-on-surface-variant);
+  line-height: 1.35;
+  margin-top: 0.12rem;
+  max-width: 48ch;
+}
+
+.md3-intercepts .md3-audio-queue-scroll {
+  max-height: 360px;
+  overflow: auto;
+  scrollbar-gutter: stable;
+  background: var(--md3-surface-container-lowest);
+}
+
+.md3-intercepts .md3-audio-queue-scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.md3-intercepts .md3-audio-queue-scroll::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--md3-on-surface) 22%, transparent);
+  border-radius: var(--md3-shape-full);
+}
+
+.md3-intercepts .md3-audio-queue-table {
+  --md3-queue-row-h: 2.35rem;
+  margin: 0 !important;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.78rem;
+}
+
+.md3-intercepts .md3-audio-queue-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--md3-on-surface-variant);
+  background: var(--md3-surface-container-high);
+  border: none !important;
+  border-bottom: 1px solid var(--md3-outline-variant) !important;
+  padding: 0.45rem 0.5rem !important;
+  vertical-align: middle;
+  white-space: nowrap;
+  box-shadow: 0 1px 0 var(--md3-outline-variant);
+}
+
+.md3-intercepts .md3-audio-queue-table thead .md3-audio-queue-th--mark {
+  width: 2rem;
+  text-align: center;
+}
+
+.md3-intercepts .md3-audio-queue-table tbody td {
+  border-color: var(--md3-outline-variant) !important;
+  padding: 0.4rem 0.5rem !important;
+  vertical-align: middle;
+  border-bottom-width: 1px !important;
+}
+
+.md3-intercepts .md3-audio-queue-table tbody tr {
+  transition: background var(--md3-motion-fast) var(--md3-motion);
+}
+
+.md3-intercepts .md3-audio-queue-table tbody tr:hover {
+  background: color-mix(in srgb, var(--md3-primary) 5%, var(--md3-surface-container-lowest)) !important;
+}
+
+.md3-intercepts .md3-audio-queue-table tbody tr.active {
+  background: color-mix(in srgb, var(--md3-primary) 11%, var(--md3-surface-container-low)) !important;
+  outline: none !important;
+  box-shadow: inset 3px 0 0 var(--md3-primary);
+}
+
+.md3-intercepts .md3-audio-queue-table tbody tr.audio-listening-now:not(.active) {
+  background: color-mix(in srgb, #f59e0b 12%, var(--md3-surface-container-lowest)) !important;
+  outline: none !important;
+  box-shadow: inset 3px 0 0 color-mix(in srgb, #f59e0b 75%, var(--md3-outline));
+}
+
+.md3-intercepts .md3-audio-queue-table tbody tr.audio-group-row {
+  background: var(--md3-surface-container-low);
+  font-weight: 650;
+}
+
+.md3-intercepts .md3-audio-queue-table tbody tr.audio-group-row:hover {
+  background: var(--md3-surface-container) !important;
+}
+
+.md3-intercepts .md3-audio-queue-empty {
+  text-align: center;
+  color: var(--md3-on-surface-variant) !important;
+  font-size: 0.8125rem;
+  padding: 1.35rem 0.75rem !important;
+  background: var(--md3-surface-container-low) !important;
+}
+
+.md3-intercepts .md3-audio-group-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.65rem;
+  height: 1.65rem;
+  margin-right: 0.2rem;
+  border: none !important;
+  border-radius: var(--md3-shape-full);
+  background: var(--md3-surface-container-high) !important;
+  color: var(--md3-primary) !important;
+  padding: 0 !important;
+  vertical-align: middle;
+  transition: background var(--md3-motion-fast) var(--md3-motion),
+    transform var(--md3-motion-fast) var(--md3-motion);
+}
+
+.md3-intercepts .md3-audio-group-toggle:hover {
+  background: var(--md3-primary-container) !important;
+  color: var(--md3-on-primary-container) !important;
+}
+
+.md3-intercepts .md3-audio-group-toggle:active {
+  transform: scale(0.94);
+}
+
+.md3-intercepts .md3-audio-queue-chip {
+  font-weight: 600;
+  font-size: 0.65rem;
+  padding: 0.2rem 0.45rem;
+  border-radius: var(--md3-shape-full);
+  vertical-align: middle;
+}
+
+.md3-intercepts .md3-audio-queue-table .audio-avatar {
+  box-shadow: var(--md3-elevation-1);
+}
+
+/* -------------------------------------------------------------------------- */
+/* MD3: настройки аудио + задание поста                                        */
+/* -------------------------------------------------------------------------- */
+
+.md3-intercepts .md3-audio-settings-card {
+  border-radius: var(--md3-shape-lg) !important;
+  border: 1px solid var(--md3-outline-variant) !important;
+  background: var(--md3-surface-container-low) !important;
+  box-shadow: var(--md3-elevation-1) !important;
+  overflow: hidden;
+}
+
+.md3-intercepts .md3-audio-settings-body {
+  padding: 0.75rem 0.85rem !important;
+}
+
+.md3-intercepts .md3-audio-settings-title {
+  font-size: 0.8125rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  color: var(--md3-on-surface);
+  margin-bottom: 0.55rem;
+}
+
+.md3-intercepts .md3-field-label {
+  display: block;
+  font-size: 0.6875rem;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--md3-on-surface-variant);
+}
+
+.md3-intercepts .md3-field-hint {
+  font-size: 0.6875rem;
+  color: var(--md3-on-surface-variant);
+  margin-top: 0.25rem;
+}
+
+.md3-intercepts .md3-outlined-input {
+  border-radius: var(--md3-shape-sm) !important;
+  border: 1px solid var(--md3-outline) !important;
+  background: var(--md3-surface-container-lowest) !important;
+  transition: border-color var(--md3-motion-fast) var(--md3-motion),
+    box-shadow var(--md3-motion-fast) var(--md3-motion);
+}
+
+.md3-intercepts .md3-outlined-input:focus {
+  border-color: var(--md3-primary) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--md3-primary) 22%, transparent) !important;
+}
+
+.md3-intercepts .md3-audio-settings-debug-btn {
+  border-radius: var(--md3-shape-full) !important;
+}
+
+.md3-intercepts .md3-audio-debug-pre {
+  border-radius: var(--md3-shape-md) !important;
+  background: var(--md3-surface-container-lowest) !important;
+  border: 1px solid var(--md3-outline-variant) !important;
+  margin-bottom: 0.35rem;
+}
+
+.md3-intercepts .md3-audio-debug-out {
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--md3-on-surface-variant);
+  font-family: var(--md3-font-mono);
+  font-size: 0.72rem;
+}
+
+.md3-intercepts .md3-audio-settings-divider {
+  height: 1px;
+  margin: 0.65rem 0 0.75rem;
+  background: var(--md3-outline-variant);
+}
+
+.md3-intercepts .md3-audio-filter-group .md3-input-group-pill {
+  border-radius: var(--md3-shape-full) 0 0 var(--md3-shape-full) !important;
+  background: var(--md3-surface-container-high);
+  border: 1px solid var(--md3-outline);
+  border-right: none;
+  color: var(--md3-on-surface-variant);
+  font-weight: 650;
+  font-size: 0.7rem;
+}
+
+.md3-intercepts .md3-audio-filter-group .form-control {
+  border-radius: 0 !important;
+}
+
+.md3-intercepts .md3-audio-filter-group .md3-filter-clear-btn {
+  border-radius: 0 var(--md3-shape-full) var(--md3-shape-full) 0 !important;
+}
+
+.md3-intercepts .md3-post-task-card {
+  margin-top: 0.15rem;
+  padding: 0.65rem 0.7rem 0.55rem;
+  border-radius: var(--md3-shape-md);
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--md3-primary) 6%, var(--md3-surface-container-lowest)) 0%,
+    var(--md3-surface-container-lowest) 72%
+  );
+  border: 1px solid color-mix(in srgb, var(--md3-primary) 14%, var(--md3-outline-variant));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+@supports not (background: color-mix(in srgb, white 50%, black)) {
+  .md3-intercepts .md3-post-task-card {
+    background: linear-gradient(160deg, #f3f6ff 0%, #ffffff 72%);
+    border-color: #d8e0f5;
+  }
+}
+
+.md3-intercepts .md3-post-task-card__head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 0.55rem;
+}
+
+.md3-intercepts .md3-post-task-card__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--md3-shape-full);
+  background: var(--md3-primary-container);
+  color: var(--md3-on-primary-container);
+  font-size: 0.95rem;
+  flex-shrink: 0;
+}
+
+.md3-intercepts .md3-post-task-card__title {
+  font-size: 0.8125rem;
+  font-weight: 650;
+  color: var(--md3-on-surface);
+  letter-spacing: -0.01em;
+}
+
+.md3-intercepts .md3-post-task-card__hint {
+  font-size: 0.6875rem;
+  line-height: 1.4;
+  color: var(--md3-on-surface-variant);
+  margin-top: 0.08rem;
+  max-width: 52ch;
+}
+
+.md3-intercepts .md3-post-task-switches {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 0.65rem;
+  padding: 0.45rem 0.5rem;
+  border-radius: var(--md3-shape-sm);
+  background: var(--md3-surface-container-low);
+  border: 1px solid var(--md3-outline-variant);
+}
+
+.md3-intercepts .md3-post-task-switch .form-check-label {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--md3-on-surface);
+}
+
+.md3-intercepts .md3-post-task-switch .form-check-input {
+  width: 2.25rem;
+  height: 1.15rem;
+  margin-top: 0.15rem;
+  background-color: var(--md3-surface-container-highest);
+  border-color: var(--md3-outline);
+  --bs-form-switch-bg: var(--md3-surface-container-highest);
+}
+
+.md3-intercepts .md3-post-task-switch .form-check-input:checked {
+  background-color: var(--md3-primary);
+  border-color: var(--md3-primary);
+}
+
+.md3-intercepts .md3-post-task-add-label {
+  margin-bottom: 0.35rem;
+}
+
+.md3-intercepts .md3-post-task-add-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) auto;
+  gap: 0.4rem;
+  align-items: stretch;
+  margin-bottom: 0.45rem;
+}
+
+@media (max-width: 575.98px) {
+  .md3-intercepts .md3-post-task-add-row {
+    grid-template-columns: 1fr;
+  }
+  .md3-intercepts .md3-post-task-add-btn {
+    width: 100%;
+    border-radius: var(--md3-shape-full) !important;
+  }
+}
+
+.md3-intercepts .md3-post-task-add-btn {
+  min-width: 2.5rem;
+  padding-left: 0.65rem;
+  padding-right: 0.65rem;
+  border-radius: var(--md3-shape-full) !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 2px rgba(29, 78, 216, 0.3);
+}
+
+.md3-intercepts .md3-post-task-from-group {
+  border-radius: var(--md3-shape-full) !important;
+  font-weight: 500;
+}
+
+.md3-intercepts .md3-post-task-list {
+  border-radius: var(--md3-shape-sm) !important;
+  overflow: hidden;
+  border: 1px solid var(--md3-outline-variant) !important;
+  background: var(--md3-surface-container-lowest);
+}
+
+.md3-intercepts .md3-post-task-list__empty {
+  font-size: 0.78rem;
+  color: var(--md3-on-surface-variant);
+  text-align: center;
+  padding: 0.85rem 0.65rem;
+  background: var(--md3-surface-container-low);
+  border-radius: var(--md3-shape-sm);
+}
+
+.md3-intercepts .md3-post-task-item {
+  border: none !important;
+  border-bottom: 1px solid var(--md3-outline-variant) !important;
+  padding: 0.55rem 0.6rem !important;
+  background: transparent !important;
+  gap: 0.5rem;
+}
+
+.md3-intercepts .md3-post-task-item:last-child {
+  border-bottom: none !important;
+}
+
+.md3-intercepts .md3-post-task-item:hover {
+  background: color-mix(in srgb, var(--md3-primary) 5%, transparent) !important;
+}
+
+.md3-intercepts .md3-post-task-item__freq {
+  font-size: 0.8125rem;
+  font-weight: 650;
+  color: var(--md3-on-surface);
+}
+
+.md3-intercepts .md3-post-task-item__unit {
+  font-size: 0.72rem;
+  color: var(--md3-on-surface-variant);
+  margin-top: 0.06rem;
+}
+
+.md3-intercepts .md3-post-task-item__state {
+  font-size: 0.65rem;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-top: 0.28rem;
+  color: var(--md3-on-surface-variant);
+}
+
+.md3-intercepts .md3-post-task-item__state--on {
+  color: var(--md3-on-tertiary-container);
+}
+
+.md3-intercepts .md3-post-task-toggle {
+  border-radius: var(--md3-shape-full) !important;
+  font-weight: 600;
+  font-size: 0.72rem;
+  min-height: 32px;
+  padding: 0 0.65rem;
+  border: 1px solid var(--md3-outline) !important;
+  background: var(--md3-surface-container-lowest) !important;
+  color: var(--md3-on-surface-variant) !important;
+}
+
+.md3-intercepts .md3-post-task-toggle--start {
+  border-color: color-mix(in srgb, #16a34a 55%, var(--md3-outline)) !important;
+  color: #15803d !important;
+  background: color-mix(in srgb, #22c55e 10%, var(--md3-surface-container-lowest)) !important;
+}
+
+.md3-intercepts .md3-post-task-toggle--start:hover {
+  background: color-mix(in srgb, #22c55e 18%, var(--md3-surface-container-lowest)) !important;
+}
+
+.md3-intercepts .md3-post-task-toggle--stop {
+  border-color: color-mix(in srgb, #d97706 45%, var(--md3-outline)) !important;
+  color: #b45309 !important;
+  background: color-mix(in srgb, #f59e0b 12%, var(--md3-surface-container-lowest)) !important;
+}
+
+.md3-intercepts .md3-post-task-toggle--stop:hover {
+  background: color-mix(in srgb, #f59e0b 20%, var(--md3-surface-container-lowest)) !important;
+}
+
+.md3-intercepts .md3-post-task-delete {
+  border-radius: var(--md3-shape-full) !important;
+  min-width: 2.25rem;
+  padding-left: 0.45rem;
+  padding-right: 0.45rem;
+}
+
+@media (max-width: 575.98px) {
+  .md3-intercepts .md3-post-task-item {
+    flex-direction: column;
+    align-items: stretch !important;
+  }
+  .md3-intercepts .md3-post-task-item__actions {
+    justify-content: flex-end;
+  }
+  .md3-intercepts .md3-audio-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .md3-intercepts .md3-audio-toolbar__options {
+    justify-content: space-between;
+  }
+}
+
+html[data-wp-theme="dark"] .md3-intercepts .md3-audio-player {
+  background: linear-gradient(
+    165deg,
+    var(--md3-surface-container-low) 0%,
+    var(--md3-surface-container) 100%
+  );
+  border-color: var(--md3-outline-variant);
+  box-shadow: var(--md3-elevation-2);
+}
+
+html[data-wp-theme="dark"] .md3-intercepts .md3-audio-waveform-wrap {
+  background: var(--md3-surface-container-lowest);
+  border-color: var(--md3-outline-variant);
+}
+
+html[data-wp-theme="dark"] .md3-intercepts .md3-audio-player__time {
+  background: var(--md3-surface-container-high);
+  color: var(--md3-on-surface-variant);
+  border-color: var(--md3-outline-variant);
+}
+
+html[data-wp-theme="dark"] .md3-intercepts .md3-audio-segment-rail-wrap {
+  background: var(--md3-surface-container);
+  border-color: var(--md3-outline-variant);
+}
+
+html[data-wp-theme="dark"] .md3-intercepts .md3-audio-icon-btn {
+  background: var(--md3-surface-container-lowest);
+  border-color: var(--md3-outline);
+  color: var(--md3-on-surface-variant);
+}
+
+html[data-wp-theme="dark"] .md3-intercepts .md3-audio-meta {
+  background: color-mix(in srgb, var(--md3-primary) 12%, var(--md3-surface-container-low));
+  border-color: var(--md3-outline-variant);
+  color: var(--md3-on-surface-variant);
+}
+
+html[data-wp-theme="dark"] .md3-intercepts .md3-audio-panel-status {
+  background: var(--md3-surface-container-high);
+  color: var(--md3-on-surface);
+  border-color: var(--md3-outline-variant);
+}
+
+html[data-wp-theme="dark"] .md3-intercepts .md3-audio-queue-card,
+html[data-wp-theme="dark"] .md3-intercepts .md3-audio-queue-scroll {
+  background: var(--md3-surface-container-low);
+  border-color: var(--md3-outline-variant);
+}
+
+html[data-wp-theme="dark"] .md3-intercepts .md3-audio-queue-head {
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--md3-primary) 14%, var(--md3-surface-container-low)) 0%,
+    var(--md3-surface-container-low) 100%
+  );
+  border-color: var(--md3-outline-variant);
+}
+
+html[data-wp-theme="dark"] .md3-intercepts .md3-audio-queue-table thead th {
+  background: var(--md3-surface-container-high);
+  color: var(--md3-on-surface-variant);
+  border-color: var(--md3-outline-variant) !important;
+}
+
+html[data-wp-theme="dark"] .md3-intercepts .md3-audio-queue-empty {
+  background: var(--md3-surface-container) !important;
+  color: var(--md3-on-surface-variant) !important;
+}
+
+html[data-wp-theme="dark"] .md3-intercepts .md3-audio-settings-card {
+  background: var(--md3-surface-container-low) !important;
+  border-color: var(--md3-outline-variant) !important;
+}
+
+html[data-wp-theme="dark"] .md3-intercepts .md3-post-task-card {
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--md3-primary) 10%, var(--md3-surface-container-low)) 0%,
+    var(--md3-surface-container-low) 72%
+  );
+  border-color: var(--md3-outline-variant);
+  box-shadow: none;
+}
+
+html[data-wp-theme="dark"] .md3-intercepts .md3-post-task-switches {
+  background: var(--md3-surface-container);
+  border-color: var(--md3-outline-variant);
+}
+
+html[data-wp-theme="dark"] .md3-intercepts .md3-post-task-list {
+  background: var(--md3-surface-container-low);
+  border-color: var(--md3-outline-variant) !important;
+}
+
+html[data-wp-theme="dark"] .md3-intercepts .md3-post-task-list__empty {
+  background: var(--md3-surface-container);
+  color: var(--md3-on-surface-variant);
+}
+
+/* Бланк и ввод — отдельные контейнеры (аудио-режим и legacy-сетка) */
+.md3-intercepts:not(.ix-messenger-ui) .ix-field-shell {
+  --tg-border: var(--md3-outline-variant, rgba(15, 23, 42, 0.12));
+  --tg-border-strong: var(--md3-outline, rgba(15, 23, 42, 0.18));
+  --tg-bg-elevated: var(--md3-surface-container-lowest, #fff);
+  --tg-bg-muted: var(--md3-surface-container-low, #f8fafc);
+  --tg-bg: var(--md3-surface, #fff);
+  --tg-text-secondary: var(--md3-on-surface-variant, rgba(15, 23, 42, 0.62));
+  margin-top: 0.5rem;
+}
+
+.md3-intercepts:not(.ix-messenger-ui) .ix-blank-shell {
+  margin-top: 0.65rem;
+}
+
+.md3-intercepts:not(.ix-messenger-ui) .ix-blank-shell #intercept-text,
+.md3-intercepts:not(.ix-messenger-ui) .ix-input-shell #intercept-input {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  margin-top: 0 !important;
+}
+
+.md3-intercepts:not(.ix-messenger-ui) .ix-blank-shell #intercept-text-wrapper {
+  min-height: 280px;
+}

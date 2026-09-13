@@ -1,0 +1,561 @@
+/**
+ * Анализ — mobile-first UI (≤767.98px)
+ * Модули-чипы, hero, подвкладки «Анализ позывных», карточный контент.
+ */
+
+@media (max-width: 767.98px) {
+  .md3-analysis-group.an-mobile-ui {
+    --an-dock-h: 0px;
+    --an-subdock-h: 52px;
+    --an-m-bg: #eef2f8;
+    --an-m-surface: #ffffff;
+    --an-m-surface-2: #f8fafd;
+    --an-m-primary: #1d4ed8;
+    --an-m-primary-soft: #dbeafe;
+    --an-m-text: #0f172a;
+    --an-m-muted: #64748b;
+    --an-m-border: rgba(148, 163, 184, 0.35);
+    --an-m-radius: 18px;
+    --an-m-radius-sm: 14px;
+    --an-m-shadow: 0 4px 24px rgba(15, 23, 42, 0.07);
+    --an-m-shadow-lg: 0 12px 40px rgba(15, 23, 42, 0.12);
+    --an-m-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .md3-analysis-group.an-mobile-ui.an-mobile-ui--callsigns {
+    --an-subdock-h: 52px;
+  }
+
+  body.eavc-page-analysis main.eavc-content,
+  main.container-fluid:has(.md3-analysis-group.an-mobile-ui) {
+    padding: 0.35rem 0 0 !important;
+    background: var(--an-m-bg);
+  }
+
+  .md3-analysis-group.an-mobile-ui .an-shell,
+  .md3-analysis-group.an-mobile-ui .analysis-layout,
+  .md3-analysis-group.an-mobile-ui .an-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  .md3-analysis-group.an-mobile-ui .an-main {
+    order: 3;
+    width: 100%;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    background: transparent;
+  }
+
+  /* --- Hero --- */
+  .md3-analysis-group.an-mobile-ui .an-mobile-hero {
+    display: block;
+    margin: 0 0.85rem 0.5rem;
+    padding: 1rem 1rem 0.9rem;
+    border-radius: var(--an-m-radius);
+    background: linear-gradient(145deg, #1e3a8a 0%, #2563eb 50%, #3b82f6 100%);
+    box-shadow: var(--an-m-shadow-lg);
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .md3-analysis-group.an-mobile-ui .an-mobile-hero::before {
+    content: "";
+    position: absolute;
+    inset: -30% -10% auto;
+    height: 100%;
+    background: radial-gradient(ellipse 60% 50% at 90% 0%, rgba(255, 255, 255, 0.2), transparent 60%);
+    pointer-events: none;
+  }
+
+  .md3-analysis-group.an-mobile-ui .an-mobile-hero__inner {
+    position: relative;
+    z-index: 1;
+  }
+
+  .md3-analysis-group.an-mobile-ui .an-mobile-hero__eyebrow {
+    margin: 0 0 0.25rem;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    opacity: 0.82;
+  }
+
+  .md3-analysis-group.an-mobile-ui .an-mobile-hero__title {
+    margin: 0;
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.2;
+  }
+
+  .md3-analysis-group.an-mobile-ui .an-mobile-hero__sub {
+    margin: 0.35rem 0 0;
+    font-size: 0.8125rem;
+    line-height: 1.4;
+    color: rgba(255, 255, 255, 0.88);
+  }
+
+  .md3-analysis-group.an-mobile-ui .an-mobile-panel-head {
+    display: none !important;
+  }
+
+  .md3-analysis-group.an-mobile-ui .an-mobile-panel-head__title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--an-m-muted);
+  }
+
+  .md3-analysis-group.an-mobile-ui .an-mobile-panel-head__sub {
+    font-size: 0.8125rem;
+    color: var(--an-m-text);
+    line-height: 1.35;
+  }
+
+  @keyframes an-head-in {
+    from {
+      opacity: 0;
+      transform: translateY(5px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* --- Модули (sidebar) --- */
+  .md3-analysis-group.an-mobile-ui .an-sidebar,
+  .md3-analysis-group.an-mobile-ui .wp-sidebar {
+    position: static !important;
+    top: auto !important;
+    width: 100%;
+    order: 2;
+    margin: 0 0.85rem;
+    padding: 0 !important;
+    border: none !important;
+    background: transparent !important;
+  }
+
+  .md3-analysis-group.an-mobile-ui .an-sidebar__block,
+  .md3-analysis-group.an-mobile-ui .wp-sidebar .card {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+
+  .md3-analysis-group.an-mobile-ui .an-sidebar__title,
+  .md3-analysis-group.an-mobile-ui .an-hint,
+  .md3-analysis-group.an-mobile-ui .wp-sidebar .card-body > .d-flex.align-items-center.gap-2,
+  .md3-analysis-group.an-mobile-ui .wp-sidebar .card-body > .small.wp-subtle {
+    display: none !important;
+  }
+
+  .md3-analysis-group.an-mobile-ui #analysis-containers {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 0.45rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 0.25rem 0.15rem 0.45rem;
+    margin: 0;
+  }
+
+  .md3-analysis-group.an-mobile-ui #analysis-containers::-webkit-scrollbar {
+    display: none;
+  }
+
+  .md3-analysis-group.an-mobile-ui #analysis-containers .list-group-item {
+    flex: 0 0 auto;
+    min-width: max-content;
+    max-width: 85vw;
+    margin-bottom: 0 !important;
+    padding: 0.45rem 0.75rem !important;
+    border-radius: var(--an-m-radius-sm) !important;
+    border: 1px solid var(--an-m-border) !important;
+    background: var(--an-m-surface) !important;
+    box-shadow: var(--an-m-shadow);
+  }
+
+  .md3-analysis-group.an-mobile-ui #analysis-containers .list-group-item.active {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+    border-color: transparent !important;
+    color: #fff !important;
+    box-shadow: 0 4px 16px rgba(37, 99, 235, 0.35);
+  }
+
+  .md3-analysis-group.an-mobile-ui #analysis-containers .analysis-container-btn {
+    min-height: auto;
+    padding: 0;
+    justify-content: flex-start;
+    gap: 0.4rem;
+  }
+
+  .md3-analysis-group.an-mobile-ui #analysis-containers .analysis-container-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .md3-analysis-group.an-mobile-ui #analysis-containers .list-group-item.active .analysis-container-icon,
+  .md3-analysis-group.an-mobile-ui #analysis-containers .list-group-item.active .analysis-container-label,
+  .md3-analysis-group.an-mobile-ui #analysis-containers .list-group-item.active .analysis-container-check {
+    color: #fff !important;
+  }
+
+  .md3-analysis-group.an-mobile-ui #analysis-containers .analysis-container-check {
+    position: static;
+    transform: none;
+    margin-left: 0.15rem;
+  }
+
+  /* --- Контент модулей --- */
+  .md3-analysis-group.an-mobile-ui .sessions-main {
+    order: 3;
+    width: 100%;
+    min-width: 0;
+    padding: 0 0.85rem calc(0.85rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .md3-analysis-group.an-mobile-ui .sessions-main > .card.wp-card,
+  .md3-analysis-group.an-mobile-ui .sessions-main > .card {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  .md3-analysis-group.an-mobile-ui .sessions-main > .card > .card-body,
+  .md3-analysis-group.an-mobile-ui .sessions-main > .card.wp-card > .card-body {
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+
+  .md3-analysis-group.an-mobile-ui .sessions-main .wp-page-header {
+    display: none;
+  }
+
+  .md3-analysis-group.an-mobile-ui .sessions-main > .card > .card-body > .d-flex.flex-wrap:first-child {
+    display: none;
+  }
+
+  /* Период / фильтры — карточка */
+  .md3-analysis-group.an-mobile-ui .sessions-main .row.g-2.mt-3.align-items-end,
+  .md3-analysis-group.an-mobile-ui .sessions-main .row.g-2.mt-2.align-items-end {
+    margin: 0 0 0.65rem !important;
+    padding: 0.75rem;
+    border-radius: var(--an-m-radius-sm);
+    background: var(--an-m-surface);
+    border: 1px solid var(--an-m-border);
+    box-shadow: var(--an-m-shadow);
+  }
+
+  .md3-analysis-group.an-mobile-ui .sessions-main .row.g-2.mt-3.align-items-end > [class*="col-"],
+  .md3-analysis-group.an-mobile-ui .sessions-main .row.g-2.mt-2.align-items-end > [class*="col-"] {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  .md3-analysis-group.an-mobile-ui .analysis-period-group {
+    width: 100%;
+    max-width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+
+  .md3-analysis-group.an-mobile-ui .analysis-period-group .btn {
+    flex: 1 1 auto;
+    min-height: 38px;
+  }
+
+  .md3-analysis-group.an-mobile-ui .an-period-calendar-row {
+    flex-direction: column;
+    align-items: stretch !important;
+  }
+
+  .md3-analysis-group.an-mobile-ui .an-period-calendar-row .btn {
+    width: 100%;
+    min-height: 42px;
+  }
+
+  .md3-analysis-group.an-mobile-ui .form-control,
+  .md3-analysis-group.an-mobile-ui .form-select {
+    font-size: max(16px, 1rem);
+    min-height: 42px;
+  }
+
+  .md3-analysis-group.an-mobile-ui .btn-sm {
+    min-height: 40px;
+  }
+
+  /* Карточки workspace */
+  .md3-analysis-group.an-mobile-ui .analysis-workspace .card,
+  .md3-analysis-group.an-mobile-ui .rg2-page .rg2__filters,
+  .md3-analysis-group.an-mobile-ui .rg-md3-dashboard .rg-md3-toolbar,
+  .md3-analysis-group.an-mobile-ui .k2-page .k2__bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .md3-analysis-group.an-mobile-ui .k2-page .k2__toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .md3-analysis-group.an-mobile-ui .k2-page .k2__search {
+    max-width: none;
+  }
+
+  .md3-analysis-group.an-mobile-ui .md3-keys-panel {
+    border-radius: var(--an-m-radius-sm) !important;
+    box-shadow: var(--an-m-shadow) !important;
+    margin-bottom: 0.65rem;
+  }
+
+  .md3-analysis-group.an-mobile-ui .analysis-scroll {
+    max-height: min(42vh, 360px) !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .md3-analysis-group.an-mobile-ui .analysis-workspace > [class*="col-"] {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  /* --- Подвкладки «Анализ позывных» --- */
+  .md3-analysis-group.an-mobile-ui.an-mobile-ui--callsigns .an-mobile-subdock--callsigns {
+    display: flex;
+    gap: 0.35rem;
+    margin: 0 0 0.65rem;
+    padding: 4px;
+    border-radius: var(--an-m-radius-sm);
+    background: var(--an-m-surface);
+    border: 1px solid var(--an-m-border);
+    box-shadow: var(--an-m-shadow);
+    position: relative;
+    --an-cs-sub-index: 0;
+    --an-cs-sub-count: 2;
+  }
+
+  .md3-analysis-group.an-mobile-ui .an-mobile-subdock--callsigns[hidden] {
+    display: none !important;
+  }
+
+  .md3-analysis-group.an-mobile-ui:not(.an-mobile-ui--callsigns) .an-mobile-subdock--callsigns {
+    display: none !important;
+  }
+
+  .md3-analysis-group.an-mobile-ui.an-mobile-ui--callsigns .an-mobile-subdock--callsigns::before {
+    content: "";
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    left: 4px;
+    width: calc((100% - 8px) / var(--an-cs-sub-count));
+    border-radius: 10px;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    box-shadow: 0 2px 10px rgba(37, 99, 235, 0.3);
+    transform: translateX(calc(var(--an-cs-sub-index, 0) * 100%));
+    transition: transform 0.35s var(--an-m-ease);
+    pointer-events: none;
+  }
+
+  .md3-analysis-group.an-mobile-ui .an-mobile-subdock__btn {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    min-height: 40px;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--an-m-muted);
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.15rem;
+  }
+
+  .md3-analysis-group.an-mobile-ui .an-mobile-subdock__btn i {
+    font-size: 1.05rem;
+  }
+
+  .md3-analysis-group.an-mobile-ui .an-mobile-subdock__btn.active,
+  .md3-analysis-group.an-mobile-ui .an-mobile-subdock__btn[aria-selected="true"] {
+    color: #fff;
+  }
+
+  .md3-analysis-group.an-mobile-ui.an-mobile-ui--callsigns .an2__body > .an-mobile-callsigns-panel {
+    display: none !important;
+  }
+
+  .md3-analysis-group.an-mobile-ui.an-mobile-ui--callsigns[data-an-cs-sub="tree"] .an-mobile-callsigns-panel--tree,
+  .md3-analysis-group.an-mobile-ui.an-mobile-ui--callsigns[data-an-cs-sub="main"] .an-mobile-callsigns-panel--main {
+    display: flex !important;
+    flex-direction: column;
+    min-height: 0;
+    animation: an-panel-in 0.35s var(--an-m-ease);
+  }
+
+  @keyframes an-panel-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* --- Граф радиосети --- */
+  .md3-analysis-group.an-mobile-ui .rg2-page .rg2__bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .md3-analysis-group.an-mobile-ui .rg2-page .rg2__bar-actions {
+    justify-content: flex-start;
+  }
+
+  .md3-analysis-group.an-mobile-ui .rg2-page .rg2__presets {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .md3-analysis-group.an-mobile-ui .rg-md3-hero {
+    flex-direction: column;
+    align-items: stretch !important;
+    padding: 0.85rem !important;
+    border-radius: var(--an-m-radius-sm) !important;
+    background: linear-gradient(145deg, #1e3a8a, #2563eb) !important;
+    color: #fff;
+    margin-bottom: 0.65rem;
+  }
+
+  .md3-analysis-group.an-mobile-ui .rg-md3-hero .wp-page-header {
+    display: block !important;
+  }
+
+  .md3-analysis-group.an-mobile-ui .rg-md3-hero .wp-page-title,
+  .md3-analysis-group.an-mobile-ui .rg-md3-hero .wp-page-lead {
+    color: #fff !important;
+  }
+
+  .md3-analysis-group.an-mobile-ui .rg-md3-hero-actions {
+    width: 100%;
+    justify-content: flex-start;
+    overflow-x: auto;
+    flex-wrap: nowrap !important;
+    padding-bottom: 0.15rem;
+  }
+
+  .md3-analysis-group.an-mobile-ui .rg-md3-hero-actions .btn {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  .md3-analysis-group.an-mobile-ui .rg-md3-filter-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .md3-analysis-group.an-mobile-ui .rg-md3-graph-host,
+  .md3-analysis-group.an-mobile-ui #rg-graph-host {
+    min-height: min(52vh, 420px) !important;
+  }
+
+  .md3-analysis-group.an-mobile-ui .rg-md3-metrics {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* --- Сеть / ключи / крипто / таблицы --- */
+  .md3-analysis-group.an-mobile-ui .table-responsive {
+    -webkit-overflow-scrolling: touch;
+    margin-left: -0.15rem;
+    margin-right: -0.15rem;
+  }
+
+  .md3-analysis-group.an-mobile-ui .bs2-page .bs2__search-row {
+    flex-wrap: wrap;
+  }
+
+  .md3-analysis-group.an-mobile-ui .bs2-page .bs2__search-row .bs2-btn {
+    flex: 1 1 auto;
+  }
+
+  .md3-analysis-group.an-mobile-ui .md3-keys-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .md3-analysis-group.an-mobile-ui .md3-network-summary .row > [class*="col-"] {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  /* AI / поиск бланков */
+  .md3-analysis-group.an-mobile-ui textarea.form-control {
+    min-height: 120px;
+  }
+
+  /* Модалки */
+  .md3-analysis-group.an-mobile-ui ~ .modal .modal-dialog,
+  body:has(.md3-analysis-group.an-mobile-ui) .modal .modal-dialog {
+    margin: 0;
+    max-width: 100%;
+    align-items: flex-end;
+    min-height: 100dvh;
+  }
+
+  body:has(.md3-analysis-group.an-mobile-ui) .modal .modal-content {
+    border-radius: 1.15rem 1.15rem 0 0;
+    max-height: 94dvh;
+  }
+}
+
+@media (max-width: 767.98px) {
+  html[data-wp-theme="dark"] .md3-analysis-group.an-mobile-ui {
+    --an-m-bg: #0c1018;
+    --an-m-surface: #151c28;
+    --an-m-surface-2: #1a2332;
+    --an-m-text: #e8edf5;
+    --an-m-muted: #94a3b8;
+    --an-m-border: rgba(148, 163, 184, 0.2);
+    --an-m-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+  }
+
+  html[data-wp-theme="dark"] body.eavc-page-analysis main.eavc-content,
+  html[data-wp-theme="dark"] main.container-fluid:has(.md3-analysis-group.an-mobile-ui) {
+    background: var(--an-m-bg);
+  }
+
+  html[data-wp-theme="dark"] .md3-analysis-group.an-mobile-ui #analysis-containers .list-group-item {
+    background: var(--an-m-surface) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @media (max-width: 767.98px) {
+    .md3-analysis-group.an-mobile-ui .an-mobile-panel-head,
+    .md3-analysis-group.an-mobile-ui .an-mobile-callsigns-panel,
+    .md3-analysis-group.an-mobile-ui .an-mobile-subdock--callsigns::before {
+      animation: none !important;
+      transition: none !important;
+    }
+  }
+}

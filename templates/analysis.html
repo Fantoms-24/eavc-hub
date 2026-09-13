@@ -1,0 +1,1446 @@
+{% extends "base.html" %}
+{% set mod = analysis_module|default('callsigns') %}
+{% block title %}Анализ{% endblock %}
+{% block container_class %}container-fluid px-0 py-0{% endblock %}
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/analysis-group-md3.css') }}?v=2" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/analysis-workbench.css') }}?v=7" />
+{% if mod == 'callsigns' %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/analysis-callsigns-tg.css') }}?v=3" />
+{% endif %}
+{% if mod == 'graph' %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/analysis-graph-v2.css') }}?v=3" />
+{% endif %}
+{% if mod == 'keys' %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/analysis-keys-v2.css') }}?v=2" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/analysis-keys-v3.css') }}?v=1" />
+{% endif %}
+{% if mod == 'blanks-search' %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/analysis-blanks-search-v2.css') }}?v=1" />
+{% endif %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/analysis-mobile.css') }}?v=3" />
+{% endblock %}
+
+{% block content %}
+<div class="md3-analysis-group an-workbench-ui" data-an-container="{{ mod }}" data-an-cs-sub="tree">
+<div class="an-mobile-hero" id="an-mobile-hero" hidden>
+  <div class="an-mobile-hero__inner">
+    <p class="an-mobile-hero__eyebrow">ЕАВС · Анализ</p>
+    <h1 class="an-mobile-hero__title" id="an-mobile-hero-title">Анализ позывных</h1>
+    <p class="an-mobile-hero__sub" id="an-mobile-hero-sub">Частота и группа → активность корреспондентов</p>
+  </div>
+</div>
+<div class="an-mobile-panel-head" id="an-mobile-panel-head" hidden>
+  <span class="an-mobile-panel-head__title" id="an-mobile-panel-head-title">Модуль</span>
+  <span class="an-mobile-panel-head__sub" id="an-mobile-panel-head-sub"></span>
+</div>
+<div class="an-shell">
+  <div class="an-layout analysis-layout analysis-layout-no-pos">
+  <!-- Контейнеры (модули анализа) -->
+  <aside class="an-sidebar an-mobile-section an-mobile-section--modules" aria-label="Модули анализа">
+    <div class="an-sidebar__block">
+      <h2 class="an-sidebar__title"><i class="bi bi-boxes"></i>Модули</h2>
+      <p class="an-hint">Выберите раздел анализа</p>
+      <div class="list-group an-modules-list" id="analysis-containers" role="tablist">
+          <a href="{{ url_for('analysis') }}" class="list-group-item list-group-item-action{% if mod == 'callsigns' %} active{% endif %}" data-container="callsigns">
+            <div class="analysis-container-btn">
+              <i class="bi bi-broadcast text-secondary me-2 analysis-container-icon"></i>
+              <span class="analysis-container-label">Анализ позывных</span>
+              <i class="bi bi-check2 analysis-container-check{% if mod != 'callsigns' %} d-none{% endif %}"></i>
+            </div>
+          </a>
+          <a href="{{ url_for('analysis', module='network') }}" class="list-group-item list-group-item-action{% if mod == 'network' %} active{% endif %}" data-container="network">
+            <div class="analysis-container-btn">
+              <i class="bi bi-diagram-3 text-secondary me-2 analysis-container-icon"></i>
+              <span class="analysis-container-label">Общий анализ радиосети</span>
+              <i class="bi bi-check2 analysis-container-check{% if mod != 'network' %} d-none{% endif %}"></i>
+            </div>
+          </a>
+          <a href="{{ url_for('analysis', module='graph') }}" class="list-group-item list-group-item-action{% if mod == 'graph' %} active{% endif %}" data-container="graph">
+            <div class="analysis-container-btn">
+              <i class="bi bi-graph-up text-secondary me-2 analysis-container-icon"></i>
+              <span class="analysis-container-label">Граф радиосети</span>
+              <i class="bi bi-check2 analysis-container-check{% if mod != 'graph' %} d-none{% endif %}"></i>
+            </div>
+          </a>
+          <a href="{{ url_for('analysis', module='keys') }}" class="list-group-item list-group-item-action{% if mod == 'keys' %} active{% endif %}" data-container="keys">
+            <div class="analysis-container-btn">
+              <i class="bi bi-key text-secondary me-2 analysis-container-icon"></i>
+              <span class="analysis-container-label">Проверка ключей</span>
+              <i class="bi bi-check2 analysis-container-check{% if mod != 'keys' %} d-none{% endif %}"></i>
+            </div>
+          </a>
+          <a href="{{ url_for('analysis', module='crypto') }}" class="list-group-item list-group-item-action{% if mod == 'crypto' %} active{% endif %}" data-container="crypto">
+            <div class="analysis-container-btn">
+              <i class="bi bi-shield-lock text-secondary me-2 analysis-container-icon"></i>
+              <span class="analysis-container-label">Крипто</span>
+              <i class="bi bi-check2 analysis-container-check{% if mod != 'crypto' %} d-none{% endif %}"></i>
+            </div>
+          </a>
+          <a href="{{ url_for('analysis', module='blanks-search') }}" class="list-group-item list-group-item-action{% if mod == 'blanks-search' %} active{% endif %}" data-container="blanks-search">
+            <div class="analysis-container-btn">
+              <i class="bi bi-search text-secondary me-2 analysis-container-icon"></i>
+              <span class="analysis-container-label">Поиск по перехватам</span>
+              <i class="bi bi-check2 analysis-container-check{% if mod != 'blanks-search' %} d-none{% endif %}"></i>
+            </div>
+          </a>
+          <a href="{{ url_for('analysis', module='ai') }}" class="list-group-item list-group-item-action{% if mod == 'ai' %} active{% endif %}" data-container="ai">
+            <div class="analysis-container-btn">
+              <i class="bi bi-stars text-secondary me-2 analysis-container-icon"></i>
+              <span class="analysis-container-label">AI-анализ</span>
+              <i class="bi bi-check2 analysis-container-check{% if mod != 'ai' %} d-none{% endif %}"></i>
+            </div>
+          </a>
+          <a href="{{ url_for('analysis', module='arm-task') }}" class="list-group-item list-group-item-action{% if mod == 'arm-task' %} active{% endif %}" data-container="arm-task">
+            <div class="analysis-container-btn">
+              <i class="bi bi-journal-richtext text-secondary me-2 analysis-container-icon"></i>
+              <span class="analysis-container-label">Задание поста</span>
+              <i class="bi bi-check2 analysis-container-check{% if mod != 'arm-task' %} d-none{% endif %}"></i>
+            </div>
+          </a>
+        </div>
+    </div>
+  </aside>
+
+  <main class="an-main an-mobile-section an-mobile-section--content">
+
+  {% if mod == 'callsigns' %}
+  <!-- Контент контейнера "Анализ позывных" (messenger UI как в Перехватах) -->
+  <div class="sessions-main an-callsigns-tg" data-container-body="callsigns" id="an-callsigns-root">
+    <div class="an2">
+      <header class="an2__bar">
+        <div class="an2__scope" id="an-selection" title="Подразделение и частота / группа">—</div>
+        <div class="an2__period">
+          <div class="an2__period-seg analysis-period-group" role="group" aria-label="Период (МСК)">
+            <button type="button" class="btn" id="p-1d">сутки</button>
+            <button type="button" class="btn" id="p-3d">трое</button>
+            <button type="button" class="btn" id="p-7d">неделя</button>
+          </div>
+          <details class="an2__period-more">
+            <summary>даты</summary>
+            <div class="an2__dates">
+              <input type="date" class="form-control form-control-sm" id="an-period-start" autocomplete="off" aria-label="С" />
+              <span class="text-muted small">—</span>
+              <input type="date" class="form-control form-control-sm" id="an-period-end" autocomplete="off" aria-label="По" />
+              <button type="button" class="btn btn-primary btn-sm" id="an-period-apply">OK</button>
+            </div>
+          </details>
+        </div>
+        <button type="button" class="btn btn-success btn-sm" id="an-export-form-btn" title="Экспорт в Word">
+          <i class="bi bi-file-earmark-word" aria-hidden="true"></i><span class="d-none d-sm-inline ms-1">Экспорт</span>
+        </button>
+      </header>
+
+      <nav class="an-mobile-subdock an-mobile-subdock--callsigns" id="an-mobile-subdock-callsigns" role="tablist" aria-label="Разделы анализа позывных" hidden>
+        <button type="button" class="an-mobile-subdock__btn active" role="tab" data-an-cs-sub="tree" aria-selected="true">
+          <i class="bi bi-diagram-3" aria-hidden="true"></i><span>Область</span>
+        </button>
+        <button type="button" class="an-mobile-subdock__btn" role="tab" data-an-cs-sub="main" aria-selected="false">
+          <i class="bi bi-people" aria-hidden="true"></i><span>Списки</span>
+        </button>
+      </nav>
+
+      <div class="an2__body" id="an-cs-body" data-an-cs-sub="tree">
+        <nav class="an2__nav an-mobile-callsigns-panel an-mobile-callsigns-panel--tree" aria-label="Подразделения и пары">
+          <div class="an2__search" role="search">
+            <i class="bi bi-search" aria-hidden="true"></i>
+            <input id="unit-filter" placeholder="Подразделение или частота" autocomplete="off" spellcheck="false" />
+          </div>
+          <div class="an2__tree" id="an-scope-tree"></div>
+          <div class="an2__nav-foot">
+            <button type="button" id="unit-all-btn" class="btn btn-link" disabled title="Позывные всего подразделения без привязки к паре">Все позывные подразделения</button>
+          </div>
+          <div id="units-side" hidden aria-hidden="true"></div>
+          <div id="pairs-side" hidden aria-hidden="true"></div>
+          <span id="unit-selected-label" hidden aria-hidden="true">—</span>
+        </nav>
+
+        <section class="an2__main an-mobile-callsigns-panel an-mobile-callsigns-panel--main">
+          <div class="an2__main-top">
+            <div class="an2__seg" role="tablist" aria-label="Списки">
+              <button type="button" class="an2__seg-btn active" data-an-cs-main-tab="callsigns" role="tab" aria-selected="true">Позывные</button>
+              <button type="button" class="an2__seg-btn" data-an-cs-main-tab="corr" role="tab" aria-selected="false">Корреспонденты</button>
+            </div>
+            <div class="an2__filters" data-an-cs-main-panel="callsigns">
+              <div class="an2__search" role="search">
+                <i class="bi bi-search" aria-hidden="true"></i>
+                <input id="an-cs-filter" placeholder="Позывной или код" autocomplete="off" />
+              </div>
+              <select id="an-cs-tag-filter" class="form-select form-select-sm" title="Фильтр по тегу">
+                <option value="tagged" selected>с тегом</option>
+                <option value="all">все</option>
+                <option value="untagged">без тега</option>
+              </select>
+              <label class="an2__chip" title="Только с сеансами за период">
+                <input type="checkbox" id="an-cs-active-only" checked />
+                <span>активные</span>
+              </label>
+            </div>
+            <div class="an2__filters" data-an-cs-main-panel="corr" hidden>
+              <div class="an2__search" role="search">
+                <i class="bi bi-search" aria-hidden="true"></i>
+                <input id="an-corr-filter" placeholder="Код или имя" autocomplete="off" />
+              </div>
+              <input id="an-corr-min" type="number" min="0" class="form-control form-control-sm" style="max-width:4.5rem;" placeholder="мин" title="Минимум сеансов" />
+              <select id="an-corr-sort" class="form-select form-select-sm">
+                <option value="count_desc">↓ сеансов</option>
+                <option value="count_asc">↑ сеансов</option>
+                <option value="code">код</option>
+                <option value="label">имя</option>
+              </select>
+              <span class="small text-muted" id="an-corr-count">—</span>
+            </div>
+            <p class="small text-muted mb-0 pb-1" id="an-cs-scope">Выберите подразделение слева</p>
+          </div>
+          <div class="an2__list">
+            <div class="an2__list-panel" data-an-cs-main-panel="callsigns" id="an-cs-list"></div>
+            <div class="an2__list-panel" data-an-cs-main-panel="corr" id="an-corr-list" hidden></div>
+          </div>
+          <div class="an2__status" id="an-status" aria-live="polite"></div>
+        </section>
+
+        <div class="an2__backdrop" id="an-cs-backdrop" hidden aria-hidden="true"></div>
+        <aside class="an2__drawer" id="an-cs-drawer" aria-label="Карточка" hidden>
+          <div class="an2__drawer-head">
+            <span class="an2__drawer-title">Карточка</span>
+            <span class="small text-muted text-truncate flex-grow-1" id="an-detail-scope">—</span>
+            <button type="button" class="an2__icon-btn" id="an-cs-close-detail-btn" title="Закрыть">
+              <i class="bi bi-x-lg" aria-hidden="true"></i>
+            </button>
+          </div>
+          <div class="an2__drawer-scroll">
+            <div class="an2__duty-block" id="an-duty-section">
+              <div class="an2__duty-label">
+                <i class="bi bi-headset me-1"></i>Опер. дежурные
+                <span class="float-end fw-normal" id="duty-correspondents-count">—</span>
+              </div>
+              <div id="duty-box">—</div>
+            </div>
+            <div id="an-detail-panel">
+              <div class="an2__profile-hero" id="an-detail-hero" hidden>
+                <div class="an2__profile-ava" id="an-detail-avatar" aria-hidden="true"></div>
+                <h3 class="an2__profile-name" id="an-detail-name"></h3>
+              </div>
+              <div class="an2__info-card" id="an-detail-body">Выберите позывной или корреспондента в списке.</div>
+              <div class="an2__drawer-actions" id="an-detail-actions" style="display:none;">
+                <button type="button" class="btn btn-outline-secondary btn-sm" id="an-detail-tag-btn">
+                  <i class="bi bi-tag me-1"></i>Тег
+                </button>
+                <button type="button" class="btn btn-outline-primary btn-sm" id="an-detail-duty-btn">
+                  <i class="bi bi-headset me-1"></i>Назначить опер.д.
+                </button>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if mod == 'network' %}
+  <!-- Контент контейнера "Общий анализ радиосети" -->
+  <div class="sessions-main net-page" data-container-body="network">
+    <div class="card wp-card border-0 net-page__card">
+      <div class="card-body net-page__body">
+        <div class="d-flex flex-wrap align-items-start justify-content-between gap-2">
+          <div>
+            {% set wp_page_title = 'Общий анализ радиосети' %}
+            {% set wp_page_lead = 'Кластеризация по подразделению: сеансы и корреспонденты за период и сравнение с предыдущим интервалом.' %}
+            {% include 'includes/page_header.html' %}
+          </div>
+        </div>
+
+        <div class="net-page__toolbar">
+          <div class="row g-2 align-items-end">
+            <div class="col-12 col-lg-4">
+              <label class="form-label small mb-1">Начало периода</label>
+              <input type="datetime-local" class="form-control form-control-sm" id="net-start" />
+            </div>
+            <div class="col-12 col-lg-4">
+              <label class="form-label small mb-1">Конец периода</label>
+              <input type="datetime-local" class="form-control form-control-sm" id="net-end" />
+            </div>
+            <div class="col-12 col-lg-4">
+              <label class="form-label small mb-1">Предыдущий период (авто)</label>
+              <div class="form-control form-control-sm wp-mono" id="net-prev">—</div>
+            </div>
+          </div>
+
+          <div class="d-flex gap-2 flex-wrap mt-3">
+            <div class="btn-group btn-group-sm" role="group" aria-label="Быстрый период">
+              <button type="button" class="btn btn-outline-secondary" id="net-preset-today">Сегодня</button>
+              <button type="button" class="btn btn-outline-secondary" id="net-preset-week">7 дн.</button>
+              <button type="button" class="btn btn-outline-secondary" id="net-preset-month">30 дн.</button>
+            </div>
+            <button class="btn btn-primary btn-sm" id="net-build-btn">
+              <i class="bi bi-table me-1"></i>Сформировать
+            </button>
+            <button class="btn btn-success btn-sm" id="net-export-btn" disabled>
+              <i class="bi bi-file-earmark-excel me-1"></i>Экспорт Excel
+            </button>
+            <button class="btn btn-outline-success btn-sm" id="net-export-unit-btn" disabled title="Excel только по указанному подразделению">
+              <i class="bi bi-building me-1"></i>Подразделение
+            </button>
+            <button class="btn btn-outline-secondary btn-sm" id="net-order-toggle" disabled>
+              <i class="bi bi-list-ol me-1"></i>Подразделения
+            </button>
+            <div class="small wp-subtle align-self-center" id="net-status"></div>
+          </div>
+          <div class="row g-2 align-items-end mt-2">
+            <div class="col-12 col-lg-6">
+              <label class="form-label small mb-1" for="net-unit-export">Подразделение для выборочной выгрузки</label>
+              <input type="text" class="form-control form-control-sm" id="net-unit-export" placeholder="2 еб 152 оебр" autocomplete="off" spellcheck="false" />
+            </div>
+          </div>
+
+          <div class="card border mt-3" id="net-intensity-merge-card">
+            <div class="card-body p-3">
+              <div class="fw-semibold mb-1">Сборка 6-часовой таблицы из 2-часовых</div>
+              <div class="small text-muted mb-2">
+                Загрузите <strong>1, 2 или 3</strong> двухчасовых таблицы (третья не обязательна). Текущий интервал — строка 5.
+                Сеансы и корреспонденты по подразделению <strong>суммируются</strong> из всех загруженных файлов.
+              </div>
+              <div class="row g-2 align-items-end">
+                <div class="col-12 col-md-4">
+                  <label class="form-label small mb-1" for="net-merge-file-1">Таблица 1 (2 ч)</label>
+                  <input type="file" class="form-control form-control-sm" id="net-merge-file-1" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
+                </div>
+                <div class="col-12 col-md-4">
+                  <label class="form-label small mb-1" for="net-merge-file-2">Таблица 2 (2 ч, необяз.)</label>
+                  <input type="file" class="form-control form-control-sm" id="net-merge-file-2" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
+                </div>
+                <div class="col-12 col-md-4">
+                  <label class="form-label small mb-1" for="net-merge-file-3">Таблица 3 (2 ч, необяз.)</label>
+                  <input type="file" class="form-control form-control-sm" id="net-merge-file-3" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
+                </div>
+                <div class="col-12 col-md-8">
+                  <label class="form-label small mb-1" for="net-merge-template-6h">Шаблон 6 ч (необязательно)</label>
+                  <input type="file" class="form-control form-control-sm" id="net-merge-template-6h" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
+                </div>
+                <div class="col-12 col-md-4 d-flex align-items-end">
+                  <button type="button" class="btn btn-outline-primary btn-sm w-100" id="net-merge-6h-btn">
+                    <i class="bi bi-box-arrow-in-down me-1"></i>Загрузить в 6 часовую
+                  </button>
+                </div>
+              </div>
+              <div class="small wp-subtle mt-2" id="net-merge-status"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="net-page__content">
+        <div class="card border mt-3" id="net-order-card" style="display:none;">
+          <div class="card-body p-3">
+            <div class="d-flex align-items-center justify-content-between gap-2">
+              <div class="fw-semibold">Включение и порядок подразделений</div>
+              <div class="d-flex gap-2">
+                {% if current_user.role == 'admin' or current_user.has_perm('manage_users') %}
+                <button class="btn btn-outline-success btn-sm" id="net-order-share">Сделать порядок для всех</button>
+                {% endif %}
+                <button class="btn btn-outline-secondary btn-sm" id="net-order-reset">Сбросить</button>
+                <button class="btn btn-primary btn-sm" id="net-order-save">Сохранить</button>
+              </div>
+            </div>
+            <div class="small wp-subtle mt-1">Снимите галочку, чтобы скрыть подразделение. Порядок меняется полем номера
+              или кнопками ↑/↓.</div>
+            <div class="d-flex align-items-center gap-2 mt-2 flex-wrap">
+              <input type="text" class="form-control form-control-sm" id="net-order-search"
+                placeholder="Поиск по списку" style="max-width: 280px;" />
+            </div>
+            <div class="list-group mt-2" id="net-order-list"></div>
+          </div>
+        </div>
+
+        <div class="mt-3 table-responsive">
+          <table class="table table-sm table-bordered align-middle" id="net-table">
+            <thead class="table-light">
+              <tr id="net-head-row">
+                <th style="min-width:200px;">Сеть</th>
+              </tr>
+            </thead>
+            <tbody id="net-body">
+              <tr>
+                <td class="text-muted">—</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <section class="net-viz-section" id="net-viz-section" style="display: none;" aria-label="Визуализация активности по сетям" hidden>
+          <div class="net-viz-head">
+            <div>
+              <h3 class="net-viz-title">Активность по сетям</h3>
+              <p class="net-viz-caption small text-muted mb-0" id="net-viz-caption"></p>
+            </div>
+            <ul class="net-viz-legend list-unstyled small mb-0">
+              <li><span class="net-viz-legend-prev" aria-hidden="true"></span> прошлый период</li>
+              <li><span class="net-viz-legend-up"></span> рост к прошлому</li>
+              <li><span class="net-viz-legend-down"></span> спад к прошлому</li>
+            </ul>
+          </div>
+
+          <div class="net-viz-band">
+            <div class="net-viz-band-label">
+              Подразделения
+              <span class="net-viz-band-hint">сеансы связи</span>
+            </div>
+            <div class="net-viz-band-scale" id="net-viz-scale-units" aria-live="polite"></div>
+            <div class="net-viz-scroll" id="net-blocks-units"></div>
+          </div>
+          <div class="net-viz-band net-viz-band--corr">
+            <div class="net-viz-band-label">
+              Корреспонденты
+              <span class="net-viz-band-hint">уникальные ID за период</span>
+            </div>
+            <div class="net-viz-band-scale" id="net-viz-scale-corr" aria-live="polite"></div>
+            <div class="net-viz-scroll" id="net-blocks-corr"></div>
+          </div>
+        </section>
+        </div>
+        <!-- примечание убрано по запросу -->
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if mod == 'graph' %}
+  <!-- Контент контейнера "Граф радиосети" -->
+  <div class="sessions-main rg2-page" data-container-body="graph">
+    <div class="rg2 rg-dashboard rg-md3-dashboard" id="rg-dashboard">
+      <header class="rg2__bar">
+        <div class="rg2__title min-w-0">
+          <h2>Граф радиосети</h2>
+          <p class="rg2__status-line" role="status">
+            <span id="rg-status-msg">—</span>
+            <span class="wp-subtle" id="rg-status-range"></span>
+          </p>
+          <div class="rg2__stats" id="rg-metrics" aria-label="Метрики графа">
+            <span class="rg2__stat"><span id="rg-m-nodes">0</span> узл</span>
+            <span class="rg2__stat"><span id="rg-m-edges">0</span> св</span>
+            <span class="rg2__stat"><span id="rg-m-density">0</span> плотн</span>
+            <span class="rg2__stat"><span id="rg-m-components">0</span> комп</span>
+            <span class="rg2__stat rg2__stat--risk" id="rg-m-risk">0 LOW</span>
+            <span class="rg2__stat" id="rg-metric-ml-risk"><span id="rg-m-ml-risk">—</span></span>
+          </div>
+        </div>
+        <div class="rg2__cmd" aria-label="Быстрые параметры">
+          <select id="rg-scope" class="form-select form-select-sm rg2__cmd-scope" title="Область">
+            <option value="all" selected>Все</option>
+            <option value="pair">Пара</option>
+            <option value="unit">Подразделение</option>
+          </select>
+          <select id="rg-minutes" class="form-select form-select-sm rg2__cmd-window" title="Окно графа">
+            <option value="15">15м</option>
+            <option value="30">30м</option>
+            <option value="60" selected>1ч</option>
+            <option value="120">2ч</option>
+            <option value="360">6ч</option>
+            <option value="720">12ч</option>
+          </select>
+          <div class="rg2__period-seg rg-md3-segmented" role="group" id="rg-period" aria-label="Период таймлайна">
+            <button type="button" class="rg-md3-segbtn" data-days="1">1д</button>
+            <button type="button" class="rg-md3-segbtn" data-days="3">3д</button>
+            <button type="button" class="rg-md3-segbtn" data-days="7">7д</button>
+            <button type="button" class="rg-md3-segbtn" data-days="14">14д</button>
+            <button type="button" class="rg-md3-segbtn active" data-days="30">30д</button>
+          </div>
+          <button type="button" class="btn btn-outline-secondary btn-sm" id="rg-toggle-filters" aria-expanded="false" aria-controls="rg-filter-drawer">
+            <i class="bi bi-sliders"></i><span class="d-none d-lg-inline ms-1">Фильтры</span>
+          </button>
+          <button type="button" class="btn btn-primary btn-sm" id="rg-apply-filters" title="Перестроить граф">
+            <i class="bi bi-check2"></i><span class="d-none d-md-inline ms-1">Применить</span>
+          </button>
+        </div>
+        <div class="rg2__bar-actions">
+          <button type="button" class="btn btn-outline-secondary btn-sm rg2__icon-btn" id="rg-refresh" title="Обновить">
+            <i class="bi bi-arrow-clockwise"></i>
+          </button>
+          <button type="button" class="btn btn-outline-primary btn-sm" id="rg-full-report" title="Сформировать полный DOCX-отчёт за календарный месяц">
+            <i class="bi bi-file-earmark-word"></i><span class="d-none d-xl-inline ms-1">Полный отчёт</span>
+          </button>
+          <button type="button" class="btn btn-outline-secondary btn-sm rg2__icon-btn" id="rg-export-png" title="Экспорт PNG">
+            <i class="bi bi-image"></i>
+          </button>
+          <button type="button" class="btn btn-outline-secondary btn-sm rg2__icon-btn" id="rg-fullscreen" title="Полный экран">
+            <i class="bi bi-arrows-fullscreen"></i>
+          </button>
+        </div>
+      </header>
+
+      <div class="rg2__filter-drawer" id="rg-filter-drawer" hidden>
+        <section class="rg2__filters" aria-label="Параметры графа">
+          <div class="rg2__filter-row">
+            <div class="rg2__field rg2__field--grow">
+              <label for="rg-unit-query">Подразделение</label>
+              <div class="rg2__search" role="search">
+                <i class="bi bi-building" aria-hidden="true"></i>
+                <input id="rg-unit-query" autocomplete="off" placeholder="Название подразделения" />
+              </div>
+            </div>
+            <div class="rg2__field rg2__field--grow">
+              <label for="rg-group-query">Группа</label>
+              <div class="rg2__search" role="search">
+                <i class="bi bi-diagram-2" aria-hidden="true"></i>
+                <input id="rg-group-query" autocomplete="off" placeholder="Фильтр группы" />
+              </div>
+            </div>
+            <div class="rg2__field">
+              <label for="rg-min-weight">Вес связи ≥</label>
+              <input type="number" min="1" value="1" class="form-control form-control-sm" id="rg-min-weight" style="width:4rem;" />
+            </div>
+            <div class="rg2__field">
+              <label for="rg-focus-id">Фокус ID</label>
+              <input id="rg-focus-id" class="form-control form-control-sm wp-mono" inputmode="numeric" placeholder="—" style="width:5.5rem;" />
+            </div>
+            <div class="rg2__field rg2__field--span">
+              <label>Быстрое окно</label>
+              <div class="rg2__chip-row rg-md3-chip-row" aria-label="Быстрый выбор окна">
+                <button type="button" class="rg-md3-chip" data-rg-minutes="30">30′</button>
+                <button type="button" class="rg-md3-chip" data-rg-minutes="60">1ч</button>
+                <button type="button" class="rg-md3-chip" data-rg-minutes="120">2ч</button>
+                <button type="button" class="rg-md3-chip" data-rg-minutes="360">6ч</button>
+                <button type="button" class="rg-md3-chip" data-rg-minutes="720">12ч</button>
+              </div>
+            </div>
+          </div>
+          <div class="rg2__chips-row">
+            <div class="rg2__toggles">
+              <div class="form-check form-switch form-switch-sm mb-0">
+                <input class="form-check-input" type="checkbox" id="rg-include-other" checked />
+                <label class="form-check-label" for="rg-include-other">Др. подразд.</label>
+              </div>
+              <div class="form-check form-switch form-switch-sm mb-0">
+                <input class="form-check-input" type="checkbox" id="rg-auto" checked />
+                <label class="form-check-label" for="rg-auto">Авто</label>
+              </div>
+              <div class="form-check form-switch form-switch-sm mb-0">
+                <input class="form-check-input" type="checkbox" id="rg-live" checked />
+                <label class="form-check-label" for="rg-live">LIVE</label>
+              </div>
+              <div class="form-check form-switch form-switch-sm mb-0">
+                <input class="form-check-input" type="checkbox" id="rg-show-labels" checked />
+                <label class="form-check-label" for="rg-show-labels">Подписи</label>
+              </div>
+              <span class="badge rounded-pill" id="rg-live-state">STATIC</span>
+            </div>
+            <div class="rg2__presets" id="rg-quick-chips">
+              <button type="button" class="btn btn-outline-secondary btn-sm" data-preset="hubs">Хабы</button>
+              <button type="button" class="btn btn-outline-secondary btn-sm" data-preset="bridges">Мосты</button>
+              <button type="button" class="btn btn-outline-secondary btn-sm" data-preset="cross-unit">Межподр.</button>
+              <button type="button" class="btn btn-outline-primary btn-sm" id="rg-ml-dataset">ML данные</button>
+              <button type="button" class="btn btn-outline-primary btn-sm" id="rg-ml-train">ML train</button>
+            </div>
+          </div>
+        </section>
+        <details class="rg2__advanced">
+          <summary><i class="bi bi-gear me-1"></i>Даты, лейаут и лимиты</summary>
+          <div class="rg2__advanced-body" id="rg-adv-collapse">
+          <div>
+            <label class="form-label" for="rg-start">С</label>
+            <input type="datetime-local" class="form-control form-control-sm" id="rg-start" />
+          </div>
+          <div>
+            <label class="form-label" for="rg-end">По</label>
+            <input type="datetime-local" class="form-control form-control-sm" id="rg-end" />
+          </div>
+          <div class="d-flex align-items-end">
+            <button class="btn btn-outline-secondary btn-sm w-100" type="button" id="rg-range-clear">Сброс дат</button>
+          </div>
+          <div>
+            <label class="form-label" for="rg-layout">Лейаут</label>
+            <select id="rg-layout" class="form-select form-select-sm">
+              <option value="cose" selected>Force</option>
+              <option value="concentric">Concentric</option>
+              <option value="circle">Circle</option>
+              <option value="grid">Grid</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label" for="rg-theme">Тема</label>
+            <select id="rg-theme" class="form-select form-select-sm">
+              <option value="unit" selected>Подразделения</option>
+              <option value="mono">Моно</option>
+              <option value="contrast">Контраст</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label" for="rg-cluster-by">Кластер</label>
+            <select id="rg-cluster-by" class="form-select form-select-sm">
+              <option value="unit" selected>Подразделение</option>
+              <option value="group">Группа</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label" for="rg-max-nodes-mode">Размер</label>
+            <select id="rg-max-nodes-mode" class="form-select form-select-sm">
+              <option value="balanced" selected>Баланс</option>
+              <option value="overview">Обзор</option>
+              <option value="dense">Плотный</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label" for="rg-mode">Режим</label>
+            <select id="rg-mode" class="form-select form-select-sm">
+              <option value="static" selected>Статический</option>
+              <option value="dynamic">Динамический</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label" for="rg-max-nodes">Макс. узлов</label>
+            <input id="rg-max-nodes" type="number" min="50" max="500" step="10" class="form-control form-control-sm wp-mono" placeholder="авто" />
+          </div>
+          <div>
+            <label class="form-label" for="rg-max-edges">Макс. рёбер</label>
+            <input id="rg-max-edges" type="number" min="100" max="2500" step="50" class="form-control form-control-sm wp-mono" placeholder="авто" />
+          </div>
+        </div>
+        </details>
+      </div>
+
+      <div class="rg2__workspace">
+        <div class="rg-main">
+          <div class="rg2__stage-wrap">
+            <div class="rg-stage">
+              <div class="rg-stage-topbar">
+                <div class="rg-stage-search" role="search">
+                  <i class="bi bi-search" aria-hidden="true"></i>
+                  <input id="rg-search" type="search" autocomplete="off" spellcheck="false" placeholder="Поиск ID, подразделения, группы" />
+                </div>
+                <div class="rg-stage-tools">
+                  <div class="rg-stage-zoom" role="group" aria-label="Масштаб">
+                    <button type="button" id="rg-zoom-out" title="Уменьшить" aria-label="Уменьшить">−</button>
+                    <button type="button" id="rg-fit" title="Вписать в экран" aria-label="Вписать">Fit</button>
+                    <button type="button" id="rg-zoom-in" title="Увеличить" aria-label="Увеличить">+</button>
+                  </div>
+                  <button type="button" class="rg-stage-tool-btn" id="rg-open-inspector" title="Детали и аналитика" aria-label="Панель аналитики">
+                    <i class="bi bi-layout-sidebar-inset-reverse" aria-hidden="true"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="rg-stage-body">
+              <div class="rg-canvas" id="rg-canvas" aria-label="Граф радиосети"></div>
+              <div class="rg-fs-panels" id="rg-fs-panels" aria-hidden="true">
+                <aside class="rg-fs-panel rg-fs-left">
+                  <div class="fw-semibold">Детали выделения</div>
+                  <div class="small wp-subtle mt-1" id="rg-fs-selection-hint">Выбери узел или связь на графе</div>
+                  <div class="rg-selection mt-2" id="rg-fs-selection">—</div>
+                  <hr class="my-2" />
+                  <div class="fw-semibold">Топ-хабы</div>
+                  <div class="small wp-subtle mt-1" id="rg-fs-top-hubs">—</div>
+                  <hr class="my-2" />
+                  <div class="fw-semibold">Топ-мосты</div>
+                  <div class="small wp-subtle mt-1" id="rg-fs-top-bridges">—</div>
+                  <hr class="my-2" />
+                  <div class="fw-semibold">ML прогноз</div>
+                  <div class="small mt-1" id="rg-fs-ml-prediction">—</div>
+                  <div class="small wp-subtle mt-1" id="rg-fs-ml-reasons">—</div>
+                  <div class="small wp-subtle mt-1" id="rg-fs-ml-hotspots">—</div>
+                  <div class="rg-ml-status mt-2" id="rg-fs-ml-model-panel">
+                    <div class="fw-semibold">Панель ML</div>
+                    <div class="small mt-1" id="rg-fs-ml-model-active">Активная модель: —</div>
+                    <div class="small wp-subtle mt-1" id="rg-fs-ml-model-metrics">Метрики: —</div>
+                    <div class="small wp-subtle mt-1" id="rg-fs-ml-model-diagnostics">Диагностика: —</div>
+                    <div class="small wp-subtle mt-1" id="rg-fs-ml-model-runs">Последние модели: —</div>
+                    <hr class="my-2" />
+                    <div class="fw-semibold">Прогноз будущего</div>
+                    <div class="small mt-1" id="rg-fs-forecast-summary">—</div>
+                    <div class="small wp-subtle mt-1" id="rg-fs-forecast-reliability">Надёжность: —</div>
+                    <div class="small wp-subtle mt-1" id="rg-fs-forecast-h30">H30: —</div>
+                    <div class="small wp-subtle mt-1" id="rg-fs-forecast-h60">H60: —</div>
+                    <div class="small wp-subtle mt-1" id="rg-fs-forecast-h120">H120: —</div>
+                  </div>
+                </aside>
+                <aside class="rg-fs-panel rg-fs-right">
+                  <div class="fw-semibold">Промежуток</div>
+                  <div class="rg-md3-segmented rg-md3-segmented--compact w-100 mt-2" role="group" id="rg-fs-period" aria-label="Период таймлайна">
+                    <button type="button" class="rg-md3-segbtn active" data-days="1">1д</button>
+                    <button type="button" class="rg-md3-segbtn" data-days="3">3д</button>
+                    <button type="button" class="rg-md3-segbtn" data-days="7">7д</button>
+                    <button type="button" class="rg-md3-segbtn" data-days="14">14д</button>
+                    <button type="button" class="rg-md3-segbtn" data-days="30">30д</button>
+                  </div>
+                  <label class="form-label small mt-2 mb-1">Окно</label>
+                  <select id="rg-fs-minutes" class="form-select form-select-sm">
+                    <option value="15">15 минут</option>
+                    <option value="30">30 минут</option>
+                    <option value="60" selected>60 минут</option>
+                    <option value="120">120 минут</option>
+                  </select>
+                  <label class="form-label small mt-2 mb-1">Дата с</label>
+                  <input type="datetime-local" class="form-control form-control-sm" id="rg-fs-start" />
+                  <label class="form-label small mt-2 mb-1">Дата по</label>
+                  <input type="datetime-local" class="form-control form-control-sm" id="rg-fs-end" />
+                  <label class="form-label small mt-2 mb-1">Режим графа</label>
+                  <select id="rg-fs-mode" class="form-select form-select-sm">
+                    <option value="static" selected>Статический</option>
+                    <option value="dynamic">Динамический</option>
+                  </select>
+                  <div class="form-check form-switch mt-2">
+                    <input class="form-check-input" type="checkbox" id="rg-fs-live" checked />
+                    <label class="form-check-label small" for="rg-fs-live">LIVE обновление</label>
+                  </div>
+                  <div class="d-grid gap-2 mt-2">
+                    <button type="button" class="btn btn-primary btn-sm" id="rg-fs-apply">Применить</button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" id="rg-fs-reset">Сбросить</button>
+                    <button type="button" class="btn btn-outline-primary btn-sm" id="rg-fs-ml-tag">Тег события по
+                      окну</button>
+                    <button type="button" class="btn btn-outline-info btn-sm" id="rg-fs-ml-minute-tag">Тег по
+                      минуте</button>
+                    <button type="button" class="btn btn-outline-success btn-sm" id="rg-fs-ml-feedback-ok">Подтвердить
+                      прогноз</button>
+                    <button type="button" class="btn btn-outline-warning btn-sm" id="rg-fs-ml-feedback-false">Ложный
+                      прогноз</button>
+                  </div>
+                  <div class="small wp-subtle mt-2" id="rg-fs-status">—</div>
+                </aside>
+                <aside class="rg-fs-panel rg-fs-bottom">
+                  <div class="d-flex align-items-center justify-content-between gap-2">
+                    <div class="fw-semibold">Динамика состава</div>
+                    <div class="small wp-subtle" id="rg-fs-time-label">—</div>
+                  </div>
+                  <canvas id="rg-fs-timeline" class="mt-2" aria-label="Лента активности (fullscreen)"></canvas>
+                  <input type="range" id="rg-fs-time-slider" class="form-range mt-2" min="0" max="0" value="0" />
+                  <div class="rg-playback mt-2">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" id="rg-fs-play-prev">◀</button>
+                    <button type="button" class="btn btn-outline-primary btn-sm" id="rg-fs-play-toggle">Play</button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" id="rg-fs-play-next">▶</button>
+                    <select id="rg-fs-play-speed" class="form-select form-select-sm">
+                      <option value="0.5">0.5x</option>
+                      <option value="1" selected>1x</option>
+                      <option value="2">2x</option>
+                      <option value="4">4x</option>
+                    </select>
+                  </div>
+                  <div class="rg-comp-metrics mt-2" id="rg-fs-comp-metrics">
+                    <div class="rg-comp-chip"><span class="rg-comp-key">Активных ID</span><span class="rg-comp-val"
+                        id="rg-fs-comp-active">—</span></div>
+                    <div class="rg-comp-chip"><span class="rg-comp-key">Сеансов</span><span class="rg-comp-val"
+                        id="rg-fs-comp-sessions">—</span></div>
+                    <div class="rg-comp-chip"><span class="rg-comp-key">Новые</span><span class="rg-comp-val"
+                        id="rg-fs-comp-new">—</span></div>
+                    <div class="rg-comp-chip"><span class="rg-comp-key">Ушли</span><span class="rg-comp-val"
+                        id="rg-fs-comp-gone">—</span></div>
+                  </div>
+                  <div class="small wp-subtle mt-2" id="rg-fs-composition">—</div>
+                </aside>
+              </div>
+              <div class="rg-context-menu" id="rg-context-menu" style="display:none;"></div>
+              <div class="rg-empty" id="rg-empty" style="display:none;" role="status">
+                <div class="rg-empty__card">
+                  <span class="rg-empty__icon" aria-hidden="true"><i class="bi bi-share"></i></span>
+                  <p class="rg-empty__title">Нет данных для отображения</p>
+                  <p class="rg-empty__hint">Выберите область и период, затем нажмите «Применить»</p>
+                </div>
+              </div>
+              <div class="rg-loading" id="rg-loading" style="display:none;" role="status" aria-live="polite">
+                <div class="rg-loading__card">
+                  <span class="rg-loading__spinner" aria-hidden="true"></span>
+                  <span>Загрузка графа…</span>
+                </div>
+              </div>
+              </div>
+            </div>
+            <div class="rg2__backdrop" id="rg-inspector-backdrop" hidden aria-hidden="true"></div>
+            <aside class="rg-side-panel" id="rg-side-panel" aria-label="Детали графа">
+              <div class="rg2__inspector-head">
+                <span class="fw-semibold">Аналитика</span>
+                <button type="button" class="btn btn-sm btn-link rg2__icon-btn ms-auto" id="rg-close-inspector" title="Закрыть">
+                  <i class="bi bi-x-lg"></i>
+                </button>
+              </div>
+              <div class="rg2__inspector-scroll">
+              <div class="fw-semibold small">Выделение</div>
+              <div class="small wp-subtle mt-1" id="rg-selection-hint">Клик по узлу или связи</div>
+              <div class="rg-selection mt-2" id="rg-selection">—</div>
+              <hr />
+              <div class="fw-semibold">Топ-хабы</div>
+              <div class="small wp-subtle mt-1" id="rg-top-hubs">—</div>
+              <hr />
+              <div class="fw-semibold">Топ-мосты</div>
+              <div class="small wp-subtle mt-1" id="rg-top-bridges">—</div>
+              <hr />
+              <div class="fw-semibold">ML прогноз</div>
+              <div class="small mt-1" id="rg-ml-prediction">—</div>
+              <div class="small wp-subtle mt-1" id="rg-ml-reasons">—</div>
+              <div class="small wp-subtle mt-1" id="rg-ml-hotspots">—</div>
+              <div class="rg-ml-status mt-2" id="rg-ml-model-panel">
+                <div class="fw-semibold">Панель ML</div>
+                <div class="small mt-1" id="rg-ml-model-active">Активная модель: —</div>
+                <div class="small wp-subtle mt-1" id="rg-ml-model-metrics">Метрики: —</div>
+                <div class="small wp-subtle mt-1" id="rg-ml-model-diagnostics">Диагностика: —</div>
+                <div class="small wp-subtle mt-1" id="rg-ml-model-runs">Последние модели: —</div>
+                <hr class="my-2" />
+                <label class="form-label small mb-1">Выбрать модель</label>
+                <div class="d-flex gap-2">
+                  <select id="rg-ml-model-select" class="form-select form-select-sm"></select>
+                  <button type="button" class="btn btn-outline-primary btn-sm"
+                    id="rg-ml-model-activate">Активировать</button>
+                </div>
+                <label class="form-label small mt-2 mb-1">Окно ML (мин)</label>
+                <input id="rg-ml-cfg-window" type="number" min="5" max="720" step="5"
+                  class="form-control form-control-sm" value="60" />
+                <div class="row g-2 mt-1">
+                  <div class="col-6">
+                    <label class="form-label small mb-1">Epochs</label>
+                    <input id="rg-ml-cfg-epochs" type="number" min="5" max="1000" step="5"
+                      class="form-control form-control-sm" value="60" />
+                  </div>
+                  <div class="col-6">
+                    <label class="form-label small mb-1">LR</label>
+                    <input id="rg-ml-cfg-lr" type="number" min="0.00001" max="0.1" step="0.0001"
+                      class="form-control form-control-sm" value="0.001" />
+                  </div>
+                </div>
+                <div class="row g-2 mt-1">
+                  <div class="col-6">
+                    <label class="form-label small mb-1">Min samples</label>
+                    <input id="rg-ml-cfg-retrain-min" type="number" min="10" max="10000" step="1"
+                      class="form-control form-control-sm" value="30" />
+                  </div>
+                  <div class="col-6">
+                    <label class="form-label small mb-1">Retrain step</label>
+                    <input id="rg-ml-cfg-retrain-step" type="number" min="1" max="1000" step="1"
+                      class="form-control form-control-sm" value="10" />
+                  </div>
+                </div>
+                <div class="form-check form-switch mt-2">
+                  <input class="form-check-input" type="checkbox" id="rg-ml-cfg-auto-activate" checked />
+                  <label class="form-check-label small" for="rg-ml-cfg-auto-activate">Автоактивация после train</label>
+                </div>
+                <div class="d-grid gap-2 mt-2">
+                  <button type="button" class="btn btn-outline-secondary btn-sm" id="rg-ml-settings-save">Сохранить
+                    настройки ML</button>
+                  <button type="button" class="btn btn-outline-secondary btn-sm" id="rg-ml-status-refresh">Обновить
+                    статус ML</button>
+                </div>
+                <hr class="my-2" />
+                <div class="fw-semibold">Прогноз будущего</div>
+                <div class="small mt-1" id="rg-forecast-summary">—</div>
+                <div class="small wp-subtle mt-1" id="rg-forecast-reliability">Надёжность: —</div>
+                <div class="small wp-subtle mt-1" id="rg-forecast-h30">H30: —</div>
+                <div class="small wp-subtle mt-1" id="rg-forecast-h60">H60: —</div>
+                <div class="small wp-subtle mt-1" id="rg-forecast-h120">H120: —</div>
+              </div>
+              <hr />
+              <div class="fw-semibold">Разметка/Feedback</div>
+              <div class="small wp-subtle mt-1">Работает по выбранному окну динамики.</div>
+              <div class="d-grid gap-2 mt-2">
+                <button type="button" class="btn btn-outline-primary btn-sm" id="rg-ml-tag">Тег события по окну</button>
+                <button type="button" class="btn btn-outline-info btn-sm" id="rg-ml-minute-tag">Тег по минуте</button>
+                <button type="button" class="btn btn-outline-success btn-sm" id="rg-ml-feedback-ok">Подтвердить
+                  прогноз</button>
+                <button type="button" class="btn btn-outline-warning btn-sm" id="rg-ml-feedback-false">Ложный
+                  прогноз</button>
+              </div>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </div>
+
+      <details class="rg2__timeline">
+        <summary><i class="bi bi-clock-history me-1"></i>Динамика и сравнение периодов</summary>
+        <div class="rg2__timeline-body">
+          <div class="rg-bottom">
+            <div class="rg-bottom-card">
+              <div class="d-flex align-items-center justify-content-between gap-2">
+                <div class="fw-semibold">Динамика состава</div>
+                <div class="small wp-subtle" id="rg-time-label">—</div>
+              </div>
+              <canvas id="rg-timeline" class="mt-2" aria-label="Лента активности"></canvas>
+              <input type="range" id="rg-time-slider" class="form-range mt-2" min="0" max="0" value="0" />
+              <div class="rg-playback mt-2">
+                <button type="button" class="btn btn-outline-secondary btn-sm" id="rg-play-prev">◀</button>
+                <button type="button" class="btn btn-outline-primary btn-sm" id="rg-play-toggle">Play</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm" id="rg-play-next">▶</button>
+                <select id="rg-play-speed" class="form-select form-select-sm">
+                  <option value="0.5">0.5x</option>
+                  <option value="1" selected>1x</option>
+                  <option value="2">2x</option>
+                  <option value="4">4x</option>
+                </select>
+              </div>
+              <div class="rg-comp-metrics mt-2" id="rg-comp-metrics">
+                <div class="rg-comp-chip"><span class="rg-comp-key">Активных ID</span><span class="rg-comp-val"
+                    id="rg-comp-active">—</span></div>
+                <div class="rg-comp-chip"><span class="rg-comp-key">Сеансов</span><span class="rg-comp-val"
+                    id="rg-comp-sessions">—</span></div>
+                <div class="rg-comp-chip"><span class="rg-comp-key">Новые</span><span class="rg-comp-val"
+                    id="rg-comp-new">—</span></div>
+                <div class="rg-comp-chip"><span class="rg-comp-key">Ушли</span><span class="rg-comp-val"
+                    id="rg-comp-gone">—</span></div>
+              </div>
+              <div class="small wp-subtle mt-2" id="rg-composition">—</div>
+            </div>
+            <div class="rg-bottom-card">
+              <div class="d-flex align-items-center justify-content-between gap-2">
+                <div class="fw-semibold">Сравнение периодов</div>
+                <div class="small wp-subtle" id="rg-compare-label">—</div>
+              </div>
+              <div class="small wp-subtle mt-2" id="rg-compare-stats">—</div>
+            </div>
+          </div>
+        </div>
+      </details>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if mod == 'keys' %}
+  <!-- Контент контейнера "Проверка ключей" -->
+  <div class="sessions-main k2-page k2-page--v3" data-container-body="keys">
+    <div class="k2" id="keys-root">
+      <header class="k2__bar">
+        <div class="k2__title min-w-0">
+          <span class="k2__kicker">ЕАВС · Анализ</span>
+          <h2>Проверка ключей</h2>
+          <p class="k2__status" id="keys-status" role="status" aria-live="polite">Выберите дату и нажмите «Проверить»</p>
+        </div>
+        <div class="k2__bar-actions">
+          <button type="button" class="k2-btn k2-btn--primary" id="keys-check-btn">
+            <i class="bi bi-arrow-clockwise" aria-hidden="true"></i><span>Проверить</span>
+          </button>
+          <button type="button" class="k2-btn k2-btn--success" id="keys-add-xml-btn" title="Добавить в DMR XML">
+            <i class="bi bi-file-earmark-code" aria-hidden="true"></i><span class="d-none d-md-inline">DMR XML</span>
+          </button>
+          <button type="button" class="k2-btn k2-btn--icon" id="keys-toggle-import" aria-expanded="false" aria-controls="keys-import-drawer" title="Импорт XLSX">
+            <i class="bi bi-upload" aria-hidden="true"></i>
+          </button>
+        </div>
+      </header>
+
+      <div class="k2__toolbar">
+        <div class="k2-tools__group k2-tools__group--main">
+          <div class="k2-field k2-field--date" title="Дата проверки">
+            <i class="bi bi-calendar3 k2-field__icon" aria-hidden="true"></i>
+            <input type="date" class="k2-field__input" id="keys-date" />
+          </div>
+          <div class="k2-field k2-field--grow k2-field--search" role="search">
+            <i class="bi bi-search k2-field__icon" aria-hidden="true"></i>
+            <input id="keys-filter" class="k2-field__input" type="search" autocomplete="off" spellcheck="false" placeholder="Частота или группа" />
+          </div>
+        </div>
+
+        <span class="k2-tools__sep" aria-hidden="true"></span>
+
+        <div class="k2-tools__group">
+          <label class="k2-chip" title="Только новые ключи">
+            <input type="checkbox" class="k2-chip__input" id="keys-only-new" />
+            <i class="bi bi-stars k2-chip__icon" aria-hidden="true"></i>
+            <span class="k2-chip__label">NEW</span>
+          </label>
+          <label class="k2-chip" title="Учитывать ID при сверке">
+            <input type="checkbox" class="k2-chip__input" id="keys-match-id" />
+            <i class="bi bi-fingerprint k2-chip__icon" aria-hidden="true"></i>
+            <span class="k2-chip__label">Учёт ID</span>
+          </label>
+        </div>
+
+        <span class="k2-tools__sep" aria-hidden="true"></span>
+
+        <div class="k2-tools__group k2-tools__group--quick">
+          <button type="button" class="k2-btn k2-btn--quick" id="keys-show-all-keys-btn" title="Показать все ключи из импорта (включая без сеансов)">
+            <i class="bi bi-key-fill" aria-hidden="true"></i><span>Все ключи</span>
+          </button>
+          <button type="button" class="k2-btn k2-btn--quick" id="keys-show-all-btn" title="Проверить без фильтра по дате добавления">
+            <i class="bi bi-calendar-week" aria-hidden="true"></i><span>Все даты</span>
+          </button>
+          <button type="button" class="k2-btn k2-btn--quick" id="keys-view-all-btn" title="Отметить всё как просмотренное">
+            <i class="bi bi-check2-all" aria-hidden="true"></i><span>Просмотрено всё</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="k2__drawer" id="keys-import-drawer" hidden>
+        <div class="k2__import">
+          <input id="keys-import-file" class="k2-field__input k2-field__input--file" type="file" accept=".xlsx" aria-label="Файл XLSX с ключами" />
+          <button type="button" id="keys-import-btn" class="k2-btn k2-btn--outline">
+            <i class="bi bi-upload" aria-hidden="true"></i><span>Импортировать</span>
+          </button>
+          <span class="k2__import-status" id="keys-import-status"></span>
+        </div>
+      </div>
+
+      <div class="k2__table-area">
+        <table class="table table-sm align-middle k2__table" id="keys-table">
+          <thead>
+            <tr>
+              <th>Частота</th>
+              <th>Группа</th>
+              <th>ID</th>
+              <th>Ключ</th>
+              <th>Подразделение</th>
+              <th>Добавлен</th>
+              <th>Активность</th>
+              <th class="text-center">DMR</th>
+              <th class="text-end">NEW</th>
+              <th class="text-end"></th>
+            </tr>
+          </thead>
+          <tbody id="keys-body">
+            <tr>
+              <td colspan="10" class="k2-empty">
+                <div class="k2-empty__inner">
+                  <span class="k2-empty__icon" aria-hidden="true"><i class="bi bi-key-fill"></i></span>
+                  <div class="k2-empty__title">Нет данных</div>
+                  <div>Нажмите «Проверить» или импортируйте XLSX</div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <pre class="k2__debug" id="keys-debug-output" hidden></pre>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if mod == 'blanks-search' %}
+  <!-- Контент контейнера "Поиск по перехватам" -->
+  <div class="sessions-main bs2-page" data-container-body="blanks-search">
+    <div class="bs2" id="blanks-search-root">
+      <header class="bs2__bar">
+        <h2>Поиск по перехватам</h2>
+        <p class="bs2__hint">Поиск по словам в бланках: частота, группа, подразделение и полный текст совпадения.</p>
+        <p class="bs2__status" id="blanks-search-status" role="status" aria-live="polite">Введите запрос и нажмите «Искать» или Enter.</p>
+      </header>
+
+      <div class="bs2__search-row">
+        <div class="bs2-field bs2-field--grow" role="search">
+          <i class="bi bi-search bs2-field__icon" aria-hidden="true"></i>
+          <input type="search" class="bs2-field__input" id="blanks-search-query" autocomplete="off" spellcheck="false"
+            placeholder="Слово, фраза, позывной, частота…" />
+        </div>
+        <button type="button" class="bs2-btn bs2-btn--primary" id="blanks-search-btn">
+          <i class="bi bi-search" aria-hidden="true"></i><span>Искать</span>
+        </button>
+      </div>
+
+      <div class="bs2__results" id="blanks-search-results" aria-live="polite">
+        <div class="bs2-empty bs2-empty--idle">
+          <span class="bs2-empty__icon" aria-hidden="true"><i class="bi bi-journal-text"></i></span>
+          <p class="bs2-empty__title">Результаты появятся здесь</p>
+          <p class="bs2-empty__sub">Поддерживается поиск по нескольким словам через пробел</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if mod == 'ai' %}
+  <!-- Контент контейнера "AI-анализ" -->
+  <div class="sessions-main" data-container-body="ai">
+    <div class="card wp-card border-0">
+      <div class="card-body p-3 p-lg-4">
+        <div class="d-flex flex-wrap align-items-start justify-content-between gap-2">
+          <div>
+            {% set wp_page_title = 'AI-анализ' %}
+            {% set wp_page_lead = 'Локальная нейросеть формирует черновики сводок смен и аналитических отчетов по перехватам.' %}
+            {% include 'includes/page_header.html' %}
+          </div>
+          <div class="small wp-subtle text-lg-end" id="ai-model-info">Модель: —</div>
+        </div>
+
+        <div class="row g-3 mt-3">
+          <div class="col-12 col-xl-4">
+            <div class="card border h-100">
+              <div class="card-body">
+                <div class="fw-semibold mb-2"><i class="bi bi-clipboard2-pulse me-1 text-primary"></i>Запуск анализа</div>
+                <label class="form-label small mb-1">ID смены (опционально)</label>
+                <input type="number" min="1" class="form-control form-control-sm" id="ai-session-id"
+                  placeholder="Пусто = последняя смена" />
+                <div class="form-text">Для сводки смены можно оставить пустым.</div>
+
+                <div class="row g-2 mt-2">
+                  <div class="col-12 col-md-6">
+                    <label class="form-label small mb-1">Период с</label>
+                    <input type="datetime-local" class="form-control form-control-sm" id="ai-start" />
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <label class="form-label small mb-1">Период по</label>
+                    <input type="datetime-local" class="form-control form-control-sm" id="ai-end" />
+                  </div>
+                </div>
+                <div class="d-flex flex-wrap gap-1 mt-2">
+                  <button type="button" class="btn btn-outline-secondary btn-sm" id="ai-range-day-btn">Сутки</button>
+                  <button type="button" class="btn btn-outline-secondary btn-sm" id="ai-range-week-btn">Неделя</button>
+                  <button type="button" class="btn btn-outline-secondary btn-sm" id="ai-range-month-btn">Месяц</button>
+                </div>
+
+                <div class="d-grid gap-2 mt-3">
+                  <button type="button" class="btn btn-primary btn-sm" id="ai-shift-summary-btn">
+                    <i class="bi bi-lightning-charge me-1"></i>Сводка смены
+                  </button>
+                  <button type="button" class="btn btn-outline-primary btn-sm" id="ai-period-report-btn">
+                    <i class="bi bi-bar-chart-line me-1"></i>Полный отчет за период
+                  </button>
+                </div>
+                <div class="small wp-subtle mt-2" id="ai-status">Готово к запуску.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-xl-8">
+            <div class="card border h-100">
+              <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
+                  <div class="fw-semibold"><i class="bi bi-file-text me-1 text-primary"></i>Результат</div>
+                  <button type="button" class="btn btn-outline-secondary btn-sm" id="ai-refresh-reports-btn">
+                    <i class="bi bi-arrow-clockwise me-1"></i>История
+                  </button>
+                </div>
+                <div class="ai-result-card" id="ai-result">AI-отчет появится здесь.</div>
+                <div class="row g-2 mt-2">
+                  <div class="col-12 col-md-4">
+                    <select class="form-select form-select-sm" id="ai-feedback-rating">
+                      <option value="">Оценка результата</option>
+                      <option value="useful">Полезно</option>
+                      <option value="needs_work">Нужно доработать</option>
+                      <option value="bad">Неполезно</option>
+                    </select>
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <input type="text" class="form-control form-control-sm" id="ai-feedback-comment"
+                      placeholder="Комментарий для обучения/улучшения" />
+                  </div>
+                  <div class="col-12 col-md-2 d-grid">
+                    <button type="button" class="btn btn-outline-success btn-sm" id="ai-feedback-btn" disabled>
+                      Отправить
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card border mt-3">
+          <div class="card-body">
+            <div class="fw-semibold mb-2"><i class="bi bi-clock-history me-1 text-primary"></i>Последние AI-отчеты</div>
+            <div id="ai-reports-list" class="small wp-subtle">История еще не загружена.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if mod == 'arm-task' %}
+  <!-- Контент контейнера «Задание поста» (ArmTask / Tempfinder*.xml) -->
+  <div class="sessions-main" data-container-body="arm-task">
+    <div class="card wp-card border-0">
+      <div class="card-body p-3 p-lg-4">
+        <div class="d-flex flex-wrap align-items-start justify-content-between gap-2">
+          <div>
+            {% set wp_page_title = 'Задание поста' %}
+            {% set wp_page_lead = 'Сводка из XML ArmTask для выбранной позиции: берётся самый новый файл в каталоге (Tempfinder*.xml) или указанный файл; сопоставление блока — по пересечению частот со справочником перехватов.' %}
+            {% include 'includes/page_header.html' %}
+          </div>
+          <div class="d-flex flex-wrap gap-1 align-items-center">
+            <button type="button" class="btn btn-outline-primary btn-sm" id="arm-task-refresh">
+              <i class="bi bi-arrow-clockwise me-1"></i>Обновить
+            </button>
+          </div>
+        </div>
+
+        {% if current_user.role == 'admin' %}
+        <div class="card border mt-3 md3-analysis-section">
+          <div class="card-body">
+            <div class="fw-semibold mb-2"><i class="bi bi-folder-symlink me-1 text-primary"></i>Путь к XML или каталогу</div>
+            <div class="small wp-subtle mb-2">
+              Укажите каталог с <code>Tempfinder*.xml</code> (будет выбран самый новый по дате изменения) или полный путь к одному файлу.
+              Также можно задать <code>arm_task_xml_dir</code> в <code>hub_config.json</code> / переменную <code>WEB_PORTAL_ARM_TASK_XML_DIR</code>.
+            </div>
+            <label class="form-label small mb-1">Путь на сервере (сохраняется в БД для этой установки)</label>
+            <input type="text" class="form-control form-control-sm font-monospace" id="arm-task-path-input"
+              placeholder="\\\\сервер\\d$\\signals или C:\\Data\\signals" autocomplete="off" />
+            <div class="d-flex flex-wrap gap-2 align-items-center mt-2">
+              <button type="button" class="btn btn-primary btn-sm" id="arm-task-path-save">Сохранить путь</button>
+              <button type="button" class="btn btn-outline-secondary btn-sm" id="arm-task-path-clear">Сбросить (env/конфиг)</button>
+              <span class="small wp-subtle" id="arm-task-path-msg">—</span>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+
+        <div class="small wp-subtle mt-3" id="arm-task-status">Загрузка…</div>
+        <div class="mt-2 small" id="arm-task-meta"></div>
+
+        <div class="mt-3" id="arm-task-matched-wrap" style="display:none;">
+          <div class="fw-semibold mb-2"><i class="bi bi-pin-map me-1 text-primary"></i>Блок задания поста</div>
+          <div class="table-responsive">
+            <table class="table table-sm table-hover align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>Частота, МГц</th>
+                  <th>Комментарий (как в XML)</th>
+                  <th>В справочнике позиции</th>
+                </tr>
+              </thead>
+              <tbody id="arm-task-matched-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="mt-3">
+          <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="collapse"
+            data-bs-target="#arm-task-all-blocks" aria-expanded="false">
+            Все блоки в файле
+          </button>
+          <div class="collapse mt-2" id="arm-task-all-blocks">
+            <div id="arm-task-all-blocks-body" class="small"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if mod == 'crypto' %}
+  <!-- Контент контейнера "Крипто" -->
+  <div class="sessions-main" data-container-body="crypto">
+    <div class="card wp-card border-0">
+      <div class="card-body p-3 p-lg-4">
+        <div class="d-flex flex-wrap align-items-start justify-content-between gap-2">
+          <div>
+            {% set wp_page_title = 'Крипто' %}
+            {% set wp_page_lead = 'Сверка ключей DMR XML и активности групп и корреспондентов по сеансам.' %}
+            {% include 'includes/page_header.html' %}
+          </div>
+        </div>
+
+        <div class="row g-3 mt-3">
+          <div class="col-12 col-xl-7">
+            <div class="card border h-100">
+              <div class="card-body">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                  <i class="bi bi-folder text-primary"></i>
+                  <div class="fw-semibold">Папка с DMR XML</div>
+                </div>
+                <div class="small wp-subtle mb-2">Добавь путь один раз. Дальше меняются только сами XML-файлы.</div>
+                <label class="form-label small mb-1">Путь к папке</label>
+                <input type="text" class="form-control form-control-sm" id="crypto-folder-path"
+                  placeholder="Например: C:\...\Новая папка" />
+                <div class="form-text">Нужны файлы: dmr_enhanced_key_groups.xml, dmr_enhanced_key_privates.xml,
+                  dmr_enhanced_keys.xml</div>
+                <div class="d-flex align-items-center gap-2 mt-3">
+                  <button class="btn btn-primary btn-sm" id="crypto-save-path">
+                    <i class="bi bi-check2-circle me-1"></i>Сохранить путь
+                  </button>
+                  <div class="small wp-subtle" id="crypto-folder-status">—</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-xl-5">
+            <div class="card border h-100">
+              <div class="card-body">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                  <i class="bi bi-calendar3 text-primary"></i>
+                  <div class="fw-semibold">Период проверки</div>
+                </div>
+                <div class="btn-group mb-2" role="group" id="crypto-period">
+                  <button type="button" class="btn btn-outline-secondary btn-sm" data-days="1">сутки</button>
+                  <button type="button" class="btn btn-outline-secondary btn-sm" data-days="7">неделя</button>
+                  <button type="button" class="btn btn-outline-secondary btn-sm" data-days="30">месяц</button>
+                </div>
+                <div class="row g-2">
+                  <div class="col-12 col-md-6">
+                    <label class="form-label small mb-1">Дата с (опц.)</label>
+                    <input type="datetime-local" class="form-control form-control-sm" id="crypto-start" />
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <label class="form-label small mb-1">Дата по (опц.)</label>
+                    <input type="datetime-local" class="form-control form-control-sm" id="crypto-end" />
+                  </div>
+                </div>
+                <div class="d-flex align-items-center gap-2 mt-3">
+                  <button class="btn btn-primary btn-sm" id="crypto-check-btn">
+                    <i class="bi bi-arrow-clockwise me-1"></i>Проверить
+                  </button>
+                  <div class="small wp-subtle" id="crypto-status">—</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-3 mt-3" id="crypto-metrics">
+          <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+              <div class="card-body p-3">
+                <div class="small wp-subtle">Активные ключи</div>
+                <div class="h5 fw-bold mb-0" id="crypto-metric-active">0</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+              <div class="card-body p-3">
+                <div class="small wp-subtle">Неактивные ключи</div>
+                <div class="h5 fw-bold mb-0" id="crypto-metric-inactive">0</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+              <div class="card-body p-3">
+                <div class="small wp-subtle">Неактивные группы</div>
+                <div class="h5 fw-bold mb-0" id="crypto-metric-groups">0</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+              <div class="card-body p-3">
+                <div class="small wp-subtle">Неактивные корреспонденты</div>
+                <div class="h5 fw-bold mb-0" id="crypto-metric-callsigns">0</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-3 table-responsive">
+          <h6 class="fw-semibold mb-2">Активные ключи</h6>
+          <table class="table table-sm table-hover align-middle" id="crypto-active-table">
+            <thead class="table-light">
+              <tr>
+                <th>key_uid</th>
+                <th>key_id</th>
+                <th>key_id в seanses</th>
+                <th>Подразделение</th>
+                <th>Группы</th>
+                <th>Корреспонденты</th>
+                <th>Последняя активность</th>
+              </tr>
+            </thead>
+            <tbody id="crypto-active-body">
+              <tr>
+                <td colspan="7" class="text-center text-muted py-3">Нет данных</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="mt-3 table-responsive">
+          <h6 class="fw-semibold mb-2">Ключи к удалению (неактивные)</h6>
+          <table class="table table-sm table-hover align-middle" id="crypto-inactive-table">
+            <thead class="table-light">
+              <tr>
+                <th>key_uid</th>
+                <th>key_id</th>
+                <th>Подразделение</th>
+                <th>Группы</th>
+                <th>Корреспонденты</th>
+                <th class="text-end">Действия</th>
+              </tr>
+            </thead>
+            <tbody id="crypto-inactive-body">
+              <tr>
+                <td colspan="6" class="text-center text-muted py-3">Нет данных</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="row g-3 mt-3">
+          <div class="col-12 col-lg-6">
+            <div class="table-responsive">
+              <h6 class="fw-semibold mb-2">Группы без активности</h6>
+              <table class="table table-sm table-hover align-middle" id="crypto-groups-table">
+                <thead class="table-light">
+                  <tr>
+                    <th>Группа</th>
+                    <th>key_uid (шт.)</th>
+                    <th>Подразделение</th>
+                    <th>Последняя активность</th>
+                    <th class="text-end">Действия</th>
+                  </tr>
+                </thead>
+                <tbody id="crypto-groups-body">
+                  <tr>
+                    <td colspan="5" class="text-center text-muted py-3">Нет данных</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="col-12 col-lg-6">
+            <div class="table-responsive">
+              <h6 class="fw-semibold mb-2">Корреспонденты без активности</h6>
+              <table class="table table-sm table-hover align-middle" id="crypto-callsigns-table">
+                <thead class="table-light">
+                  <tr>
+                    <th>ID</th>
+                    <th>key_uid (шт.)</th>
+                    <th>Последняя активность</th>
+                  </tr>
+                </thead>
+                <tbody id="crypto-callsigns-body">
+                  <tr>
+                    <td colspan="3" class="text-center text-muted py-3">Нет данных</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+  </main>
+  </div>
+</div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script defer src="{{ url_for('static', filename='js/analysis-runtime.js') }}?v=1"></script>
+<script defer src="{{ url_for('static', filename='js/analysis.js') }}?v=strip-callsigns-1"></script>
+{% if mod == 'callsigns' %}
+<script defer src="{{ url_for('static', filename='js/analysis-callsigns.js') }}?v=extract-1"></script>
+{% endif %}
+{% if mod == 'network' %}
+<script defer src="{{ url_for('static', filename='js/analysis-network.js') }}?v=extract-1"></script>
+{% endif %}
+{% if mod == 'keys' %}
+<script defer src="{{ url_for('static', filename='js/analysis-keys.js') }}?v=extract-1"></script>
+{% endif %}
+{% if mod == 'blanks-search' %}
+<script defer src="{{ url_for('static', filename='js/analysis-blanks.js') }}?v=extract-1"></script>
+{% endif %}
+{% if mod == 'ai' %}
+<script defer src="{{ url_for('static', filename='js/analysis-ai.js') }}?v=extract-1"></script>
+{% endif %}
+{% if mod == 'arm-task' %}
+<script defer src="{{ url_for('static', filename='js/analysis-arm-task.js') }}"></script>
+{% endif %}
+{% if mod == 'graph' %}
+<script defer src="{{ url_for('static', filename='js/vendor/cytoscape.min.js') }}?v=3.30.2"></script>
+<script defer src="{{ url_for('static', filename='js/analysis-graph.js') }}?v=seans-graph-v2-1"></script>
+{% endif %}
+{% if mod == 'crypto' %}
+<script defer src="{{ url_for('static', filename='js/crypto.js') }}"></script>
+{% endif %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const seen = new Set();
+  document.querySelectorAll("#analysis-containers a[href]").forEach(function (link) {
+    link.addEventListener("mouseenter", function () {
+      const href = link.href;
+      if (!href || seen.has(href)) return;
+      seen.add(href);
+      const prefetch = document.createElement("link");
+      prefetch.rel = "prefetch";
+      prefetch.href = href;
+      document.head.appendChild(prefetch);
+    }, { once: true });
+  });
+});
+</script>
+{% endblock %}

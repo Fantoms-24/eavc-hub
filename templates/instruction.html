@@ -1,0 +1,1109 @@
+{% extends "base.html" %}
+{% block title %}Инструкции — ЕАВС{% endblock %}
+{% block container_class %}container-fluid px-0 py-0{% endblock %}
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/instruction-modern.css') }}?v=1" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/intercepts-messenger.css') }}?v=3" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/intercepts-modern.css') }}?v=3" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/instruction-tests.css') }}?v=3" />
+{% endblock %}
+
+{% block content %}
+<div class="instr-docs" id="instr-docs">
+  <a class="instr-skip visually-hidden-focusable" href="#instr-main">Перейти к содержанию</a>
+  <div class="instr-toc-backdrop" id="instr-toc-backdrop" hidden aria-hidden="true"></div>
+
+  <header class="instr-hero">
+    <div class="instr-hero__mesh" aria-hidden="true"></div>
+    <div class="instr-hero__inner">
+      <div class="instr-hero__badge"><i class="bi bi-journal-bookmark" aria-hidden="true"></i> ЕАВС · Руководство</div>
+      <h1 class="instr-hero__title">Инструкция по работе с порталом</h1>
+      <p class="instr-hero__lead">Пошаговые разделы по каждой вкладке приложения и интерактивные тренажёры для отработки навыков на месте.</p>
+      <div class="instr-hero__chips">
+        <span class="instr-chip"><i class="bi bi-play-circle" aria-hidden="true"></i> 6 тренажёров</span>
+        <span class="instr-chip"><i class="bi bi-list-check" aria-hidden="true"></i> 9 разделов</span>
+      </div>
+    </div>
+    <button type="button" class="instr-toc-toggle" id="instr-toc-toggle" aria-controls="instr-toc" aria-expanded="false">
+      <i class="bi bi-list-ul" aria-hidden="true"></i> Содержание
+    </button>
+  </header>
+
+  <div class="instr-layout">
+    <aside class="instr-toc" id="instr-toc" aria-label="Содержание">
+      <div class="instr-toc__head">
+        <span class="instr-toc__label">Разделы</span>
+        <button type="button" class="instr-toc__close d-lg-none" id="instr-toc-close" aria-label="Закрыть содержание">
+          <i class="bi bi-x-lg" aria-hidden="true"></i>
+        </button>
+      </div>
+      <nav class="instr-toc__nav">
+        <a class="instr-toc__link" href="#step-intercepts"><i class="bi bi-journal-text" aria-hidden="true"></i><span>Перехваты</span><span class="instr-toc__num">01</span></a>
+        <a class="instr-toc__link" href="#step-sessions"><i class="bi bi-folder2-open" aria-hidden="true"></i><span>Сеансы</span><span class="instr-toc__num">02</span></a>
+        <a class="instr-toc__link" href="#step-aviation"><i class="bi bi-airplane" aria-hidden="true"></i><span>Авиация</span><span class="instr-toc__num">03</span></a>
+        <a class="instr-toc__link" href="#step-analysis"><i class="bi bi-graph-up" aria-hidden="true"></i><span>Анализ</span><span class="instr-toc__num">04</span></a>
+        <a class="instr-toc__link" href="#step-search"><i class="bi bi-table" aria-hidden="true"></i><span>Поиск онлайн</span><span class="instr-toc__num">05</span></a>
+        <a class="instr-toc__link" href="#step-dict"><i class="bi bi-journal-bookmark" aria-hidden="true"></i><span>Справочники</span><span class="instr-toc__num">06</span></a>
+        <a class="instr-toc__link" href="#step-chat"><i class="bi bi-chat-dots" aria-hidden="true"></i><span>Чат</span><span class="instr-toc__num">07</span></a>
+        <a class="instr-toc__link" href="#step-targeting"><i class="bi bi-bell" aria-hidden="true"></i><span>Нацеливания</span><span class="instr-toc__num">08</span></a>
+        <a class="instr-toc__link" href="#step-admin"><i class="bi bi-shield-lock" aria-hidden="true"></i><span>Админ-панель</span><span class="instr-toc__num">09</span></a>
+      </nav>
+    </aside>
+
+    <main class="instr-main" id="instr-main" tabindex="-1">
+    <section id="step-intercepts" class="instruction-section instr-section">
+      <h2 class="h5 fw-bold border-bottom pb-2 mb-3 d-flex align-items-center gap-2">
+        1. Перехваты
+        <span class="instruction-step-badge text-muted" title="Подсказка"><i class="bi bi-info-circle"></i></span>
+      </h2>
+      <p class="text-muted small mb-3">Раздел для просмотра и работы с данными перехватов: бланки, позывные, группы.
+        Пройдите интерактивный тест, чтобы отработать порядок действий.</p>
+
+      <div class="instruction-tip-box mb-4 p-4 rounded-3 border shadow-sm" role="complementary" aria-label="Подсказка: что такое Перехваты и как работать">
+        <div class="d-flex align-items-start gap-3">
+          <div class="instruction-tip-icon flex-shrink-0 rounded-circle d-flex align-items-center justify-content-center">
+            <i class="bi bi-lightbulb text-warning"></i>
+          </div>
+          <div class="flex-grow-1">
+            <h3 class="h6 fw-bold mb-2 text-primary">Что такое «Перехваты» и что здесь выбирается</h3>
+            <p class="small mb-2">В разделе <strong>Перехваты</strong> ведётся общий бланк радиоперехватов по выбранной позиции. Чтобы начать работу:</p>
+            <ol class="small mb-2 ps-3">
+              <li class="mb-1"><strong>Позиция</strong> — в левой колонке выберите свою позицию (например, «Позиция Браво»). От неё зависят доступные смены и группы.</li>
+              <li class="mb-1"><strong>Смена</strong> — в блоке «Смены» выберите активную смену. Список групп (частота/код) подгружается для выбранной смены.</li>
+              <li class="mb-1"><strong>Группа (частота / код)</strong> — в списке «Подразделения / группы» кликните по нужной паре <span class="wp-mono">частота / код</span>. Откроется бланк именно для этой группы; весь ввод и сохранение будут относиться к ней.</li>
+            </ol>
+            <p class="small mb-0"><strong>Как вносить данные:</strong> в поле «Ввод радиоперехвата» введите текст (поддерживаются время в формате с точкой, авто-тире по Enter, подстановка ID при вводе «(»). Нажмите «Отправить в бланк» — текст добавится в бланк выбранной группы и при наличии прав сохранится на сервер. Позывные можно добавлять в блоке «Позывные» и вставлять код в текст по клику.</p>
+          </div>
+        </div>
+      </div>
+
+      <div id="intercept-test-wrap" class="instr-lab" data-lab-total="5">
+        <div id="intercept-test-start" class="instr-lab__intro">
+          <div class="instr-lab__intro-icon" aria-hidden="true"><i class="bi bi-journal-text"></i></div>
+          <h3 class="instr-lab__intro-title">Тренажёр: Перехваты</h3>
+          <p class="instr-lab__intro-text">Отработайте порядок действий: раздел → позиция → чат → ввод в бланк → позывной.</p>
+          <button type="button" class="instr-lab__start-btn" id="intercept-test-start-btn">
+            <i class="bi bi-play-fill" aria-hidden="true"></i> Начать практику
+          </button>
+        </div>
+
+        <div id="intercept-test-steps" class="instr-lab__run" style="display: none;">
+          <div class="instr-lab__toolbar intercept-test-step-bar">
+            <div class="instr-lab__progress" aria-hidden="true">
+              <span class="instr-lab__progress-track"><span class="instr-lab__progress-fill"></span></span>
+            </div>
+            <div class="instr-lab__meta">
+              <span class="instr-lab__badge" id="intercept-test-step-badge">Шаг 1 из 5</span>
+              <p class="instr-lab__hint" id="intercept-test-step-hint"></p>
+            </div>
+          </div>
+
+          <div id="intercept-mock-page" class="intercept-mock-page instr-lab-mock instr-lab__window md3-intercepts ix-messenger-ui ix-modern-ui">
+            <div class="intercept-mock-shell">
+              <!-- Шаг 1: боковая навигация ЕАВС -->
+              <aside class="intercept-mock-rail" aria-label="Навигация">
+                <div class="intercept-mock-rail__brand" aria-hidden="true">ЕАВС</div>
+                <nav class="intercept-mock-rail__nav">
+                  <a class="intercept-mock-rail__link intercept-test-rail-link intercept-test-rail-link--active" href="#" id="intercept-test-rail-intercepts" title="Перехваты">
+                    <i class="bi bi-journal-text" aria-hidden="true"></i>
+                    <span>Перехваты</span>
+                  </a>
+                  <a class="intercept-mock-rail__link" href="#" tabindex="-1" aria-disabled="true"><i class="bi bi-airplane" aria-hidden="true"></i><span>Авиация</span></a>
+                  <a class="intercept-mock-rail__link" href="#" tabindex="-1" aria-disabled="true"><i class="bi bi-house-door" aria-hidden="true"></i><span>Сеансы</span></a>
+                  <a class="intercept-mock-rail__link" href="#" tabindex="-1" aria-disabled="true"><i class="bi bi-graph-up" aria-hidden="true"></i><span>Анализ</span></a>
+                </nav>
+                <div class="intercept-hint-popover intercept-hint-popover-step1 shadow" role="tooltip">
+                  <div class="intercept-hint-popover-body">
+                    <p class="mb-2"><strong>Откройте раздел «Перехваты».</strong> Здесь ведётся бланк радиообменов по выбранной группе.</p>
+                    <p class="mb-0 small text-muted">Нажмите на выделенный пункт «Перехваты» в боковой панели навигации.</p>
+                  </div>
+                </div>
+              </aside>
+
+              <div class="intercept-mock-main-col">
+                <!-- Шаг 2: позиция в шапке -->
+                <header class="intercept-mock-topbar">
+                  <div class="intercept-mock-topbar-pos position-relative">
+                    <button type="button" class="intercept-mock-topbar-pos__trigger" id="intercept-test-pos-label" aria-haspopup="listbox">
+                      <i class="bi bi-broadcast-pin" aria-hidden="true"></i>
+                      <span>Позиция Альфа</span>
+                      <i class="bi bi-chevron-down" aria-hidden="true"></i>
+                    </button>
+                    <ul class="intercept-mock-topbar-pos__menu" role="listbox" aria-label="Позиция">
+                      <li><button type="button" class="intercept-mock-topbar-pos__item intercept-test-pos" data-correct="0">Позиция Альфа</button></li>
+                      <li><button type="button" class="intercept-mock-topbar-pos__item intercept-test-pos" data-correct="1">Позиция Браво</button></li>
+                      <li><button type="button" class="intercept-mock-topbar-pos__item intercept-test-pos" data-correct="0">Позиция Чарли</button></li>
+                    </ul>
+                    <div class="intercept-hint-popover intercept-hint-popover-step2 shadow" role="tooltip">
+                      <div class="intercept-hint-popover-body">
+                        <p class="mb-2"><strong>Выберите позицию.</strong> От неё зависят доступные смены и чаты перехватов.</p>
+                        <p class="mb-0 small text-muted">Нажмите на выделенный переключатель позиции и выберите «Позиция Браво».</p>
+                      </div>
+                    </div>
+                  </div>
+                  <span class="intercept-mock-topbar__title">Перехваты</span>
+                </header>
+
+                <!-- Messenger-layout как в разделе -->
+                <div class="tg-layout ix-messenger-layout intercept-mock-tg">
+                  <aside class="tg-sidebar intercept-mock-sidebar">
+                    <div class="intercepts-groups-panel">
+                      <div class="groups-drawer-inner tg-sidebar__inner">
+                        <header class="tg-sidebar__head">
+                          <div class="ix-mobile-segments intercept-mock-segments" role="tablist" aria-label="Раздел каталога">
+                            <button type="button" class="ix-mobile-segments__btn active intercept-mock-seg-chats" role="tab" data-ix-side-view="chats" aria-selected="true">
+                              <i class="bi bi-chat-left-text" aria-hidden="true"></i><span>Чаты</span>
+                            </button>
+                            <button type="button" class="ix-mobile-segments__btn intercept-mock-seg-callsigns" role="tab" data-ix-side-view="callsigns" aria-selected="false">
+                              <i class="bi bi-person-badge" aria-hidden="true"></i><span>Позывные</span>
+                            </button>
+                          </div>
+                          <div class="tg-sidebar__head-top">
+                            <h2 class="tg-sidebar__title" id="intercept-test-sidebar-title">Чаты</h2>
+                          </div>
+                          <div class="tg-sidebar__head-row">
+                            <select class="form-select form-select-sm md3-intercepts-shift-select" id="intercept-test-shift-select" aria-label="Смена">
+                              <option value="">Смена: Дневная</option>
+                            </select>
+                            <button type="button" class="tg-icon-btn md3-intercepts-toolbar-btn" disabled aria-label="Новые записи"><i class="bi bi-plus-lg" aria-hidden="true"></i></button>
+                          </div>
+                        </header>
+
+                        <div id="intercept-test-chats-view" class="tg-sidebar-view" data-ix-sidebar-view="chats">
+                          <div class="tg-sidebar__search md3-groups-search">
+                            <div class="tg-search-field md3-search-field" role="search">
+                              <i class="bi bi-search tg-search-field__icon" aria-hidden="true"></i>
+                              <input type="search" class="tg-search-field__input md3-search-field__input" placeholder="Поиск" disabled />
+                            </div>
+                          </div>
+                          <div class="tg-chat-list groups-list-resizable">
+                            <div class="groups-list-scroll tg-chat-list__scroll">
+                              <div class="list-group tg-chat-list__items position-relative" id="intercept-test-groups-list">
+                                <div class="list-group-item tg-chat-item intercept-test-freq" data-correct="0">
+                                  <button type="button" class="tg-chat-item__btn">
+                                    <span class="tg-chat-item__avatar" style="background:hsl(210,48%,46%)">5</span>
+                                    <span class="tg-chat-item__body">
+                                      <span class="tg-chat-item__top"><span class="tg-chat-item__title">141.0000 5252</span></span>
+                                      <span class="tg-chat-item__preview">—</span>
+                                    </span>
+                                  </button>
+                                </div>
+                                <div class="list-group-item tg-chat-item intercept-test-freq" data-correct="1">
+                                  <button type="button" class="tg-chat-item__btn">
+                                    <span class="tg-chat-item__avatar" style="background:hsl(160,48%,46%)">3</span>
+                                    <span class="tg-chat-item__body">
+                                      <span class="tg-chat-item__top"><span class="tg-chat-item__title">155.3120 300190</span></span>
+                                      <span class="tg-chat-item__preview">—</span>
+                                    </span>
+                                  </button>
+                                </div>
+                                <div class="list-group-item tg-chat-item intercept-test-freq" data-correct="0">
+                                  <button type="button" class="tg-chat-item__btn">
+                                    <span class="tg-chat-item__avatar" style="background:hsl(280,48%,46%)">3</span>
+                                    <span class="tg-chat-item__body">
+                                      <span class="tg-chat-item__top"><span class="tg-chat-item__title">155.6005 377827</span></span>
+                                      <span class="tg-chat-item__preview">—</span>
+                                    </span>
+                                  </button>
+                                </div>
+                                <div class="intercept-hint-popover intercept-hint-popover-step3 shadow" role="tooltip">
+                                  <div class="intercept-hint-popover-body">
+                                    <p class="mb-2"><strong>Выберите чат (частота и код).</strong> В нём откроется бланк радиообменов.</p>
+                                    <p class="mb-0 small text-muted">Нажмите на строку с нужной частотой — например, 155.3120 / 300190.</p>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div id="intercept-test-callsigns-view" class="tg-sidebar-view intercept-mock-callsigns-zone" data-ix-sidebar-view="callsigns" hidden>
+                          <div class="tg-sidebar__search tg-callsigns-toolbar">
+                            <div class="tg-search-field tg-callsigns-search-field" role="search">
+                              <i class="bi bi-search tg-search-field__icon" aria-hidden="true"></i>
+                              <input type="search" class="tg-search-field__input" placeholder="Поиск позывных" disabled />
+                            </div>
+                          </div>
+                          <p class="tg-callsigns-hint">Формат: Бром (124). Клик — вставить код в текст.</p>
+                          <div class="tg-callsign-list-scroll">
+                            <div id="intercept-test-callsigns-list" class="tg-callsign-list text-muted small px-2"></div>
+                          </div>
+                          <footer class="tg-sidebar__foot tg-callsigns-foot">
+                            <div class="tg-callsign-add">
+                              <input type="text" id="intercept-test-cs-label" class="form-control form-control-sm" placeholder="Название позывного" autocomplete="off" />
+                              <input type="text" id="intercept-test-cs-code" class="form-control form-control-sm md3-callsign-code-field" placeholder="Код" inputmode="numeric" autocomplete="off" />
+                              <button type="button" id="intercept-test-callsign-add" class="btn btn-primary btn-sm" title="Добавить"><i class="bi bi-plus-lg" aria-hidden="true"></i></button>
+                            </div>
+                          </footer>
+                          <div class="intercept-hint-popover intercept-hint-popover-step5 shadow" role="tooltip">
+                            <div class="intercept-hint-popover-body">
+                              <p class="mb-2"><strong>Добавьте позывной.</strong> Укажите название и код (например, Бром и 124), затем нажмите «+».</p>
+                              <p class="mb-0 small text-muted">Заполните поля внизу панели «Позывные» и нажмите кнопку добавления.</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </aside>
+
+                  <section class="tg-chat ix-chat-main-col">
+                    <header class="tg-chat__header">
+                      <button type="button" class="tg-chat__peer" aria-label="Информация о чате">
+                        <span class="tg-chat__avatar tg-chat-item__avatar" style="background:hsl(160,48%,46%)">3</span>
+                        <span class="tg-chat__peer-text">
+                          <span class="tg-chat__title" id="intercept-test-chat-title">Выберите чат</span>
+                          <span class="tg-chat__status" id="intercept-test-editor-subtitle">Выберите группу в списке слева</span>
+                        </span>
+                      </button>
+                      <div class="tg-chat__header-actions">
+                        <button type="button" class="tg-icon-btn" title="Позывные" aria-label="Позывные"><i class="bi bi-person-badge" aria-hidden="true"></i></button>
+                        <button type="button" class="tg-icon-btn" disabled title="Экспорт" aria-label="Экспорт"><i class="bi bi-file-earmark-arrow-down" aria-hidden="true"></i></button>
+                      </div>
+                    </header>
+
+                    <div class="tg-chat__body wp-intercepts-blank intercept-mock-blank-zone position-relative">
+                      <div class="tg-chat__history">
+                        <textarea id="intercept-test-blank-preview" class="tg-chat__log" rows="8" readonly
+                          placeholder="Выберите частоту в списке слева — здесь откроется бланк перехвата">— выберите группу, затем введите сообщение и нажмите «Отправить в бланк» —</textarea>
+                      </div>
+                    </div>
+
+                    <footer class="tg-composer ix-chat-composer-panel md3-intercepts-input-block intercept-mock-composer-zone position-relative">
+                      <div class="tg-composer__inner">
+                        <div class="tg-composer__field">
+                          <textarea id="intercept-test-msg-input" class="tg-composer__input form-control" rows="3"
+                            placeholder="Введите текст радиоперехвата…&#10;Enter — новая строка, авто-тире, ( — выбор ID"></textarea>
+                        </div>
+                        <button type="button" class="tg-composer__send btn btn-primary btn-sm" id="intercept-test-msg-send">
+                          <i class="bi bi-send-fill me-1" aria-hidden="true"></i>Отправить в бланк
+                        </button>
+                      </div>
+                      <div class="intercept-hint-popover intercept-hint-popover-step4 shadow" role="tooltip">
+                        <div class="intercept-hint-popover-body">
+                          <p class="mb-2"><strong>Введите текст радиоперехвата.</strong> Сообщение попадёт в бланк выбранного чата.</p>
+                          <p class="mb-0 small text-muted">Введите текст в поле внизу и нажмите «Отправить в бланк».</p>
+                        </div>
+                      </div>
+                    </footer>
+                  </section>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="intercept-step-6" class="instr-lab__done intercept-test-step" data-step="6" style="display: none;">
+            <div class="instr-lab__done-card">
+              <div class="instr-lab__done-icon" aria-hidden="true"><i class="bi bi-check-lg"></i></div>
+              <h3 class="instr-lab__done-title">Практика завершена</h3>
+              <p class="instr-lab__done-text">Вы выполнили все шаги: переход в «Перехваты», выбор позиции, выбор чата, ввод сообщения в бланк и добавление позывного.</p>
+              <button type="button" class="instr-lab__restart-btn" id="intercept-test-restart">
+                <i class="bi bi-arrow-repeat" aria-hidden="true"></i> Пройти снова
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="step-sessions" class="instruction-section instr-section">
+      <h2 class="h5 fw-bold border-bottom pb-2 mb-3">2. Сеансы</h2>
+      <p class="text-muted small mb-3">Просмотр сеансов, выбор папки для обработки, экспорт в Word, автопоиск. Пройдите
+        интерактивный тест по образцу раздела «Перехваты».</p>
+
+      <div id="sessions-test-wrap" class="instr-lab" data-lab-total="5">
+        <div id="sessions-test-start" class="instr-lab__intro">
+          <div class="instr-lab__intro-icon" aria-hidden="true"><i class="bi bi-folder2-open"></i></div>
+          <h3 class="instr-lab__intro-title">Тренажёр: Сеансы</h3>
+          <p class="instr-lab__intro-text">Потренируйтесь: открыть раздел, выбрать позицию, период, обработать папку и экспортировать Word.</p>
+          <button type="button" class="instr-lab__start-btn" id="sessions-test-start-btn">
+            <i class="bi bi-play-fill" aria-hidden="true"></i> Начать практику
+          </button>
+        </div>
+        <div id="sessions-test-steps" class="instr-lab__run" style="display: none;">
+          <div class="instr-lab__toolbar">
+            <div class="instr-lab__progress" aria-hidden="true">
+              <span class="instr-lab__progress-track"><span class="instr-lab__progress-fill"></span></span>
+            </div>
+            <div class="instr-lab__meta">
+              <span class="instr-lab__badge" id="sessions-test-step-badge">Шаг 1 из 5</span>
+              <p class="instr-lab__hint" id="sessions-test-step-hint"></p>
+            </div>
+          </div>
+          <div id="sessions-mock-page" class="sessions-mock-page instr-lab-mock instr-lab__window">
+            <nav class="navbar navbar-expand-lg wp-nav border-bottom px-3 py-2" style="min-height: 52px;">
+              <a class="navbar-brand fw-bold me-3">ЕАВС</a>
+              <div class="navbar-nav gap-1">
+                <a class="nav-link py-1 px-2 text-muted" href="#">Перехваты</a>
+                <a class="nav-link py-1 px-2 sessions-test-nav-item active" href="#" id="sessions-nav-link"><i
+                    class="bi bi-folder2-open me-1"></i>Сеансы</a>
+                <a class="nav-link py-1 px-2 text-muted" href="#">Авиация</a>
+                <a class="nav-link py-1 px-2 text-muted" href="#">Анализ</a>
+                <a class="nav-link py-1 px-2 text-muted" href="#">Поиск онлайн</a>
+                <a class="nav-link py-1 px-2 text-muted" href="#">Справочники</a>
+              </div>
+            </nav>
+            <div class="row g-0 sessions-mock-layout">
+              <aside class="col-12 col-md-3 border-end p-3 sessions-mock-sidebar">
+                <div class="card wp-card border-0">
+                  <div class="card-body p-3">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                      <i class="bi bi-broadcast-pin text-primary"></i>
+                      <div class="fw-bold">Позиции</div>
+                    </div>
+                    <div class="small wp-subtle mb-2">Доступные позиции</div>
+                    <div class="list-group list-group-flush">
+                      <button type="button" class="list-group-item list-group-item-action text-start sessions-test-pos"
+                        data-correct="0">Позиция Альфа</button>
+                      <button type="button" class="list-group-item list-group-item-action text-start sessions-test-pos"
+                        data-correct="1">Позиция Браво</button>
+                      <button type="button" class="list-group-item list-group-item-action text-start sessions-test-pos"
+                        data-correct="0">Позиция Чарли</button>
+                    </div>
+                  </div>
+                </div>
+              </aside>
+              <div class="col-12 col-md-9 p-3 sessions-mock-main">
+                <div class="card wp-card border-0">
+                  <div class="card-body p-3 p-lg-4">
+                    <div class="mb-3">
+                      <h1 class="h5 fw-bold mb-2 d-flex align-items-center gap-2">
+                        <i class="bi bi-folder2-open text-primary"></i>Сеансы
+                      </h1>
+                      <div class="small wp-subtle">Позиция: <span class="fw-semibold"
+                          id="sessions-test-pos-label">—</span></div>
+                    </div>
+                    <div class="card border mb-3 sessions-mock-folder-zone">
+                      <div class="card-body p-3">
+                        <h6 class="card-title mb-2 d-flex align-items-center gap-2">
+                          <i class="bi bi-folder text-primary"></i>Выбор папки для обработки
+                        </h6>
+                        <label class="form-label small fw-semibold">Путь к папке</label>
+                        <div class="input-group input-group-sm mb-2">
+                          <input type="text" class="form-control" id="sessions-test-folder-path"
+                            placeholder="Введите путь к папке с result0.txt файлами" />
+                          <button type="button" class="btn btn-outline-secondary" id="sessions-test-browse-btn"><i
+                              class="bi bi-folder2-open me-1"></i>Обзор</button>
+                        </div>
+                        <div class="d-flex gap-2 flex-wrap">
+                          <button type="button" class="btn btn-primary btn-sm" id="sessions-test-process-btn"><i
+                              class="bi bi-play-circle me-1"></i>Обработать папку</button>
+                          <button type="button" class="btn btn-success btn-sm" id="sessions-test-watch-btn"><i
+                              class="bi bi-eye me-1"></i>Запустить автопоиск</button>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="card border mb-3 sessions-mock-table-zone">
+                      <div class="card-body p-3">
+                        <h6 class="card-title mb-2 d-flex align-items-center gap-2">
+                          <i class="bi bi-table text-primary"></i>Данные сеансов
+                        </h6>
+                        <div class="btn-group btn-group-sm mb-2" role="group">
+                          <button type="button" class="btn btn-outline-secondary sessions-test-preset"
+                            data-correct="0">Сегодня</button>
+                          <button type="button" class="btn btn-outline-secondary sessions-test-preset"
+                            data-correct="0">Вчера</button>
+                          <button type="button" class="btn btn-outline-secondary sessions-test-preset"
+                            data-correct="1">7 дней</button>
+                          <button type="button" class="btn btn-outline-secondary sessions-test-preset"
+                            data-correct="0">30 дней</button>
+                        </div>
+                        <div class="d-flex gap-2 flex-wrap align-items-center mb-2">
+                          <button type="button" class="btn btn-outline-secondary btn-sm" id="sessions-test-load-btn"><i
+                              class="bi bi-arrow-clockwise me-1"></i>Загрузить</button>
+                          <button type="button" class="btn btn-success btn-sm" id="sessions-test-export-btn"><i
+                              class="bi bi-file-earmark-word me-1"></i>Экспорт Word</button>
+                        </div>
+                        <div class="small text-muted">Таблица сеансов (в тесте не загружается)</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="sessions-step-6" class="instr-lab__done" style="display: none;">
+            <div class="instr-lab__done-card">
+              <div class="instr-lab__done-icon" aria-hidden="true"><i class="bi bi-check-lg"></i></div>
+              <h3 class="instr-lab__done-title">Практика завершена</h3>
+              <p class="instr-lab__done-text">Вы выполнили все шаги: переход в «Сеансы», выбор позиции, периода (7 дней), обработку папки и экспорт Word.</p>
+              <button type="button" class="instr-lab__restart-btn" id="sessions-test-restart"><i class="bi bi-arrow-repeat" aria-hidden="true"></i> Пройти снова</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="step-aviation" class="instruction-section instr-section">
+      <h2 class="h5 fw-bold border-bottom pb-2 mb-3">3. Авиация</h2>
+      <p class="text-muted small mb-3">Работа с авиационными данными: частоты, перехваты, позывные. Пройдите интерактивный тест.</p>
+      <div class="instruction-tip-box mb-3 p-3 rounded-3 border shadow-sm">
+        <p class="small mb-0">Выберите вкладку «Авиация», затем позицию и при необходимости задайте период или фильтры для просмотра данных.</p>
+      </div>
+      <div id="aviation-test-wrap" class="instr-lab" data-lab-total="3">
+        <div id="aviation-test-start" class="instr-lab__intro">
+          <div class="instr-lab__intro-icon" aria-hidden="true"><i class="bi bi-airplane"></i></div>
+          <h3 class="instr-lab__intro-title">Тренажёр: Авиация</h3>
+          <p class="instr-lab__intro-text">Откройте раздел, выберите позицию и загрузите данные по частотам.</p>
+          <button type="button" class="instr-lab__start-btn" id="aviation-test-start-btn"><i class="bi bi-play-fill" aria-hidden="true"></i> Начать практику</button>
+        </div>
+        <div id="aviation-test-steps" class="instr-lab__run" style="display: none;">
+          <div class="instr-lab__toolbar">
+            <div class="instr-lab__progress" aria-hidden="true"><span class="instr-lab__progress-track"><span class="instr-lab__progress-fill"></span></span></div>
+            <div class="instr-lab__meta">
+              <span class="instr-lab__badge" id="aviation-test-step-badge">Шаг 1 из 3</span>
+              <p class="instr-lab__hint" id="aviation-test-step-hint"></p>
+            </div>
+          </div>
+          <div id="aviation-mock-page" class="aviation-mock instr-lab-mock instr-lab__window position-relative">
+            <nav class="navbar navbar-expand-lg wp-nav border-bottom px-3 py-2" style="min-height: 52px;">
+              <a class="navbar-brand fw-bold me-3">ЕАВС</a>
+              <div class="navbar-nav gap-1">
+                <span class="position-relative d-inline-block">
+                  <a class="nav-link py-1 px-2 aviation-test-nav active" href="#" id="aviation-nav-link"><i class="bi bi-airplane me-1"></i>Авиация</a>
+                  <div class="intercept-hint-popover generic-hint aviation-hint-step1 shadow">
+                    <div class="intercept-hint-popover-body">
+                      <p class="mb-0"><strong>Нажмите «Авиация»</strong> в верхней панели, чтобы открыть раздел.</p>
+                    </div>
+                    <div class="intercept-hint-popover-arrow intercept-hint-popover-arrow-left"></div>
+                  </div>
+                </span>
+                <a class="nav-link py-1 px-2 text-muted" href="#">Сеансы</a>
+                <a class="nav-link py-1 px-2 text-muted" href="#">Перехваты</a>
+                <a class="nav-link py-1 px-2 text-muted" href="#">Анализ</a>
+                <a class="nav-link py-1 px-2 text-muted" href="#">Поиск онлайн</a>
+                <a class="nav-link py-1 px-2 text-muted" href="#">Справочники</a>
+              </div>
+            </nav>
+            <div class="row g-0 p-3">
+              <aside class="col-12 col-md-3 border-end p-3 position-relative aviation-mock-sidebar">
+                <div class="card wp-card border-0">
+                  <div class="card-body p-3">
+                    <div class="d-flex align-items-center gap-2 mb-2"><i class="bi bi-broadcast-pin text-primary"></i><div class="fw-bold">Позиции</div></div>
+                    <div class="list-group list-group-flush">
+                      <button type="button" class="list-group-item list-group-item-action text-start aviation-test-pos" data-correct="0">Позиция Альфа</button>
+                      <button type="button" class="list-group-item list-group-item-action text-start aviation-test-pos" data-correct="1">Позиция Браво</button>
+                      <button type="button" class="list-group-item list-group-item-action text-start aviation-test-pos" data-correct="0">Позиция Чарли</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="intercept-hint-popover generic-hint aviation-hint-step2 shadow">
+                  <div class="intercept-hint-popover-body"><p class="mb-0"><strong>Выберите позицию</strong> в списке (например, «Позиция Браво»).</p></div>
+                  <div class="intercept-hint-popover-arrow intercept-hint-popover-arrow-left"></div>
+                </div>
+              </aside>
+              <div class="col-12 col-md-9 p-3 position-relative aviation-mock-main">
+                <div class="card border">
+                  <div class="card-body p-3">
+                    <h6 class="card-title mb-2"><i class="bi bi-airplane me-1 text-primary"></i>Частоты и перехваты</h6>
+                    <button type="button" class="btn btn-primary btn-sm" id="aviation-test-load-btn"><i class="bi bi-arrow-clockwise me-1"></i>Загрузить</button>
+                    <div class="small text-muted mt-2">Таблица данных (в тесте не загружается)</div>
+                  </div>
+                </div>
+                <div class="intercept-hint-popover generic-hint aviation-hint-step3 shadow">
+                  <div class="intercept-hint-popover-body"><p class="mb-0"><strong>Нажмите «Загрузить»</strong>, чтобы подгрузить данные по выбранной позиции.</p></div>
+                  <div class="intercept-hint-popover-arrow intercept-hint-popover-arrow-left"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="aviation-step-done" class="instr-lab__done" style="display: none;">
+            <div class="instr-lab__done-card">
+              <div class="instr-lab__done-icon" aria-hidden="true"><i class="bi bi-check-lg"></i></div>
+              <h3 class="instr-lab__done-title">Практика завершена</h3>
+              <p class="instr-lab__done-text">Вы открыли «Авиация», выбрали позицию и нажали «Загрузить».</p>
+              <button type="button" class="instr-lab__restart-btn" id="aviation-test-restart"><i class="bi bi-arrow-repeat" aria-hidden="true"></i> Пройти снова</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="step-analysis" class="instruction-section instr-section">
+      <h2 class="h5 fw-bold border-bottom pb-2 mb-3">4. Анализ</h2>
+      <p class="text-muted small mb-3">Модули анализа: позывные, радиосеть, граф, проверка ключей, крипто. Пройдите интерактивный тест.</p>
+      <div class="instruction-tip-box mb-3 p-3 rounded-3 border shadow-sm">
+        <p class="small mb-0">Откройте «Анализ», выберите контейнер (модуль) в левой панели и при необходимости позицию — затем смотрите данные в основной области.</p>
+      </div>
+      <div id="analysis-test-wrap" class="instr-lab" data-lab-total="3">
+        <div id="analysis-test-start" class="instr-lab__intro">
+          <div class="instr-lab__intro-icon" aria-hidden="true"><i class="bi bi-graph-up"></i></div>
+          <h3 class="instr-lab__intro-title">Тренажёр: Анализ</h3>
+          <p class="instr-lab__intro-text">Выберите модуль анализа, позицию и просмотрите данные в основной области.</p>
+          <button type="button" class="instr-lab__start-btn" id="analysis-test-start-btn"><i class="bi bi-play-fill" aria-hidden="true"></i> Начать практику</button>
+        </div>
+        <div id="analysis-test-steps" class="instr-lab__run" style="display: none;">
+          <div class="instr-lab__toolbar">
+            <div class="instr-lab__progress" aria-hidden="true"><span class="instr-lab__progress-track"><span class="instr-lab__progress-fill"></span></span></div>
+            <div class="instr-lab__meta">
+              <span class="instr-lab__badge" id="analysis-test-step-badge">Шаг 1 из 3</span>
+              <p class="instr-lab__hint" id="analysis-test-step-hint"></p>
+            </div>
+          </div>
+          <div id="analysis-mock-page" class="analysis-mock instr-lab-mock instr-lab__window position-relative">
+            <nav class="navbar navbar-expand-lg wp-nav border-bottom px-3 py-2" style="min-height: 52px;">
+              <a class="navbar-brand fw-bold me-3">ЕАВС</a>
+              <div class="navbar-nav gap-1">
+                <a class="nav-link py-1 px-2 text-muted" href="#">Авиация</a>
+                <a class="nav-link py-1 px-2 text-muted" href="#">Сеансы</a>
+                <a class="nav-link py-1 px-2 text-muted" href="#">Перехваты</a>
+                <span class="position-relative d-inline-block">
+                  <a class="nav-link py-1 px-2 analysis-test-nav active" href="#" id="analysis-nav-link"><i class="bi bi-graph-up me-1"></i>Анализ</a>
+                  <div class="intercept-hint-popover generic-hint analysis-hint-step1 shadow">
+                    <div class="intercept-hint-popover-body"><p class="mb-0"><strong>Нажмите «Анализ»</strong> в верхней панели.</p></div>
+                    <div class="intercept-hint-popover-arrow intercept-hint-popover-arrow-left"></div>
+                  </div>
+                </span>
+                <a class="nav-link py-1 px-2 text-muted" href="#">Поиск онлайн</a>
+                <a class="nav-link py-1 px-2 text-muted" href="#">Справочники</a>
+              </div>
+            </nav>
+            <div class="row g-0 p-3">
+              <aside class="col-12 col-md-2 border-end p-2 position-relative analysis-mock-containers">
+                <div class="small fw-bold mb-2">Контейнеры</div>
+                <div class="list-group list-group-flush">
+                  <button type="button" class="list-group-item list-group-item-action text-start analysis-test-container" data-correct="1">Анализ позывных</button>
+                  <button type="button" class="list-group-item list-group-item-action text-start analysis-test-container" data-correct="0">Граф радиосети</button>
+                  <button type="button" class="list-group-item list-group-item-action text-start analysis-test-container" data-correct="0">Проверка ключей</button>
+                </div>
+                <div class="intercept-hint-popover generic-hint analysis-hint-step2 shadow">
+                  <div class="intercept-hint-popover-body"><p class="mb-0"><strong>Выберите модуль</strong>, например «Анализ позывных».</p></div>
+                  <div class="intercept-hint-popover-arrow intercept-hint-popover-arrow-left"></div>
+                </div>
+              </aside>
+              <aside class="col-12 col-md-2 border-end p-2 position-relative analysis-mock-positions">
+                <div class="small fw-bold mb-2">Позиции</div>
+                <div class="list-group list-group-flush">
+                  <button type="button" class="list-group-item list-group-item-action text-start analysis-test-pos" data-correct="1">Все позиции</button>
+                  <button type="button" class="list-group-item list-group-item-action text-start analysis-test-pos" data-correct="0">Позиция Альфа</button>
+                </div>
+                <div class="intercept-hint-popover generic-hint analysis-hint-step3 shadow">
+                  <div class="intercept-hint-popover-body"><p class="mb-0"><strong>Выберите позицию</strong> или «Все позиции» для просмотра данных.</p></div>
+                  <div class="intercept-hint-popover-arrow intercept-hint-popover-arrow-left"></div>
+                </div>
+              </aside>
+              <div class="col-12 col-md-8 p-3">
+                <div class="card border"><div class="card-body p-3"><div class="small text-muted">Основная область: таблицы и графики выбранного модуля</div></div></div>
+              </div>
+            </div>
+          </div>
+          <div id="analysis-step-done" class="instr-lab__done" style="display: none;">
+            <div class="instr-lab__done-card">
+              <div class="instr-lab__done-icon" aria-hidden="true"><i class="bi bi-check-lg"></i></div>
+              <h3 class="instr-lab__done-title">Практика завершена</h3>
+              <p class="instr-lab__done-text">Вы открыли «Анализ», выбрали контейнер и позицию.</p>
+              <button type="button" class="instr-lab__restart-btn" id="analysis-test-restart"><i class="bi bi-arrow-repeat" aria-hidden="true"></i> Пройти снова</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="step-search" class="instruction-section instr-section">
+      <h2 class="h5 fw-bold border-bottom pb-2 mb-3">5. Поиск онлайн</h2>
+      <p class="text-muted small mb-3">Поиск и просмотр данных в режиме онлайн. Пройдите интерактивный тест.</p>
+      <div class="instruction-tip-box mb-3 p-3 rounded-3 border shadow-sm">
+        <p class="small mb-0">Откройте «Поиск онлайн», введите запрос в поле поиска и нажмите кнопку поиска.</p>
+      </div>
+      <div id="search-test-wrap" class="instr-lab" data-lab-total="2">
+        <div id="search-test-start" class="instr-lab__intro">
+          <div class="instr-lab__intro-icon" aria-hidden="true"><i class="bi bi-table"></i></div>
+          <h3 class="instr-lab__intro-title">Тренажёр: Поиск онлайн</h3>
+          <p class="instr-lab__intro-text">Откройте раздел и выполните поиск по запросу.</p>
+          <button type="button" class="instr-lab__start-btn" id="search-test-start-btn"><i class="bi bi-play-fill" aria-hidden="true"></i> Начать практику</button>
+        </div>
+        <div id="search-test-steps" class="instr-lab__run" style="display: none;">
+          <div class="instr-lab__toolbar">
+            <div class="instr-lab__progress" aria-hidden="true"><span class="instr-lab__progress-track"><span class="instr-lab__progress-fill"></span></span></div>
+            <div class="instr-lab__meta">
+              <span class="instr-lab__badge" id="search-test-step-badge">Шаг 1 из 2</span>
+              <p class="instr-lab__hint" id="search-test-step-hint"></p>
+            </div>
+          </div>
+          <div id="search-mock-page" class="search-mock instr-lab-mock instr-lab__window position-relative">
+            <nav class="navbar navbar-expand-lg wp-nav border-bottom px-3 py-2" style="min-height: 52px;">
+              <a class="navbar-brand fw-bold me-3">ЕАВС</a>
+              <div class="navbar-nav gap-1">
+                <a class="nav-link py-1 px-2 text-muted" href="#">Авиация</a>
+                <a class="nav-link py-1 px-2 text-muted" href="#">Сеансы</a>
+                <a class="nav-link py-1 px-2 text-muted" href="#">Перехваты</a>
+                <a class="nav-link py-1 px-2 text-muted" href="#">Анализ</a>
+                <span class="position-relative d-inline-block">
+                  <a class="nav-link py-1 px-2 search-test-nav active" href="#" id="search-nav-link"><i class="bi bi-table me-1"></i>Поиск онлайн</a>
+                  <div class="intercept-hint-popover generic-hint search-hint-step1 shadow">
+                    <div class="intercept-hint-popover-body"><p class="mb-0"><strong>Нажмите «Поиск онлайн»</strong> в верхней панели.</p></div>
+                    <div class="intercept-hint-popover-arrow intercept-hint-popover-arrow-left"></div>
+                  </div>
+                </span>
+                <a class="nav-link py-1 px-2 text-muted" href="#">Справочники</a>
+              </div>
+            </nav>
+            <div class="p-3 position-relative search-mock-main">
+              <div class="card border mb-3">
+                <div class="card-body p-3">
+                  <label class="form-label small">Поисковый запрос</label>
+                  <div class="input-group">
+                    <input type="text" class="form-control form-control-sm" id="search-test-query" placeholder="Введите запрос..." />
+                    <button type="button" class="btn btn-primary btn-sm" id="search-test-btn"><i class="bi bi-search me-1"></i>Найти</button>
+                  </div>
+                </div>
+                <div class="intercept-hint-popover generic-hint search-hint-step2 shadow">
+                  <div class="intercept-hint-popover-body"><p class="mb-0"><strong>Введите запрос</strong> в поле и нажмите «Найти».</p></div>
+                  <div class="intercept-hint-popover-arrow intercept-hint-popover-arrow-left"></div>
+                </div>
+              </div>
+              <div class="small text-muted">Результаты поиска (в тесте не загружаются)</div>
+            </div>
+          </div>
+          <div id="search-step-done" class="instr-lab__done" style="display: none;">
+            <div class="instr-lab__done-card">
+              <div class="instr-lab__done-icon" aria-hidden="true"><i class="bi bi-check-lg"></i></div>
+              <h3 class="instr-lab__done-title">Практика завершена</h3>
+              <p class="instr-lab__done-text">Вы открыли «Поиск онлайн» и нажали «Найти».</p>
+              <button type="button" class="instr-lab__restart-btn" id="search-test-restart"><i class="bi bi-arrow-repeat" aria-hidden="true"></i> Пройти снова</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="step-dict" class="instruction-section instr-section">
+      <h2 class="h5 fw-bold border-bottom pb-2 mb-3">6. Справочники</h2>
+      <p class="text-muted small mb-3">Подразделения, частоты/группы, позывные — данные из перехватов. Пройдите интерактивный тест.</p>
+      <div class="instruction-tip-box mb-3 p-3 rounded-3 border shadow-sm">
+        <p class="small mb-0">Откройте «Справочники», выберите вкладку (Подразделения, Частоты/группы или Позывные) и при необходимости воспользуйтесь поиском.</p>
+      </div>
+      <div id="dict-test-wrap" class="instr-lab" data-lab-total="3">
+        <div id="dict-test-start" class="instr-lab__intro">
+          <div class="instr-lab__intro-icon" aria-hidden="true"><i class="bi bi-journal-bookmark"></i></div>
+          <h3 class="instr-lab__intro-title">Тренажёр: Справочники</h3>
+          <p class="instr-lab__intro-text">Откройте раздел, переключите вкладку и воспользуйтесь поиском.</p>
+          <button type="button" class="instr-lab__start-btn" id="dict-test-start-btn"><i class="bi bi-play-fill" aria-hidden="true"></i> Начать практику</button>
+        </div>
+        <div id="dict-test-steps" class="instr-lab__run" style="display: none;">
+          <div class="instr-lab__toolbar">
+            <div class="instr-lab__progress" aria-hidden="true"><span class="instr-lab__progress-track"><span class="instr-lab__progress-fill"></span></span></div>
+            <div class="instr-lab__meta">
+              <span class="instr-lab__badge" id="dict-test-step-badge">Шаг 1 из 3</span>
+              <p class="instr-lab__hint" id="dict-test-step-hint"></p>
+            </div>
+          </div>
+          <div id="dict-mock-page" class="dict-mock instr-lab-mock instr-lab__window position-relative">
+            <nav class="navbar navbar-expand-lg wp-nav border-bottom px-3 py-2" style="min-height: 52px;">
+              <a class="navbar-brand fw-bold me-3">ЕАВС</a>
+              <div class="navbar-nav gap-1">
+                <a class="nav-link py-1 px-2 text-muted" href="#">Авиация</a>
+                <a class="nav-link py-1 px-2 text-muted" href="#">Сеансы</a>
+                <a class="nav-link py-1 px-2 text-muted" href="#">Перехваты</a>
+                <a class="nav-link py-1 px-2 text-muted" href="#">Анализ</a>
+                <a class="nav-link py-1 px-2 text-muted" href="#">Поиск онлайн</a>
+                <span class="position-relative d-inline-block">
+                  <a class="nav-link py-1 px-2 dict-test-nav active" href="#" id="dict-nav-link"><i class="bi bi-journal-bookmark me-1"></i>Справочники</a>
+                  <div class="intercept-hint-popover generic-hint dict-hint-step1 shadow">
+                    <div class="intercept-hint-popover-body"><p class="mb-0"><strong>Нажмите «Справочники»</strong> в верхней панели.</p></div>
+                    <div class="intercept-hint-popover-arrow intercept-hint-popover-arrow-left"></div>
+                  </div>
+                </span>
+              </div>
+            </nav>
+            <div class="p-3 position-relative dict-mock-main">
+              <ul class="nav nav-tabs mb-2">
+                <li class="nav-item"><button type="button" class="nav-link dict-test-tab active" data-tab="units" data-correct="0">Подразделения</button></li>
+                <li class="nav-item"><button type="button" class="nav-link dict-test-tab" data-tab="freq" data-correct="1">Частоты / группы</button></li>
+                <li class="nav-item"><button type="button" class="nav-link dict-test-tab" data-tab="callsigns" data-correct="0">Позывные</button></li>
+              </ul>
+              <div class="intercept-hint-popover generic-hint dict-hint-step2 shadow">
+                <div class="intercept-hint-popover-body"><p class="mb-0"><strong>Выберите вкладку</strong>, например «Частоты / группы».</p></div>
+                <div class="intercept-hint-popover-arrow intercept-hint-popover-arrow-left"></div>
+              </div>
+              <input type="text" class="form-control form-control-sm mb-2" id="dict-test-search" placeholder="Поиск по названию…" style="max-width: 260px;" />
+              <div class="intercept-hint-popover generic-hint dict-hint-step3 shadow">
+                <div class="intercept-hint-popover-body"><p class="mb-0"><strong>Введите текст</strong> в поле поиска для фильтрации списка (или оставьте пустым).</p></div>
+                <div class="intercept-hint-popover-arrow intercept-hint-popover-arrow-left"></div>
+              </div>
+              <div class="small text-muted">Таблица справочника (в тесте не загружается)</div>
+            </div>
+          </div>
+          <div id="dict-step-done" class="instr-lab__done" style="display: none;">
+            <div class="instr-lab__done-card">
+              <div class="instr-lab__done-icon" aria-hidden="true"><i class="bi bi-check-lg"></i></div>
+              <h3 class="instr-lab__done-title">Практика завершена</h3>
+              <p class="instr-lab__done-text">Вы открыли «Справочники», выбрали вкладку и можете использовать поиск.</p>
+              <button type="button" class="instr-lab__restart-btn" id="dict-test-restart"><i class="bi bi-arrow-repeat" aria-hidden="true"></i> Пройти снова</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="step-chat" class="instruction-section instr-section">
+      <h2 class="h5 fw-bold border-bottom pb-2 mb-3">7. Чат</h2>
+      <p class="text-muted small mb-3">Общий чат и при наличии прав — чат «Рабочая атмосфера».</p>
+      <ol class="instruction-steps">
+        <li><strong>Выбор:</strong> в правом верхнем углу нажмите иконку чата (пузырёк сообщений).</li>
+        <li><strong>Выбор:</strong> в левой панели модального окна выберите канал: «Общий чат» или «Рабочая атмосфера»
+          (если он вам доступен).</li>
+        <li>Читайте сообщения в основной области; при необходимости прокручивайте вниз.</li>
+        <li><strong>Ввод:</strong> введите текст в поле «Введите сообщение…» и нажмите «Отправить» или Enter.</li>
+        <li><strong>Выбор:</strong> при необходимости прикрепите файл кнопкой «Файл» перед отправкой.</li>
+      </ol>
+    </section>
+
+    <section id="step-targeting" class="instruction-section instr-section">
+      <h2 class="h5 fw-bold border-bottom pb-2 mb-3">8. Нацеливания</h2>
+      <p class="text-muted small mb-3">Сообщения и уведомления для пользователей или позиций.</p>
+      <ol class="instruction-steps">
+        <li><strong>Выбор:</strong> в правом верхнем углу нажмите иконку колокольчика (уведомления).</li>
+        <li>В открывшемся окне просматривайте список нацеливаний.</li>
+        <li>В админ-панели (раздел «Пользователи») администратор может создавать новые нацеливания и выбирать
+          получателей.</li>
+      </ol>
+    </section>
+
+    <section id="step-admin" class="instruction-section instr-section">
+      <h2 class="h5 fw-bold border-bottom pb-2 mb-3">9. Админ-панель</h2>
+      <p class="text-muted small mb-3">Управление пользователями, ролями, позициями, настройками. Доступно только
+        пользователям с правом доступа к админ-панели.</p>
+      <ol class="instruction-steps">
+        <li><strong>Выбор:</strong> в верхнем меню нажмите «Админ».</li>
+        <li><strong>Выбор:</strong> переключите вкладку: «Пользователи», «Роли», «Синхронизация», «Hub онлайн» или
+          «Настройки».</li>
+        <li><strong>Пользователи:</strong> просмотр списка, создание пользователя (логин, позывной, роль, пароль), смена
+          роли, назначение позиций, нацеливания.</li>
+        <li><strong>Роли:</strong> просмотр встроенных и кастомных ролей, создание и редактирование кастомных ролей
+          (доступ по вкладкам).</li>
+        <li><strong>Настройки:</strong> настройка доступа к чату «Рабочая атмосфера» по ролям — отметьте нужные роли и
+          нажмите «Сохранить».</li>
+        <li><strong>Синхронизация / Hub онлайн:</strong> просмотр статуса синхронизации и списка активных Hub'ов.</li>
+      </ol>
+    </section>
+
+        <div class="instr-footer" role="note">
+          <i class="bi bi-info-circle me-2" aria-hidden="true"></i>
+          Набор доступных разделов и действий зависит от вашей роли и назначенных прав. При отсутствии нужного раздела или
+          кнопки обратитесь к администратору.
+        </div>
+    </main>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/instruction-modern.js') }}?v=1"></script>
+<script>
+  (function () {
+    var step = 0;
+    var hints = {
+      1: 'Нажмите «Перехваты» в боковой панели навигации.',
+      2: 'Выберите позицию в верхней шапке (например, «Позиция Браво»).',
+      3: 'Выберите чат (частоту/группу) в списке слева.',
+      4: 'Введите текст в поле ввода и нажмите «Отправить в бланк».',
+      5: 'Добавьте позывной во вкладке «Позывные» (напр. Бром и 124).',
+      6: ''
+    };
+    function $id(id) { return document.getElementById(id); }
+    function setInterceptSidebarView(view) {
+      var chats = $id('intercept-test-chats-view');
+      var cs = $id('intercept-test-callsigns-view');
+      var segChats = document.querySelector('#intercept-mock-page .intercept-mock-seg-chats');
+      var segCs = document.querySelector('#intercept-mock-page .intercept-mock-seg-callsigns');
+      var title = $id('intercept-test-sidebar-title');
+      if (chats) chats.hidden = view !== 'chats';
+      if (cs) cs.hidden = view !== 'callsigns';
+      if (segChats) {
+        segChats.classList.toggle('active', view === 'chats');
+        segChats.setAttribute('aria-selected', view === 'chats' ? 'true' : 'false');
+      }
+      if (segCs) {
+        segCs.classList.toggle('active', view === 'callsigns');
+        segCs.setAttribute('aria-selected', view === 'callsigns' ? 'true' : 'false');
+      }
+      if (title) title.textContent = view === 'callsigns' ? 'Позывные' : 'Чаты';
+    }
+    function showStep(n) {
+      step = n;
+      var mock = document.getElementById('intercept-mock-page');
+      var done = document.getElementById('intercept-step-6');
+      if (mock) {
+        mock.style.display = n === 6 ? 'none' : 'block';
+        mock.className = 'intercept-mock-page instr-lab-mock instr-lab__window md3-intercepts ix-messenger-ui ix-modern-ui intercept-step-' + (n <= 5 ? n : 1);
+      }
+      if (done) done.style.display = n === 6 ? 'block' : 'none';
+      var badge = $id('intercept-test-step-badge');
+      var hint = $id('intercept-test-step-hint');
+      if (badge) badge.textContent = n <= 5 ? 'Шаг ' + n + ' из 5' : 'Готово';
+      if (hint) hint.textContent = hints[n] || '';
+      setInterceptSidebarView(n === 5 ? 'callsigns' : 'chats');
+    }
+    function startTest() {
+      $id('intercept-test-start').style.display = 'none';
+      $id('intercept-test-steps').style.display = 'block';
+      var pre = $id('intercept-test-blank-preview');
+      if (pre) pre.value = '— выберите группу, затем введите сообщение и нажмите «Отправить в бланк» —';
+      var listEl = $id('intercept-test-callsigns-list');
+      if (listEl) { listEl.innerHTML = ''; listEl.classList.add('text-muted'); }
+      var msgInput = $id('intercept-test-msg-input');
+      if (msgInput) msgInput.value = '';
+      var csLabel = $id('intercept-test-cs-label');
+      var csCode = $id('intercept-test-cs-code');
+      if (csLabel) csLabel.value = ''; if (csCode) csCode.value = '';
+      var sub = $id('intercept-test-editor-subtitle');
+      if (sub) sub.textContent = 'Выберите группу в списке слева';
+      var chatTitle = $id('intercept-test-chat-title');
+      if (chatTitle) chatTitle.textContent = 'Выберите чат';
+      var posLabel = $id('intercept-test-pos-label');
+      if (posLabel) {
+        var posSpan = posLabel.querySelector('span');
+        if (posSpan) posSpan.textContent = 'Позиция Альфа';
+      }
+      document.querySelectorAll('#intercept-test-groups-list .tg-chat-item').forEach(function (el) {
+        el.classList.remove('tg-chat-item--active', 'active');
+      });
+      showStep(1);
+    }
+    function restartTest() {
+      startTest();
+    }
+    $id('intercept-test-start-btn').addEventListener('click', startTest);
+    $id('intercept-test-restart') && $id('intercept-test-restart').addEventListener('click', restartTest);
+
+    var railItem = document.getElementById('intercept-test-rail-intercepts');
+    if (railItem) {
+      railItem.addEventListener('click', function (e) {
+        e.preventDefault();
+        if (step === 1) showStep(2);
+      });
+    }
+    document.querySelectorAll('.intercept-test-pos').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        if (step !== 2) return;
+        var posLabel = $id('intercept-test-pos-label');
+        if (posLabel) {
+          var posSpan = posLabel.querySelector('span');
+          if (posSpan) posSpan.textContent = btn.textContent.trim();
+        }
+        if (btn.getAttribute('data-correct') === '1') showStep(3);
+      });
+    });
+    document.querySelectorAll('.intercept-test-freq').forEach(function (row) {
+      row.addEventListener('click', function () {
+        if (step !== 3 || row.getAttribute('data-correct') !== '1') return;
+        document.querySelectorAll('#intercept-test-groups-list .tg-chat-item').forEach(function (el) {
+          el.classList.remove('tg-chat-item--active', 'active');
+        });
+        row.classList.add('tg-chat-item--active', 'active');
+        var titleEl = row.querySelector('.tg-chat-item__title');
+        var chatTitle = $id('intercept-test-chat-title');
+        var sub = $id('intercept-test-editor-subtitle');
+        if (titleEl && chatTitle) chatTitle.textContent = titleEl.textContent.trim();
+        if (sub) sub.textContent = '155.3120 / 300190';
+        showStep(4);
+      });
+    });
+    var msgSend = $id('intercept-test-msg-send');
+    if (msgSend) msgSend.addEventListener('click', function () {
+      if (step !== 4) return;
+      var msg = ($id('intercept-test-msg-input').value || '').trim();
+      if (msg) {
+        var pre = $id('intercept-test-blank-preview');
+        if (pre) {
+          var now = new Date();
+          var time = now.getHours() + '.' + (now.getMinutes() < 10 ? '0' : '') + now.getMinutes();
+          var base = (pre.value.indexOf('—') === 0 ? '' : pre.value + '\n');
+          pre.value = base + time + '\n-' + msg;
+        }
+        var sub = $id('intercept-test-editor-subtitle');
+        if (sub) sub.textContent = '155.3120 / 300190';
+        showStep(5);
+      }
+    });
+    var csAdd = $id('intercept-test-callsign-add');
+    if (csAdd) csAdd.addEventListener('click', function () {
+      if (step !== 5) return;
+      var label = ($id('intercept-test-cs-label').value || '').trim();
+      var code = ($id('intercept-test-cs-code').value || '').trim();
+      if (label || code) {
+        var listEl = $id('intercept-test-callsigns-list');
+        if (listEl) {
+          listEl.classList.remove('text-muted');
+          var item = document.createElement('div');
+          item.className = 'tg-callsign-list__item';
+          item.textContent = (label || '—') + ' (' + (code || '—') + ')';
+          listEl.appendChild(item);
+        }
+        showStep(6);
+      }
+    });
+  })();
+
+  (function () {
+    var sStep = 0;
+    var sHints = {
+      1: 'Нажмите «Сеансы» в верхней панели.',
+      2: 'Выберите позицию в левой панели.',
+      3: 'Выберите период в блоке «Данные сеансов» (напр. «7 дней»).',
+      4: 'Введите путь к папке и нажмите «Обработать папку».',
+      5: 'Нажмите «Экспорт Word».'
+    };
+    function sid(id) { return document.getElementById(id); }
+    function showSessionsStep(n) {
+      sStep = n;
+      var mock = sid('sessions-mock-page');
+      var done = sid('sessions-step-6');
+      if (mock) {
+        mock.style.display = n === 6 ? 'none' : 'block';
+        mock.className = 'sessions-mock-page instr-lab-mock instr-lab__window sessions-step-' + (n <= 5 ? n : 1);
+      }
+      if (done) done.style.display = n === 6 ? 'block' : 'none';
+      var badge = sid('sessions-test-step-badge');
+      var hint = sid('sessions-test-step-hint');
+      if (badge) badge.textContent = n <= 5 ? 'Шаг ' + n + ' из 5' : 'Готово';
+      if (hint) hint.textContent = sHints[n] || '';
+    }
+    function startSessionsTest() {
+      sid('sessions-test-start').style.display = 'none';
+      sid('sessions-test-steps').style.display = 'block';
+      sid('sessions-test-pos-label').textContent = '—';
+      sid('sessions-test-folder-path').value = '';
+      showSessionsStep(1);
+    }
+    sid('sessions-test-start-btn').addEventListener('click', startSessionsTest);
+    var sRestart = sid('sessions-test-restart');
+    if (sRestart) sRestart.addEventListener('click', startSessionsTest);
+    var sNav = sid('sessions-nav-link');
+    if (sNav) sNav.addEventListener('click', function (e) { e.preventDefault(); if (sStep === 1) showSessionsStep(2); });
+    document.querySelectorAll('.sessions-test-pos').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        if (sStep === 2 && btn.getAttribute('data-correct') === '1') {
+          sid('sessions-test-pos-label').textContent = 'Позиция Браво';
+          showSessionsStep(3);
+        }
+      });
+    });
+    document.querySelectorAll('.sessions-test-preset').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        if (sStep === 3 && btn.getAttribute('data-correct') === '1') showSessionsStep(4);
+      });
+    });
+    var sProcess = sid('sessions-test-process-btn');
+    if (sProcess) sProcess.addEventListener('click', function () {
+      if (sStep !== 4) return;
+      var path = (sid('sessions-test-folder-path').value || '').trim();
+      if (path) showSessionsStep(5);
+    });
+    var sExport = sid('sessions-test-export-btn');
+    if (sExport) sExport.addEventListener('click', function () {
+      if (sStep === 5) showSessionsStep(6);
+    });
+  })();
+
+  (function () {
+    var step = 0;
+    var hints = { 1: 'Нажмите «Авиация» в верхней панели.', 2: 'Выберите позицию в левой панели.', 3: 'Нажмите «Загрузить» для подгрузки данных.' };
+    function id(x) { return document.getElementById(x); }
+    function show(n) {
+      step = n;
+      var mock = id('aviation-mock-page');
+      var done = id('aviation-step-done');
+      if (mock) { mock.style.display = n === 4 ? 'none' : 'block'; mock.className = 'aviation-mock instr-lab-mock instr-lab__window position-relative aviation-step-' + (n <= 3 ? n : 1); }
+      if (done) done.style.display = n === 4 ? 'block' : 'none';
+      var b = id('aviation-test-step-badge'); if (b) b.textContent = n <= 3 ? 'Шаг ' + n + ' из 3' : '';
+      var h = id('aviation-test-step-hint'); if (h) h.textContent = hints[n] || '';
+    }
+    function start() {
+      id('aviation-test-start').style.display = 'none';
+      id('aviation-test-steps').style.display = 'block';
+      show(1);
+    }
+    id('aviation-test-start-btn').addEventListener('click', start);
+    id('aviation-test-restart').addEventListener('click', start);
+    id('aviation-nav-link').addEventListener('click', function (e) { e.preventDefault(); if (step === 1) show(2); });
+    document.querySelectorAll('.aviation-test-pos').forEach(function (btn) {
+      btn.addEventListener('click', function () { if (step === 2 && btn.getAttribute('data-correct') === '1') show(3); });
+    });
+    id('aviation-test-load-btn').addEventListener('click', function () { if (step === 3) show(4); });
+  })();
+
+  (function () {
+    var step = 0;
+    var hints = { 1: 'Нажмите «Анализ» в верхней панели.', 2: 'Выберите контейнер (модуль) в левой панели.', 3: 'Выберите позицию.' };
+    function id(x) { return document.getElementById(x); }
+    function show(n) {
+      step = n;
+      var mock = id('analysis-mock-page');
+      var done = id('analysis-step-done');
+      if (mock) { mock.style.display = n === 4 ? 'none' : 'block'; mock.className = 'analysis-mock instr-lab-mock instr-lab__window position-relative analysis-step-' + (n <= 3 ? n : 1); }
+      if (done) done.style.display = n === 4 ? 'block' : 'none';
+      var b = id('analysis-test-step-badge'); if (b) b.textContent = n <= 3 ? 'Шаг ' + n + ' из 3' : '';
+      var h = id('analysis-test-step-hint'); if (h) h.textContent = hints[n] || '';
+    }
+    function start() {
+      id('analysis-test-start').style.display = 'none';
+      id('analysis-test-steps').style.display = 'block';
+      show(1);
+    }
+    id('analysis-test-start-btn').addEventListener('click', start);
+    id('analysis-test-restart').addEventListener('click', start);
+    id('analysis-nav-link').addEventListener('click', function (e) { e.preventDefault(); if (step === 1) show(2); });
+    document.querySelectorAll('.analysis-test-container').forEach(function (btn) {
+      btn.addEventListener('click', function () { if (step === 2 && btn.getAttribute('data-correct') === '1') show(3); });
+    });
+    document.querySelectorAll('.analysis-test-pos').forEach(function (btn) {
+      btn.addEventListener('click', function () { if (step === 3 && btn.getAttribute('data-correct') === '1') show(4); });
+    });
+  })();
+
+  (function () {
+    var step = 0;
+    var hints = { 1: 'Нажмите «Поиск онлайн» в верхней панели.', 2: 'Введите запрос и нажмите «Найти».' };
+    function id(x) { return document.getElementById(x); }
+    function show(n) {
+      step = n;
+      var mock = id('search-mock-page');
+      var done = id('search-step-done');
+      if (mock) { mock.style.display = n === 3 ? 'none' : 'block'; mock.className = 'search-mock instr-lab-mock instr-lab__window position-relative search-step-' + (n <= 2 ? n : 1); }
+      if (done) done.style.display = n === 3 ? 'block' : 'none';
+      var b = id('search-test-step-badge'); if (b) b.textContent = n <= 2 ? 'Шаг ' + n + ' из 2' : '';
+      var h = id('search-test-step-hint'); if (h) h.textContent = hints[n] || '';
+    }
+    function start() {
+      id('search-test-start').style.display = 'none';
+      id('search-test-steps').style.display = 'block';
+      show(1);
+    }
+    id('search-test-start-btn').addEventListener('click', start);
+    id('search-test-restart').addEventListener('click', start);
+    id('search-nav-link').addEventListener('click', function (e) { e.preventDefault(); if (step === 1) show(2); });
+    id('search-test-btn').addEventListener('click', function () { if (step === 2) show(3); });
+  })();
+
+  (function () {
+    var step = 0;
+    var hints = { 1: 'Нажмите «Справочники» в верхней панели.', 2: 'Выберите вкладку (Подразделения, Частоты/группы или Позывные).', 3: 'При необходимости введите текст в поле поиска.' };
+    function id(x) { return document.getElementById(x); }
+    function show(n) {
+      step = n;
+      var mock = id('dict-mock-page');
+      var done = id('dict-step-done');
+      if (mock) { mock.style.display = n === 4 ? 'none' : 'block'; mock.className = 'dict-mock instr-lab-mock instr-lab__window position-relative dict-step-' + (n <= 3 ? n : 1); }
+      if (done) done.style.display = n === 4 ? 'block' : 'none';
+      var b = id('dict-test-step-badge'); if (b) b.textContent = n <= 3 ? 'Шаг ' + n + ' из 3' : '';
+      var h = id('dict-test-step-hint'); if (h) h.textContent = hints[n] || '';
+    }
+    function start() {
+      id('dict-test-start').style.display = 'none';
+      id('dict-test-steps').style.display = 'block';
+      show(1);
+    }
+    id('dict-test-start-btn').addEventListener('click', start);
+    id('dict-test-restart').addEventListener('click', start);
+    id('dict-nav-link').addEventListener('click', function (e) { e.preventDefault(); if (step === 1) show(2); });
+    document.querySelectorAll('.dict-test-tab').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        document.querySelectorAll('.dict-test-tab').forEach(function (t) { t.classList.remove('active'); });
+        btn.classList.add('active');
+        if (step === 2 && btn.getAttribute('data-correct') === '1') show(3);
+      });
+    });
+    id('dict-test-search').addEventListener('input', function () { if (step === 3) show(4); });
+    id('dict-test-search').addEventListener('focus', function () { if (step === 3) show(4); });
+  })();
+</script>
+{% endblock %}

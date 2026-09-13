@@ -1,0 +1,477 @@
+/**
+ * EAVC Mobile App — полноценная мобильная версия
+ * Аудио: режим «Слушать» | Карта: Alpine Quest style
+ */
+
+@media (max-width: 767.98px) {
+  /* ── Shell ── */
+  body.eavc-app.eavc-mobile-shell {
+    --eavc-m-global-dock-h: 0px;
+    --eavc-m-dock-h: calc(64px + env(safe-area-inset-bottom, 0px));
+  }
+
+  body.eavc-app.eavc-mobile-shell .eavc-mobile-primary-dock {
+    display: none !important;
+  }
+
+  body.eavc-app.eavc-mobile-shell .eavc-topbar__section {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: min(54vw, 220px);
+  }
+
+  body.eavc-app.eavc-mobile-shell .eavc-topbar__section-trigger {
+    width: 100%;
+    min-height: 40px;
+    padding: 0.35rem 0.65rem;
+    border-radius: 14px;
+    border: 1px solid rgba(151, 173, 163, 0.24);
+    background: linear-gradient(145deg, rgba(67, 209, 158, 0.14), rgba(18, 34, 30, 0.92));
+    color: #eef7f2;
+    font-size: 0.82rem;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+
+  body.eavc-app.eavc-mobile-shell .eavc-topbar__section-menu {
+    border-radius: 16px;
+    background: rgba(10, 20, 17, 0.98);
+    border: 1px solid rgba(151, 173, 163, 0.2);
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.42);
+    padding: 0.35rem;
+  }
+
+  body.eavc-app.eavc-mobile-shell .eavc-topbar__section-link.active {
+    background: linear-gradient(145deg, #43d19e, #7ce5ba);
+    color: #04120e;
+    border-radius: 12px;
+  }
+
+  body.eavc-app.eavc-mobile-shell .eavc-topbar__profile-name,
+  body.eavc-app.eavc-mobile-shell .eavc-topbar__profile-chevron {
+    display: none;
+  }
+
+  /* ── AUDIO APP ── */
+  body.eavc-page-audio.eavc-mobile-shell main.container-fluid {
+    padding: 0 !important;
+  }
+
+  body.eavc-page-audio.eavc-mobile-shell .md3-intercepts.ix-mobile-ui {
+    --ix-dock-h: calc(64px + env(safe-area-inset-bottom, 0px));
+  }
+
+  body.eavc-page-audio.eavc-mobile-shell .md3-intercepts.ix-mobile-ui .intercepts-topbar {
+    display: none !important;
+  }
+
+  body.eavc-page-audio.eavc-mobile-shell .md3-intercepts.ix-mobile-ui .sessions-main > .card.wp-card > .card-body {
+    padding: 0.5rem 0.75rem calc(0.75rem + var(--ix-dock-h)) !important;
+  }
+
+  body.eavc-page-audio.eavc-mobile-shell .md3-intercepts.ix-mobile-ui .ix-mobile-panel-head {
+    margin: 0 0 0.5rem;
+    padding: 0.15rem 0.25rem;
+  }
+
+  body.eavc-page-audio.eavc-mobile-shell .md3-intercepts.ix-mobile-ui .ix-mobile-panel-head__title {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #eef7f2;
+  }
+
+  body.eavc-page-audio.eavc-mobile-shell .md3-intercepts.ix-mobile-ui .groups-drawer-inner {
+    border-radius: 18px;
+    padding: 0.85rem !important;
+  }
+
+  body.eavc-page-audio.eavc-mobile-shell .md3-intercepts.ix-mobile-ui #groups-list .list-group-item {
+    min-height: 52px;
+    border-radius: 14px !important;
+    margin-bottom: 0.4rem;
+  }
+
+  body.eavc-page-audio.eavc-mobile-shell .md3-intercepts.ix-mobile-ui #groups-list .list-group-item.active {
+    background: linear-gradient(135deg, rgba(67, 209, 158, 0.24), rgba(67, 209, 158, 0.08)) !important;
+    border-color: rgba(67, 209, 158, 0.45) !important;
+  }
+
+  /* Listen panel layout */
+  body.eavc-page-audio.eavc-mobile-shell .ix-mobile-panel--audio .audio-panel {
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  body.eavc-page-audio.eavc-mobile-shell .ix-mobile-panel--audio .audio-panel > .card-body {
+    padding: 0 !important;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  body.eavc-page-audio.eavc-mobile-shell .ix-mobile-queue-in-listen {
+    order: 1;
+    margin: 0 !important;
+  }
+
+  body.eavc-page-audio.eavc-mobile-shell .ix-mobile-queue-in-listen .md3-audio-queue-head__text .md3-audio-queue-sub {
+    display: none;
+  }
+
+  body.eavc-page-audio.eavc-mobile-shell .ix-mobile-queue-in-listen .md3-audio-queue-scroll {
+    max-height: min(38dvh, 320px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  body.eavc-page-audio.eavc-mobile-shell .ix-mobile-panel--audio .md3-audio-player {
+    order: 2;
+    position: sticky;
+    bottom: calc(var(--ix-dock-h) + 0.25rem);
+    z-index: 20;
+    border-radius: 22px !important;
+    border: 1px solid rgba(67, 209, 158, 0.28) !important;
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.38) !important;
+  }
+
+  body.eavc-page-audio.eavc-mobile-shell .ix-mobile-panel--audio .md3-audio-waveform {
+    height: 88px;
+    touch-action: none;
+  }
+
+  body.eavc-page-audio.eavc-mobile-shell .ix-mobile-panel--audio .md3-audio-transport .btn-primary {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    box-shadow: 0 10px 28px rgba(67, 209, 158, 0.35);
+  }
+
+  body.eavc-page-audio.eavc-mobile-shell .ix-mobile-panel--audio .md3-audio-toolbar__actions .btn {
+    min-height: 44px;
+    border-radius: 14px;
+  }
+
+  /* Audio mobile cards */
+  .ix-audio-mobile-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    padding: 0.15rem 0;
+  }
+
+  .ix-audio-card {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.75rem 0.85rem;
+    border: 1px solid rgba(151, 173, 163, 0.18);
+    border-radius: 16px;
+    background: rgba(13, 24, 21, 0.92);
+    color: #eef7f2;
+    text-align: left;
+    transition: transform 0.15s ease, background 0.15s ease;
+  }
+
+  .ix-audio-card:active {
+    transform: scale(0.98);
+  }
+
+  .ix-audio-card.active {
+    border-color: rgba(67, 209, 158, 0.55);
+    background: linear-gradient(135deg, rgba(67, 209, 158, 0.18), rgba(13, 24, 21, 0.95));
+    box-shadow: 0 8px 24px rgba(67, 209, 158, 0.16);
+  }
+
+  .ix-audio-card--done {
+    opacity: 0.72;
+  }
+
+  .ix-audio-card--empty {
+    justify-content: center;
+    color: #8fa39a;
+    font-size: 0.875rem;
+    padding: 1.25rem;
+  }
+
+  .ix-audio-card--group {
+    background: rgba(18, 34, 30, 0.88);
+  }
+
+  .ix-audio-card--item {
+    margin-left: 0.65rem;
+    width: calc(100% - 0.65rem);
+  }
+
+  .ix-audio-card__icon {
+    color: #43d19e;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+
+  .ix-audio-card__avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    border: 1px solid;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.72rem;
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+
+  .ix-audio-card__main {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.12rem;
+  }
+
+  .ix-audio-card__title {
+    font-size: 0.875rem;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .ix-audio-card__sub {
+    font-size: 0.75rem;
+    color: #8fa39a;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .ix-audio-card__dur,
+  .ix-audio-card__play {
+    flex-shrink: 0;
+    color: #43d19e;
+    font-weight: 800;
+    font-size: 0.82rem;
+  }
+
+  /* 2-tab dock */
+  body.eavc-page-audio.eavc-mobile-shell .ix-mobile-dock--audio-app {
+    bottom: max(10px, env(safe-area-inset-bottom, 0px));
+    border-radius: 24px;
+    padding: 7px;
+    background: rgba(8, 18, 15, 0.96);
+    border: 1px solid rgba(151, 173, 163, 0.22);
+    box-shadow: 0 16px 42px rgba(0, 0, 0, 0.4);
+  }
+
+  body.eavc-page-audio.eavc-mobile-shell .ix-mobile-dock--audio-app .ix-mobile-dock__pill {
+    background: linear-gradient(145deg, #43d19e, #1d8e70);
+  }
+
+  body.eavc-page-audio.eavc-mobile-shell .ix-mobile-dock--audio-app .ix-mobile-dock__btn {
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+  }
+
+  body.eavc-page-audio.eavc-mobile-shell .ix-mobile-dock--audio-app .ix-mobile-dock__btn.active {
+    color: #04120e;
+  }
+
+  body.eavc-page-audio.eavc-mobile-shell .md3-intercepts.ix-mobile-ui[data-ix-panel="blank"] .ix-mobile-panel--blank {
+    display: none !important;
+  }
+
+  /* ── MAP APP (Alpine Quest style) ── */
+  body.eavc-page-map.eavc-mobile-shell main.container-fluid.map-page-container {
+    padding: 0 !important;
+    height: calc(100dvh - var(--eavc-m-topbar-h, 56px));
+    overflow: hidden;
+  }
+
+  body.eavc-page-map.eavc-mobile-shell .map-workbench.mp-mobile-ui {
+    --mp-dock-h: calc(64px + env(safe-area-inset-bottom, 0px));
+    height: 100%;
+  }
+
+  body.eavc-page-map.eavc-mobile-shell .map-workbench.mp-mobile-ui .map-page-body {
+    padding: 0 !important;
+    height: 100%;
+  }
+
+  body.eavc-page-map.eavc-mobile-shell .map-workbench.mp-mobile-ui .map-studio-stage {
+    height: 100%;
+    min-height: 0 !important;
+  }
+
+  body.eavc-page-map.eavc-mobile-shell .map-workbench.mp-mobile-ui .map-map-col {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    z-index: 1;
+  }
+
+  body.eavc-page-map.eavc-mobile-shell .map-workbench.mp-mobile-ui .map-map-col .map-wrap {
+    min-height: 100% !important;
+    height: 100% !important;
+    border-radius: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  body.eavc-page-map.eavc-mobile-shell .map-workbench.map-mobile-app.map-studio-focus .map-studio-hud-stack {
+    opacity: 1;
+  }
+
+  body.eavc-page-map.eavc-mobile-shell .map-workbench.mp-mobile-ui .map-studio-hud-stack {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 5;
+    pointer-events: none;
+  }
+
+  body.eavc-page-map.eavc-mobile-shell .map-workbench.mp-mobile-ui .map-studio-hud {
+    margin: max(8px, env(safe-area-inset-top, 0px)) 8px 0 !important;
+    padding: 0.45rem 0.55rem !important;
+    border-radius: 16px !important;
+    pointer-events: auto;
+    background: rgba(8, 18, 15, 0.82) !important;
+    backdrop-filter: blur(14px);
+    min-height: auto !important;
+  }
+
+  body.eavc-page-map.eavc-mobile-shell .map-workbench.mp-mobile-ui .map-studio-hud__center,
+  body.eavc-page-map.eavc-mobile-shell .map-workbench.mp-mobile-ui .map-studio-hud__right .map-studio-hud-btn:not(#map-toggle-layers):not(#map-toggle-inspector) {
+    display: none !important;
+  }
+
+  body.eavc-page-map.eavc-mobile-shell .map-workbench.mp-mobile-ui .map-readout {
+    display: none !important;
+  }
+
+  body.eavc-page-map.eavc-mobile-shell .map-workbench.mp-mobile-ui .map-studio-mode-rail {
+    position: fixed;
+    left: 8px;
+    bottom: calc(var(--mp-dock-h) + 72px);
+    flex-direction: row;
+    gap: 0.35rem;
+    z-index: 6;
+    pointer-events: auto;
+    max-width: calc(100% - 80px);
+    overflow-x: auto;
+    padding: 0.35rem;
+    border-radius: 16px;
+    background: rgba(8, 18, 15, 0.82);
+    backdrop-filter: blur(12px);
+  }
+
+  body.eavc-page-map.eavc-mobile-shell .map-workbench.mp-mobile-ui .mp-mobile-zoom-rail {
+    position: fixed !important;
+    right: max(8px, env(safe-area-inset-right, 0px));
+    bottom: calc(var(--mp-dock-h) + 8px);
+    z-index: 6;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 0.4rem;
+    border-radius: 20px;
+    background: rgba(8, 18, 15, 0.88);
+    border: 1px solid rgba(151, 173, 163, 0.22);
+    backdrop-filter: blur(16px);
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.36);
+  }
+
+  body.eavc-page-map.eavc-mobile-shell .map-workbench.mp-mobile-ui .mp-zoom-btn {
+    min-width: 52px !important;
+    min-height: 52px !important;
+    border-radius: 16px !important;
+    font-size: 1.1rem;
+    font-weight: 800;
+  }
+
+  body.eavc-page-map.eavc-mobile-shell .map-workbench.mp-mobile-ui .mp-zoom-btn--level {
+    min-height: 34px !important;
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+  }
+
+  /* Bottom sheets for layers / editor */
+  body.eavc-page-map.eavc-mobile-shell .map-workbench.mp-mobile-ui .mp-left-drawer-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1035;
+    background: rgba(2, 8, 6, 0.55);
+    backdrop-filter: blur(2px);
+  }
+
+  body.eavc-page-map.eavc-mobile-shell .map-workbench.mp-mobile-ui[data-mobile-tab="layers"] .map-groups-col,
+  body.eavc-page-map.eavc-mobile-shell .map-workbench.mp-mobile-ui[data-mobile-tab="editor"] .map-editor-col {
+    display: flex !important;
+    position: fixed !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: auto !important;
+    bottom: calc(var(--mp-dock-h) - 4px) !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: min(78dvh, 640px) !important;
+    min-height: 0 !important;
+    z-index: 1040;
+    margin: 0 !important;
+    border-radius: 22px 22px 0 0 !important;
+    box-shadow: 0 -12px 48px rgba(0, 0, 0, 0.42);
+    animation: mp-sheet-up 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  body.eavc-page-map.eavc-mobile-shell .map-workbench.mp-mobile-ui .mp-mobile-dock {
+    z-index: 1050;
+    bottom: max(8px, env(safe-area-inset-bottom, 0px));
+    border-radius: 24px;
+    background: rgba(8, 18, 15, 0.96);
+    border-color: rgba(151, 173, 163, 0.22);
+  }
+
+  body.eavc-page-map.eavc-mobile-shell .map-workbench.mp-mobile-ui .mp-mobile-dock__pill {
+    background: linear-gradient(145deg, #43d19e, #1d8e70);
+  }
+
+  body.eavc-page-map.eavc-mobile-shell .map-workbench.mp-mobile-ui .mp-mobile-dock__btn.active {
+    color: #04120e;
+  }
+
+  body.eavc-page-map.eavc-mobile-shell .map-workbench.mp-mobile-ui .mp-panel-head {
+    display: none !important;
+  }
+
+  body.eavc-page-map.eavc-mobile-shell .map-workbench.mp-mobile-ui .map-root {
+    touch-action: none;
+  }
+
+  @keyframes mp-sheet-up {
+    from {
+      opacity: 0;
+      transform: translateY(24px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @media (max-width: 767.98px) {
+    .ix-audio-card,
+    body.eavc-page-map.eavc-mobile-shell .map-workbench.mp-mobile-ui[data-mobile-tab="layers"] .map-groups-col,
+    body.eavc-page-map.eavc-mobile-shell .map-workbench.mp-mobile-ui[data-mobile-tab="editor"] .map-editor-col {
+      animation: none !important;
+      transition: none !important;
+    }
+  }
+}

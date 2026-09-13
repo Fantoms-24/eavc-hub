@@ -1,0 +1,476 @@
+/**
+ * Chat — modern web patterns (glass composer, soft AI cards, mobile drawer, performance).
+ */
+
+#chatModal.chat-modern-ui {
+  --chat-glass: rgba(255, 255, 255, 0.72);
+  --chat-glass-border: rgba(148, 163, 184, 0.28);
+  --chat-surface: #f4f8fc;
+  --chat-accent: #2563eb;
+  --chat-accent-soft: rgba(37, 99, 235, 0.1);
+  --chat-ai-surface: linear-gradient(180deg, #f3f8ff 0%, #ffffff 100%);
+  --chat-radius: 18px;
+}
+
+html[data-wp-theme="dark"] #chatModal.chat-modern-ui {
+  --chat-glass: rgba(22, 32, 48, 0.82);
+  --chat-glass-border: rgba(148, 163, 184, 0.18);
+  --chat-surface: #0f172a;
+  --chat-accent: #60a5fa;
+  --chat-accent-soft: rgba(96, 165, 250, 0.12);
+  --chat-ai-surface: linear-gradient(180deg, rgba(30, 58, 138, 0.22) 0%, rgba(15, 23, 42, 0.92) 100%);
+}
+
+#chatModal.chat-modern-ui .modal-content {
+  border-radius: 22px;
+  border: 1px solid var(--chat-glass-border);
+  background: var(--chat-surface);
+  box-shadow: 0 28px 80px rgba(15, 23, 42, 0.18);
+  overflow: clip;
+}
+
+#chatModal.chat-modern-ui .modal-header {
+  background: var(--chat-glass);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+}
+
+#chatModal.chat-modern-ui .chat-modal-body {
+  container-type: inline-size;
+  container-name: chat-shell;
+}
+
+#chatModal.chat-modern-ui .chat-modal-body > .d-flex {
+  position: relative;
+  min-height: 0;
+}
+
+/* Sidebar */
+#chatModal.chat-modern-ui .chat-sidebar {
+  background:
+    radial-gradient(circle at 12% 0%, rgba(96, 165, 250, 0.14), transparent 34%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(241, 245, 249, 0.96) 100%);
+}
+
+#chatModal.chat-modern-ui .chat-sidebar-hero {
+  background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 52%, #0369a1 100%);
+  box-shadow: 0 10px 28px rgba(37, 99, 235, 0.18);
+}
+
+#chatModal.chat-modern-ui .chat-channel-item {
+  border-radius: 12px;
+  margin-inline: 0.65rem;
+}
+
+#chatModal.chat-modern-ui .chat-channel-item.active {
+  background: var(--chat-accent-soft);
+  border-color: color-mix(in srgb, var(--chat-accent) 28%, transparent);
+  box-shadow: inset 3px 0 0 var(--chat-accent);
+}
+
+/* Main thread */
+#chatModal.chat-modern-ui .chat-main {
+  position: relative;
+  min-height: 0;
+  background: var(--chat-surface);
+}
+
+#chatModal.chat-modern-ui .chat-conversation-top {
+  background: var(--chat-glass);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  z-index: 2;
+}
+
+#chatModal.chat-modern-ui .chat-sidebar-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 10px;
+  border: 1px solid var(--chat-glass-border);
+  background: rgba(255, 255, 255, 0.65);
+  color: var(--wp-text);
+}
+
+#chatModal.chat-modern-ui .chat-ai-status {
+  font-variant-numeric: tabular-nums;
+}
+
+#chatModal.chat-modern-ui .chat-thread-wrap {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+#chatModal.chat-modern-ui #chat-messages-container {
+  flex: 1 1 auto;
+  min-height: 0;
+  overscroll-behavior: contain;
+  scroll-behavior: smooth;
+  padding: 1.1rem 1.25rem 1.5rem;
+  background:
+    radial-gradient(circle at 10% 88%, rgba(37, 99, 235, 0.06), transparent 34%),
+    radial-gradient(circle at 92% 8%, rgba(14, 165, 233, 0.07), transparent 38%),
+    linear-gradient(180deg, rgba(248, 251, 255, 0.95) 0%, rgba(255, 255, 255, 0.98) 100%);
+}
+
+@supports (content-visibility: auto) {
+  #chatModal.chat-modern-ui .chat-message {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 88px;
+  }
+}
+
+@supports not (content-visibility: auto) {
+  #chatModal.chat-modern-ui #chat-messages-container {
+    contain: layout style paint;
+  }
+}
+
+/* Messages — softer AI, own messages on the right */
+#chatModal.chat-modern-ui .chat-message {
+  margin-bottom: 0.85rem;
+  max-width: min(100%, 920px);
+}
+
+#chatModal.chat-modern-ui .chat-message-own {
+  margin-inline-start: auto;
+}
+
+#chatModal.chat-modern-ui .chat-message-own > .d-flex {
+  flex-direction: row-reverse;
+}
+
+#chatModal.chat-modern-ui .chat-message-bubble {
+  border-radius: 16px 16px 16px 6px;
+  max-width: min(78%, 760px);
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+}
+
+#chatModal.chat-modern-ui .chat-message-own .chat-message-bubble {
+  border-radius: 16px 16px 6px 16px;
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.12), rgba(14, 165, 233, 0.08));
+  border-color: rgba(37, 99, 235, 0.18);
+}
+
+#chatModal.chat-modern-ui .chat-message-own .chat-message-bubble::before {
+  left: auto;
+  right: -8px;
+  border-width: 8px 0 8px 8px;
+  border-color: transparent transparent transparent rgba(37, 99, 235, 0.12);
+}
+
+#chatModal.chat-modern-ui .chat-message-ai .chat-message-bubble {
+  background: var(--chat-ai-surface);
+  border: 1px solid color-mix(in srgb, var(--chat-accent) 22%, transparent);
+  border-left: 4px solid var(--chat-accent);
+  color: var(--wp-text);
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.08);
+}
+
+#chatModal.chat-modern-ui .chat-message-ai .chat-message-bubble::before {
+  border-color: transparent #eef4ff transparent transparent;
+}
+
+#chatModal.chat-modern-ui .chat-message-ai .chat-message-author,
+#chatModal.chat-modern-ui .chat-message-ai .chat-message-text,
+#chatModal.chat-modern-ui .chat-message-ai .chat-md-heading,
+#chatModal.chat-modern-ui .chat-message-ai .chat-md-heading-1,
+#chatModal.chat-modern-ui .chat-message-ai .chat-md-heading-2,
+#chatModal.chat-modern-ui .chat-message-ai .chat-md-heading-3,
+#chatModal.chat-modern-ui .chat-message-ai .chat-md-heading-4,
+#chatModal.chat-modern-ui .chat-message-ai .chat-message-text strong {
+  color: var(--wp-text);
+  text-shadow: none;
+}
+
+#chatModal.chat-modern-ui .chat-message-ai .chat-message-time {
+  color: #64748b;
+}
+
+#chatModal.chat-modern-ui .chat-message-ai .chat-message-text code {
+  background: rgba(15, 23, 42, 0.06);
+  color: #334155;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+}
+
+#chatModal.chat-modern-ui .chat-message-ai .chat-md-bullet,
+#chatModal.chat-modern-ui .chat-message-ai .chat-md-number {
+  color: var(--chat-accent);
+}
+
+#chatModal.chat-modern-ui .chat-message-ai .chat-open-blank-link {
+  background: rgba(37, 99, 235, 0.08);
+  color: #1d4ed8;
+  border: 1px solid rgba(37, 99, 235, 0.16);
+}
+
+#chatModal.chat-modern-ui .chat-message-ai .chat-open-blank-link:hover {
+  background: rgba(37, 99, 235, 0.14);
+  color: #1e40af;
+}
+
+#chatModal.chat-modern-ui .chat-message-ai .chat-ai-feedback-label {
+  color: #64748b;
+}
+
+#chatModal.chat-modern-ui .chat-message-ai .chat-ai-feedback-btn {
+  color: #475569;
+}
+
+#chatModal.chat-modern-ui .chat-message-ai .chat-ai-feedback-btn.active {
+  color: #16a34a;
+  text-shadow: none;
+}
+
+#chatModal.chat-modern-ui .chat-message-ai .chat-ai-feedback-down.active {
+  color: #dc2626;
+}
+
+#chatModal.chat-modern-ui .chat-message-ai .chat-message-avatar {
+  background: linear-gradient(135deg, #0ea5e9, #2563eb);
+}
+
+#chatModal.chat-modern-ui .chat-message-time {
+  font-variant-numeric: tabular-nums;
+}
+
+#chatModal.chat-modern-ui .chat-message-text {
+  line-height: 1.55;
+}
+
+#chatModal.chat-modern-ui .chat-ai-feedback {
+  margin-top: 0.45rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid var(--chat-glass-border);
+}
+
+#chatModal.chat-modern-ui .chat-message-ai .chat-ai-feedback {
+  max-width: min(78%, 760px);
+}
+
+/* Bottom stack: prompts + composer */
+#chatModal.chat-modern-ui .chat-bottom-stack {
+  flex-shrink: 0;
+  background: var(--chat-glass);
+  backdrop-filter: blur(16px) saturate(1.35);
+  -webkit-backdrop-filter: blur(16px) saturate(1.35);
+  border-top: 1px solid var(--chat-glass-border);
+}
+
+#chatModal.chat-modern-ui .chat-quick-prompts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  padding: 0.65rem 1rem 0;
+  background: transparent;
+  border-top: 0;
+}
+
+#chatModal.chat-modern-ui .chat-prompt-chip {
+  border-radius: 999px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border: 1px solid color-mix(in srgb, var(--chat-accent) 20%, transparent);
+  background: var(--chat-accent-soft);
+  color: color-mix(in srgb, var(--chat-accent) 85%, #0f172a);
+}
+
+#chatModal.chat-modern-ui .chat-prompt-chip:hover {
+  background: color-mix(in srgb, var(--chat-accent) 16%, white);
+}
+
+#chatModal.chat-modern-ui .chat-input-area {
+  padding: 0.65rem 1rem 0.95rem;
+  background: transparent;
+  border-top: 0;
+}
+
+#chatModal.chat-modern-ui .chat-composer {
+  border-radius: 18px;
+  border: 1px solid var(--chat-glass-border);
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.07);
+}
+
+#chatModal.chat-modern-ui #chat-message-input {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  min-height: 2.75rem;
+  max-height: 9rem;
+  resize: none;
+  padding-inline: 0.35rem;
+}
+
+@supports (field-sizing: content) {
+  #chatModal.chat-modern-ui #chat-message-input {
+    field-sizing: content;
+  }
+}
+
+#chatModal.chat-modern-ui .chat-send-btn {
+  width: 2.65rem;
+  height: 2.65rem;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+#chatModal.chat-modern-ui .chat-scroll-bottom {
+  position: absolute;
+  right: 1rem;
+  bottom: 0.75rem;
+  z-index: 3;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid var(--chat-glass-border);
+  border-radius: 999px;
+  background: var(--chat-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: var(--chat-accent);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+#chatModal.chat-modern-ui .chat-scroll-bottom[hidden] {
+  display: none !important;
+}
+
+#chatModal.chat-modern-ui .chat-sidebar-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  border: 0;
+  background: rgba(15, 23, 42, 0.42);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease;
+}
+
+#chatModal.chat-modern-ui.chat-sidebar-open .chat-sidebar-backdrop {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  #chatModal.chat-modern-ui .modal-header,
+  #chatModal.chat-modern-ui .chat-conversation-top,
+  #chatModal.chat-modern-ui .chat-bottom-stack,
+  #chatModal.chat-modern-ui .chat-composer,
+  #chatModal.chat-modern-ui .chat-scroll-bottom {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #chatModal.chat-modern-ui .chat-message,
+  #chatModal.chat-modern-ui #chat-messages-container {
+    animation: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@container chat-shell (max-width: 720px) {
+  #chatModal.chat-modern-ui .chat-message-bubble,
+  #chatModal.chat-modern-ui .chat-message-ai .chat-ai-feedback {
+    max-width: 92%;
+  }
+}
+
+/* Mobile drawer for channels */
+@media (max-width: 991.98px) {
+  #chatModal.chat-modern-ui .chat-modal-body > .d-flex {
+    flex-direction: row !important;
+  }
+
+  #chatModal.chat-modern-ui .chat-sidebar {
+    position: absolute;
+    inset: 0 auto 0 0;
+    z-index: 5;
+    width: min(300px, 88vw) !important;
+    min-width: 0 !important;
+    max-height: none !important;
+    transform: translateX(-105%);
+    transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+    box-shadow: 8px 0 32px rgba(15, 23, 42, 0.18);
+  }
+
+  #chatModal.chat-modern-ui.chat-sidebar-open .chat-sidebar {
+    transform: translateX(0);
+  }
+
+  #chatModal.chat-modern-ui .chat-main[inert] {
+    pointer-events: none;
+    user-select: none;
+  }
+}
+
+html[data-wp-theme="dark"] #chatModal.chat-modern-ui .chat-message-ai .chat-message-author,
+html[data-wp-theme="dark"] #chatModal.chat-modern-ui .chat-message-ai .chat-message-text,
+html[data-wp-theme="dark"] #chatModal.chat-modern-ui .chat-message-ai .chat-md-heading {
+  color: #e2e8f0;
+}
+
+html[data-wp-theme="dark"] #chatModal.chat-modern-ui .chat-message-ai .chat-message-text code {
+  background: rgba(255, 255, 255, 0.08);
+  color: #e2e8f0;
+  border-color: rgba(148, 163, 184, 0.24);
+}
+
+html[data-wp-theme="dark"] #chatModal.chat-modern-ui .chat-message-ai .chat-ai-feedback-label {
+  color: #94a3b8;
+}
+
+html[data-wp-theme="dark"] #chatModal.chat-modern-ui .chat-message-ai .chat-ai-feedback-btn {
+  color: #cbd5e1;
+}
+
+html[data-wp-theme="dark"] #chatModal.chat-modern-ui .chat-message-ai .chat-message-bubble::before {
+  border-color: transparent rgba(30, 58, 138, 0.5) transparent transparent;
+}
+
+html[data-wp-theme="dark"] #chatModal.chat-modern-ui .chat-composer {
+  background: rgba(15, 23, 42, 0.88);
+}
+
+html[data-wp-theme="dark"] #chatModal.chat-modern-ui #chat-messages-container {
+  background:
+    radial-gradient(circle at 10% 88%, rgba(37, 99, 235, 0.08), transparent 34%),
+    linear-gradient(180deg, rgba(15, 23, 42, 0.96) 0%, rgba(2, 6, 23, 0.98) 100%);
+}
+
+html[data-wp-theme="dark"] #chatModal.chat-modern-ui .chat-sidebar {
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.98) 0%, rgba(2, 6, 23, 0.98) 100%);
+}
+
+html[data-wp-theme="dark"] #chatModal.chat-modern-ui .chat-ai-feedback {
+  background: rgba(15, 23, 42, 0.72);
+}
+
+@media (max-width: 767.98px) {
+  #chatModal.chat-modern-ui .modal-content {
+    border-radius: 0;
+  }
+
+  #chatModal.chat-modern-ui .chat-sidebar-hero {
+    margin: 0.65rem;
+    padding: 0.8rem;
+  }
+}
