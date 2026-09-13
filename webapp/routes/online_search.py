@@ -27,6 +27,7 @@ from web_portal.application.online_search import (
     OnlineSearchUseCaseHTTP,
     assemble_online_search_battalion_spectrum_payload,
     assemble_online_search_unit_detail_payload,
+    assemble_online_search_unit_dashboard_payload,
     assemble_online_search_unit_parent_payload,
     assemble_online_search_units_list_payload,
     execute_online_search_import_xlsx,
@@ -178,6 +179,27 @@ def register_online_search_routes(app, ctx: AppContext):
             return jsonify(e.payload), e.status_code
         finally:
             conn.close()
+
+    @app.get("/api/online-search/unit-dashboard")
+    @login_required
+    def api_online_search_unit_dashboard():
+        unit_key = unquote(request.args.get("p") or request.args.get("key") or "").strip()
+        period_days = request.args.get("days", 7, type=int)
+        if period_days not in (7, 14, 30):
+            period_days = 7
+        search_p = search_online_db_path(); main_p = db_path(DEFAULT_DB_NAME)
+        ensure_db(search_p); ensure_db(main_p)
+        search_conn = connect(search_p); main_conn = connect(main_p)
+        try:
+            payload = assemble_online_search_unit_dashboard_payload(
+                search_conn,
+                main_conn,
+                unit_key,
+                period_days=period_days,
+            )
+            return jsonify(payload), (200 if payload.get("ok") else 404)
+        finally:
+            search_conn.close(); main_conn.close()
 
     @app.get("/api/online-search/battalion-spectrum")
     @login_required
@@ -333,12 +355,32 @@ def register_online_search_routes(app, ctx: AppContext):
                 if hv is None:
                     new_hero_str = None
                 elif isinstance(hv, dict):
-                    if str(hv.get("mode") or "default") == "default":
+                    mode = str(hv.get("mode") or "default")
+                    if mode not in ("default", "tint", "banner"):
+                        mode = "default"
+                    clean_hero: dict[str, object] = {"mode": mode}
+                    title = str(hv.get("title") or "").strip()[:120]
+                    subtitle = str(hv.get("subtitle") or "").strip()[:180]
+                    status = str(hv.get("status") or "").strip()[:40]
+                    tags = hv.get("tags") if isinstance(hv.get("tags"), list) else []
+                    clean_tags = [str(tag).strip()[:50] for tag in tags if str(tag).strip()][:5]
+                    if title:
+                        clean_hero["title"] = title
+                    if subtitle:
+                        clean_hero["subtitle"] = subtitle
+                    if status:
+                        clean_hero["status"] = status
+                    if clean_tags:
+                        clean_hero["tags"] = clean_tags
+                    if mode == "tint" and re.match(r"^#[0-9a-fA-F]{6}$", str(hv.get("tint") or "")):
+                        clean_hero["tint"] = str(hv.get("tint"))
+                    if mode == "banner" and re.match(r"^h[a-fA-F0-9]{32}\.[A-Za-z0-9]{2,5}$", str(hv.get("banner") or "")):
+                        clean_hero["banner"] = str(hv.get("banner"))
+                    has_identity = any(key in clean_hero for key in ("title", "subtitle", "status", "tags"))
+                    if mode == "default" and not has_identity:
                         new_hero_str = None
                     else:
-                        new_hero_str = json.dumps(
-                            hv, ensure_ascii=False, sort_keys=True
-                        )
+                        new_hero_str = json.dumps(clean_hero, ensure_ascii=False, sort_keys=True)
                 else:
                     return (
                         jsonify(

@@ -128,7 +128,7 @@ function applyHero(hero) {
   }
 }
 
-function _fillHeroForm(hero) {
+function _fillHeroForm(hero, state) {
   const d = document.getElementById("up-hm-def");
   const t = document.getElementById("up-hm-tint");
   const b = document.getElementById("up-hm-ban");
@@ -138,6 +138,14 @@ function _fillHeroForm(hero) {
   if (b) b.checked = hero && hero.mode === "banner";
   if (c && hero && hero.tint) c.value = String(hero.tint);
   else if (c) c.value = "#1d4ed8";
+  const title = document.getElementById("up-set-title");
+  const subtitle = document.getElementById("up-set-subtitle");
+  const status = document.getElementById("up-set-status");
+  const tags = document.getElementById("up-set-tags");
+  if (title) title.value = String((hero && hero.title) || (state && state.defaultTitle) || "");
+  if (subtitle) subtitle.value = String((hero && hero.subtitle) || (state && state.defaultSubtitle) || "");
+  if (status) status.value = String((hero && hero.status) || "Онлайн");
+  if (tags) tags.value = Array.isArray(hero && hero.tags) ? hero.tags.join(", ") : "Сухопутные войска, Морская пехота, В/ч неизвестна";
   _syncHeroFormVisibility();
 }
 
@@ -151,19 +159,27 @@ function _syncHeroFormVisibility() {
 
 function _readHeroForSave(state) {
   const m = document.querySelector('input[name="up-hero-mode"]:checked')?.value || "default";
-  if (m === "default") return { mode: "default" };
+  let result = { mode: m };
   if (m === "tint") {
     const col = document.getElementById("up-set-hero-tint");
-    return { mode: "tint", tint: (col && col.value) || "#1d4ed8" };
+    result.tint = (col && col.value) || "#1d4ed8";
   }
   if (m === "banner") {
     const fn = state.hero && state.hero.banner;
     if (!fn) {
       return null;
     }
-    return { mode: "banner", banner: fn };
+    result.banner = fn;
   }
-  return { mode: "default" };
+  result.title = String(document.getElementById("up-set-title")?.value || "").trim();
+  result.subtitle = String(document.getElementById("up-set-subtitle")?.value || "").trim();
+  result.status = String(document.getElementById("up-set-status")?.value || "").trim();
+  result.tags = String(document.getElementById("up-set-tags")?.value || "")
+    .split(",")
+    .map((tag) => tag.trim())
+    .filter(Boolean)
+    .slice(0, 5);
+  return result;
 }
 
 function _wireSettings(state) {
@@ -176,6 +192,7 @@ function _wireSettings(state) {
   const save = document.getElementById("up-set-save");
   const avWrap = document.getElementById("up-set-av-wrap");
   const resHero = document.getElementById("up-set-hero-reset");
+  const historyCount = document.getElementById("up-set-history-count");
   if (!btn || !modalEl || !ta || !save || !avWrap) return;
   if (!window.bootstrap) return;
   const modal = window.bootstrap.Modal.getOrCreateInstance(modalEl);
@@ -191,9 +208,9 @@ function _wireSettings(state) {
       ev.preventDefault();
       const def = document.getElementById("up-hm-def");
       if (def) def.checked = true;
-      _fillHeroForm(null);
-      state.hero = { mode: "default" };
-      applyHero(null);
+      const tint = document.getElementById("up-set-hero-tint");
+      if (tint) tint.value = "#1d4ed8";
+      _syncHeroFormVisibility();
     });
   }
   if (hBanner) {
@@ -207,6 +224,7 @@ function _wireSettings(state) {
         const data = await apiUploadFile("/api/online-search/unit-hero-banner", fd);
         if (data.banner) {
           state.hero = {
+            ...(state.hero || {}),
             mode: "banner",
             banner: data.banner,
             banner_url: data.banner_url,
@@ -228,9 +246,14 @@ function _wireSettings(state) {
     _setPatch(avWrap, state.avatarUrl);
     if (avInp) avInp.value = "";
     if (hBanner) hBanner.value = "";
-    _fillHeroForm(state.hero);
+    state.defaultSubtitle = document.getElementById("up-ph-sub")?.textContent || state.defaultSubtitle;
+    _fillHeroForm(state.hero, state);
+    if (historyCount) historyCount.textContent = String(ta.value.length);
     applyHero(state.hero);
     modal.show();
+  });
+  ta.addEventListener("input", () => {
+    if (historyCount) historyCount.textContent = String(ta.value.length);
   });
   if (avInp) {
     avInp.addEventListener("change", async (ev) => {
@@ -269,7 +292,7 @@ function _wireSettings(state) {
         hero: heroToSave,
       });
       state.history = history;
-      if (heroToSave && heroToSave.mode && heroToSave.mode !== "default") {
+      if (heroToSave) {
         state.hero = { ...state.hero, ...heroToSave };
         if (state.hero.mode === "tint" && !state.hero.tint) {
           state.hero.tint = document.getElementById("up-set-hero-tint")?.value || "#1d4ed8";
@@ -280,13 +303,12 @@ function _wireSettings(state) {
           state.hero.banner_url = `${base}/api/online-search/unit-hero/${path}`;
         }
         applyHero(state.hero);
-      } else {
-        state.hero = null;
-        applyHero(null);
-      }
+      } else state.hero = null;
+      applyHero(state.hero);
       const has = String(history || "").trim().length > 0;
       _renderDescriptionBlock(phHist, state.history, canEdit);
       _renderTimeline(listEl, has);
+      window.dispatchEvent(new CustomEvent("unit-profile-updated", { detail: { ...state, hero: state.hero } }));
       modal.hide();
     } catch (e) {
       window.alert(String(e.message || e));
@@ -309,10 +331,13 @@ function _wireSettings(state) {
     return;
   }
   try {
-    const r = await fetch(`/api/online-search/unit-parent?p=${encodeURIComponent(p)}`, {
+    const profilePromise = window.__UP_PROFILE_PROMISE__ || fetch(`/api/online-search/unit-parent?p=${encodeURIComponent(p)}`, {
       credentials: "same-origin",
-    });
-    const data = await r.json();
+    }).then(async (response) => ({ response, data: await response.json() }));
+    window.__UP_PROFILE_PROMISE__ = profilePromise;
+    const profileResult = await profilePromise;
+    const r = profileResult.response;
+    const data = profileResult.data;
     if (!r.ok || !data.ok) throw new Error(data.error || r.status);
 
     if (loading) loading.classList.add("d-none");
@@ -324,6 +349,8 @@ function _wireSettings(state) {
       history: data.history || "",
       avatarUrl: data.avatar_url || "",
       hero: data.hero && typeof data.hero === "object" ? { ...data.hero } : null,
+      defaultTitle: data.parent_label || "",
+      defaultSubtitle: "",
     };
 
     _setCrumb(parentKey);

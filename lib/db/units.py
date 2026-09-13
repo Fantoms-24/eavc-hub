@@ -822,8 +822,13 @@ def get_unit_family_by_parent_key(
     pk = (parent_key or "").strip()
     if not pk:
         return None
-    for fam in list_online_search_unit_families(conn):
+    families = list_online_search_unit_families(conn)
+    for fam in families:
         if str(fam.get("parent_key") or "") == pk:
+            return fam
+    folded = pk.casefold()
+    for fam in families:
+        if str(fam.get("parent_key") or "").casefold() == folded:
             return fam
     return None
 

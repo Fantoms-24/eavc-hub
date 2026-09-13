@@ -16,6 +16,9 @@ from web_portal.application.online_search.media_urls import (
 from web_portal.application.online_search.unit_detail import (
     assemble_online_search_unit_detail_payload,
 )
+from web_portal.application.online_search.unit_dashboard import (
+    assemble_online_search_unit_dashboard_payload,
+)
 from web_portal.application.online_search.unit_parent import (
     assemble_online_search_unit_parent_payload,
 )
@@ -34,6 +37,7 @@ __all__ = [
     "OnlineSearchUseCaseHTTP",
     "assemble_online_search_battalion_spectrum_payload",
     "assemble_online_search_unit_detail_payload",
+    "assemble_online_search_unit_dashboard_payload",
     "assemble_online_search_unit_parent_payload",
     "assemble_online_search_units_list_payload",
     "avatar_url_for_file",

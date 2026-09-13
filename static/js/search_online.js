@@ -93,6 +93,19 @@ function _unitLabelFromKey(k) {
   return k === "__none__" ? "Без подразделения" : k;
 }
 
+/** Короткая подпись для дочерней карточки в объединении подразделений. */
+function _unitChildLabel(label, key) {
+  const raw = String(key || "").trim();
+  const fallback = String(label || "").trim();
+  if (!raw) return fallback || "Подразделение";
+  // Поддерживаем «155 ОМБр 1 мсб» и «1 мсб 155 ОМБр».
+  const suffix = raw.match(/(?:^|\s)(\d+\s*(?:мсб|шб|бат|ббпс|бмп|бон))\s*$/iu);
+  const prefix = raw.match(/^(\d+\s*(?:мсб|шб|бат|ббпс|бмп|бон))(?:\s|$)/iu);
+  if (suffix) return suffix[1].replace(/\s+/g, " ");
+  if (prefix) return prefix[1].replace(/\s+/g, " ");
+  return fallback && fallback !== "Записи" ? fallback : raw;
+}
+
 function _groupRowsByUnit(list) {
   const m = new Map();
   for (const r of list || []) {
@@ -343,7 +356,7 @@ function _osWbAppendChips(wrap, children, plab) {
   }
   for (const ch of children) {
     const uk = ch.unit_key;
-    const cLab = String(ch.label || "Записи");
+    const cLab = _unitChildLabel(ch.label, uk);
     const cCnt = Number(ch.row_count || 0);
     const tile = document.createElement("a");
     tile.className = "os-unit-tile";

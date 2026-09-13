@@ -1376,7 +1376,14 @@
   "methods": [
    "GET"
   ],
-  "rule": "/api/online-search/unit-detail"
+ "rule": "/api/online-search/unit-detail"
+ },
+ "/api/online-search/unit-dashboard [api_online_search_unit_dashboard]": {
+  "endpoint": "api_online_search_unit_dashboard",
+  "methods": [
+   "GET"
+  ],
+  "rule": "/api/online-search/unit-dashboard"
  },
  "/api/online-search/unit-hero-banner [api_online_search_unit_hero_banner_upload]": {
   "endpoint": "api_online_search_unit_hero_banner_upload",

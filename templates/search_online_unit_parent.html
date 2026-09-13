@@ -4,67 +4,85 @@
 {% block styles %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/analysis-group-md3.css') }}" />
 <link rel="stylesheet" href="{{ url_for('static', filename='css/unit-portal-parent-v2.css') }}?v=1" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/unit-dashboard.css') }}?v=7" />
 {% endblock %}
 {% block content %}
 <div class="unit-portal up2-page" id="up-parent-root">
-  <div class="up2">
-    <nav class="up2__top" aria-label="Навигация">
-      <a class="up2-back" href="{{ url_for('search_online') }}">
-        <span class="up2-back__ic" aria-hidden="true"><i class="bi bi-arrow-left"></i></span>
-        <span>Поиск онлайн</span>
-      </a>
-      <span class="up2__crumb" id="up2-crumb" hidden></span>
+  <div class="up2 ud-page">
+    <nav class="ud-breadcrumbs" aria-label="Навигация">
+      <a href="{{ url_for('search_online') }}"><i class="bi bi-arrow-left" aria-hidden="true"></i><span>Поиск онлайн</span></a>
+      <i class="bi bi-chevron-right" aria-hidden="true"></i><span>Подразделения</span>
+      <i class="bi bi-chevron-right" aria-hidden="true"></i><strong id="up2-crumb">Подразделение</strong>
+      {% if current_user.is_authenticated and current_user.has_perm('edit_search') %}
+      <button type="button" class="ud-actions" id="up-btn-settings" title="Настройки подразделения">
+        <span>Действия</span><i class="bi bi-chevron-down" aria-hidden="true"></i>
+      </button>
+      {% endif %}
     </nav>
 
-    <p class="up2-skel" id="up-parent-loading">Загрузка…</p>
+    <p class="up2-skel" id="up-parent-loading">Загрузка страницы подразделения…</p>
 
     <div id="up-parent-body" class="d-none">
-      <header class="up-hero up2-hero" id="up-hero">
+      <header class="up-hero ud-hero" id="up-hero">
         <div class="up-hero__stack" id="up-hero-stack" aria-hidden="true">
           <div class="up-hero__bg" id="up-hero-bg"></div>
           <div class="up-hero__scrim" id="up-hero-scrim" hidden></div>
           <div class="up-hero__tint" id="up-hero-tint" hidden></div>
         </div>
         <div class="up-hero__aurora" id="up-hero-aurora" aria-hidden="true"></div>
-        <div class="up-hero__actions">
-          {% if current_user.is_authenticated and current_user.has_perm('edit_search') %}
-          <button type="button" class="up-settings-btn" id="up-btn-settings" title="Настройки подразделения" aria-label="Настройки подразделения">
-            <i class="bi bi-gear" aria-hidden="true"></i>
-          </button>
-          {% endif %}
-        </div>
-        <div class="up2-hero__bar">
-          <div class="up2-hero__main">
-            <p class="up-hero__kicker" id="up-ph-sub">Объединение подразделений</p>
-            <h1 class="up-hero__title" id="up-ph-title">—</h1>
-            <div class="up-hero__stats" id="up-ph-meta" aria-label="Сводка"></div>
-          </div>
-          <div class="up-hero__patch up2-hero__patch" id="up-ph-patch" aria-hidden="true">
+        <div class="ud-identity">
+          <div class="up-hero__patch ud-hero__patch" id="up-ph-patch" aria-hidden="true">
             <i class="bi bi-shield-shaded" aria-hidden="true"></i>
           </div>
+          <div class="ud-identity__text">
+            <div class="ud-title-row"><h1 id="up-ph-title">—</h1><span class="ud-online" id="ud-unit-status"><i></i><span>Онлайн</span></span></div>
+            <p id="up-ph-sub">Отдельная морская бригада</p>
+            <div class="ud-tags" id="ud-unit-tags"><span>Сухопутные войска</span><span>Морская пехота</span><span>В/ч неизвестна</span></div>
+          </div>
         </div>
+        <div class="ud-hero-metrics" id="udash-kpis">
+          <div class="ud-hero-metric"><i class="bi bi-stopwatch"></i><div><b id="udash-summary-sessions">0</b><span id="udash-summary-sessions-label">сеансов<br>за 7 дней</span></div></div>
+          <div class="ud-hero-metric"><i class="bi bi-broadcast-pin"></i><div><b id="udash-summary-correspondents">0</b><span id="udash-summary-correspondents-label">корреспондентов<br>за 7 дней</span></div></div>
+          <div class="ud-hero-metric"><i class="bi bi-people"></i><div><b id="udash-summary-callsigns">0</b><span>активных<br>позывных</span></div></div>
+          <div class="ud-hero-metric ud-hero-metric--period"><i class="bi bi-calendar3"></i><div><b id="udash-period">—</b><span id="udash-updated">Последнее обновление</span></div></div>
+        </div>
+        <div id="up-ph-meta" hidden></div>
       </header>
 
-      <div class="up2__layout">
-        <section class="up2-panel" aria-labelledby="up2-about-title">
-          <h2 class="up2-panel__title" id="up2-about-title">О подразделении</h2>
-          <div class="up-about__text" id="up-ph-history">—</div>
+      <main class="ud-workspace" id="up-dashboard" aria-label="Аналитика подразделения">
+        <section class="ud-panel ud-panel--activity" aria-labelledby="udash-title">
+          <header class="ud-panel__head"><h2 id="udash-title"><i class="bi bi-bar-chart-fill"></i>Активность радиосети</h2><label class="ud-period-select"><span class="visually-hidden">Период графика</span><select id="udash-period-select" aria-label="Период аналитики"><option value="7">за 7 дней</option><option value="14">за 14 дней</option><option value="30">за 30 дней</option></select><i class="bi bi-chevron-down" aria-hidden="true"></i></label></header>
+          <div class="ud-chart" id="udash-chart"></div>
         </section>
-        <details class="up2-aside">
-          <summary>Справка</summary>
-          <div class="up2-aside__body">
-            <ul class="up-tl" id="up-ph-tl" aria-label="События"></ul>
-          </div>
-        </details>
-      </div>
 
-      <section class="up2-section" aria-labelledby="up2-struct-title">
-        <header class="up2-section__head">
-          <h2 class="up2-section__title" id="up2-struct-title">Варианты в базе</h2>
-          <p class="up2-section__lead">Батальоны и записи без префикса. Откройте вариант для частот, архива и эмблемы.</p>
-        </header>
-        <div class="up2-variant-grid" id="up-children" role="list"></div>
-      </section>
+        <section class="ud-panel ud-panel--structure" aria-labelledby="udash-structure-title">
+          <header class="ud-panel__head"><h2 id="udash-structure-title"><i class="bi bi-diagram-3"></i>Структура подразделения</h2><button type="button" id="udash-expand-structure">Развернуть все</button></header>
+          <div class="ud-structure" id="udash-structure"></div>
+        </section>
+
+        <section class="ud-panel ud-panel--calls" aria-labelledby="udash-calls-title">
+          <header class="ud-panel__head"><h2 id="udash-calls-title"><i class="bi bi-headphones"></i>Самые активные позывные</h2><button type="button" id="udash-all-calls">Все позывные</button></header>
+          <div class="ud-call-table" id="udash-calls"></div>
+        </section>
+
+        <aside class="ud-panel ud-panel--call-detail" id="udash-call-detail" aria-live="polite">
+          <button class="ud-detail-close" type="button" id="udash-call-close" aria-label="Закрыть">×</button>
+          <div class="ud-detail-title"><strong id="udash-call-title">Позывной</strong><span>Активный</span></div>
+          <div class="ud-detail-stats"><div><small id="udash-call-sessions-label">Сеансов за 7 дней</small><b id="udash-call-sessions">0</b></div><div><small>ID корреспондента</small><b id="udash-call-correspondent-id">—</b></div></div>
+          <h3>Последнее сообщение в перехватах</h3>
+          <div class="ud-detail-message" id="udash-call-text">Выберите позывной в таблице слева.</div>
+          <div class="ud-detail-meta" id="udash-call-meta"></div>
+        </aside>
+
+        <section class="ud-panel ud-panel--frequencies" aria-labelledby="udash-frequencies-title">
+          <header class="ud-panel__head"><h2 id="udash-frequencies-title"><i class="bi bi-broadcast"></i>Частоты и группы</h2><label class="ud-period-select"><span class="visually-hidden">Период частот</span><select id="udash-frequency-period-select" aria-label="Период частот"><option value="7">за 7 дней</option><option value="14">за 14 дней</option><option value="30">за 30 дней</option></select><i class="bi bi-chevron-down" aria-hidden="true"></i></label></header>
+          <div class="ud-frequency-table" id="udash-frequencies"></div>
+        </section>
+      </main>
+
+      <div hidden>
+        <div id="up-ph-history"></div><ul id="up-ph-tl"></ul><div id="up-children"></div>
+      </div>
     </div>
 
     <p class="up2-skel text-danger d-none" id="up-parent-err"></p>
@@ -72,58 +90,55 @@
 </div>
 {% if current_user.is_authenticated and current_user.has_perm('edit_search') %}
 <div class="modal fade" id="up-settings-modal" tabindex="-1" aria-labelledby="up-settings-title" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-lg">
-    <div class="modal-content up2-settings-modal__box border-0">
-      <div class="modal-header up2-settings-modal__head border-0">
-        <h2 class="modal-title h5" id="up-settings-title">Настройки подразделения</h2>
+  <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable ud-settings-dialog">
+    <div class="modal-content up2-settings-modal__box ud-settings-modal border-0">
+      <div class="modal-header ud-settings-head border-0">
+        <div class="ud-settings-heading"><span class="ud-settings-heading__icon"><i class="bi bi-sliders2"></i></span><div><h2 class="modal-title" id="up-settings-title">Настройка карточки</h2><p>Название, статус, метки и оформление подразделения</p></div></div>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
       </div>
-      <div class="modal-body">
-        <p class="small text-secondary mb-2">Эмблема, оформление шапки и описание сохраняются по ключу объединения (до 4000 символов в <code>note</code>).</p>
-        <h3 class="h6 text-secondary text-uppercase small mb-2 mt-1">Шапка</h3>
-        <div class="row g-2 align-items-end mb-3 p-2 rounded-3 bg-light-subtle">
-          <div class="col-12 col-sm-auto">
-            <label class="form-label small text-secondary mb-0">Режим</label>
-            <div class="btn-group flex-wrap" role="group" aria-label="Режим шапки">
+      <div class="modal-body ud-settings-body">
+        <section class="ud-settings-section">
+          <div class="ud-settings-section__title"><span>01</span><div><h3>Информация</h3><p>То, что сотрудники видят в верхней карточке.</p></div></div>
+          <div class="ud-settings-grid">
+            <label class="ud-field ud-field--wide" for="up-set-title"><span>Название подразделения</span><input type="text" id="up-set-title" maxlength="120" placeholder="Например, 155 ОМБр" /></label>
+            <label class="ud-field ud-field--wide" for="up-set-subtitle"><span>Полное наименование</span><input type="text" id="up-set-subtitle" maxlength="180" placeholder="Отдельная морская бригада" /></label>
+            <label class="ud-field" for="up-set-status"><span>Статус</span><select id="up-set-status"><option value="Онлайн">Онлайн</option><option value="Не в сети">Не в сети</option><option value="Статус не указан">Статус не указан</option></select></label>
+            <label class="ud-field" for="up-set-tags"><span>Метки через запятую</span><input type="text" id="up-set-tags" maxlength="260" placeholder="Морская пехота, Сухопутные войска" /><small>До пяти коротких меток</small></label>
+          </div>
+        </section>
+
+        <section class="ud-settings-section">
+          <div class="ud-settings-section__title"><span>02</span><div><h3>Эмблема и фон</h3><p>Загрузите эмблему и выберите спокойный стиль шапки.</p></div></div>
+          <div class="ud-settings-appearance">
+            <div class="ud-settings-avatar-card">
+              <div class="up-settings-av" id="up-set-av-wrap"><i class="bi bi-shield-shaded" aria-hidden="true"></i></div>
+              <div><strong>Эмблема</strong><p>PNG, JPG или WebP</p><label class="ud-upload" for="up-set-avatar"><i class="bi bi-upload"></i>Загрузить</label><input type="file" id="up-set-avatar" accept="image/jpeg,image/png,image/gif,image/webp" hidden /></div>
+            </div>
+            <div class="ud-settings-style">
+              <span class="ud-settings-label">Стиль фона</span>
+              <div class="ud-style-options" role="group" aria-label="Режим шапки">
               <input type="radio" class="btn-check" name="up-hero-mode" id="up-hm-def" value="default" checked autocomplete="off" />
-              <label class="btn btn-sm btn-outline-secondary" for="up-hm-def">Стандарт</label>
+              <label for="up-hm-def"><i class="bi bi-layout-text-window"></i><span>Стандарт</span></label>
               <input type="radio" class="btn-check" name="up-hero-mode" id="up-hm-tint" value="tint" autocomplete="off" />
-              <label class="btn btn-sm btn-outline-secondary" for="up-hm-tint">Оттенок</label>
+              <label for="up-hm-tint"><i class="bi bi-palette"></i><span>Оттенок</span></label>
               <input type="radio" class="btn-check" name="up-hero-mode" id="up-hm-ban" value="banner" autocomplete="off" />
-              <label class="btn btn-sm btn-outline-secondary" for="up-hm-ban">Баннер</label>
+              <label for="up-hm-ban"><i class="bi bi-image"></i><span>Баннер</span></label>
+              </div>
+              <div class="ud-conditional-field" id="up-hero-tint-wrap"><label for="up-set-hero-tint">Цвет оттенка</label><input type="color" id="up-set-hero-tint" value="#2563eb" title="Цвет тона" /></div>
+              <div class="ud-conditional-field" id="up-hero-banner-wrap"><label class="ud-upload ud-upload--wide" for="up-set-hero-banner"><i class="bi bi-image"></i>Выбрать фоновое изображение</label><input type="file" id="up-set-hero-banner" accept="image/jpeg,image/png,image/gif,image/webp" hidden /><small id="up-hero-banner-hint">Широкое изображение автоматически обрезается по размеру карточки.</small></div>
             </div>
           </div>
-          <div class="col-12 col-sm-auto" id="up-hero-tint-wrap">
-            <label class="form-label small text-secondary mb-0" for="up-set-hero-tint">Цвет оттенка</label>
-            <input type="color" class="form-control form-control-color" id="up-set-hero-tint" value="#2563eb" title="Цвет тона" />
-          </div>
-          <div class="col-12" id="up-hero-banner-wrap">
-            <label class="form-label small text-secondary mb-0" for="up-set-hero-banner">Фоновое фото</label>
-            <input type="file" id="up-set-hero-banner" class="form-control form-control-sm" accept="image/jpeg,image/png,image/gif,image/webp" />
-            <p class="form-text small mb-0" id="up-hero-banner-hint">Широкое изображение; обрезается по ширине шапки.</p>
-          </div>
-        </div>
-        <h3 class="h6 text-secondary text-uppercase small mb-2">Эмблема и текст</h3>
-        <div class="row g-3">
-          <div class="col-12 col-md-4">
-            <label class="form-label small text-secondary mb-1">Эмблема</label>
-            <div class="up-settings-av rounded border d-flex align-items-center justify-content-center overflow-hidden" id="up-set-av-wrap" style="width:96px;height:96px;background:var(--bs-secondary-bg)">
-              <i class="bi bi-shield-shaded fs-2 text-secondary" aria-hidden="true"></i>
-            </div>
-            <input type="file" id="up-set-avatar" class="form-control form-control-sm mt-2" accept="image/jpeg,image/png,image/gif,image/webp" />
-          </div>
-          <div class="col-12 col-md-8 d-flex flex-column">
-            <label class="form-label small text-secondary mb-1" for="up-set-history">Описание</label>
-            <textarea class="form-control" id="up-set-history" rows="8" placeholder="Краткое описание, история, заметки…"></textarea>
-          </div>
-        </div>
+        </section>
+
+        <section class="ud-settings-section">
+          <div class="ud-settings-section__title"><span>03</span><div><h3>Описание</h3><p>Служебная справка и важные примечания.</p></div></div>
+          <label class="ud-field" for="up-set-history"><span>Описание подразделения</span><textarea id="up-set-history" rows="4" maxlength="4000" placeholder="Краткое описание, история, заметки…"></textarea><small><span id="up-set-history-count">0</span> / 4000</small></label>
+        </section>
       </div>
-      <div class="modal-footer up2-settings-modal__foot border-0">
-        <button type="button" class="btn btn-link text-secondary" id="up-set-hero-reset">Сброс шапки</button>
-        <div class="ms-auto d-flex gap-2">
-          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
-          <button type="button" class="btn btn-primary" id="up-set-save">Сохранить</button>
-        </div>
+      <div class="modal-footer ud-settings-footer border-0">
+        <button type="button" class="ud-reset" id="up-set-hero-reset"><i class="bi bi-arrow-counterclockwise"></i>Сбросить оформление</button>
+        <button type="button" class="ud-cancel" data-bs-dismiss="modal">Отмена</button>
+        <button type="button" class="ud-save" id="up-set-save"><i class="bi bi-check2"></i>Сохранить изменения</button>
       </div>
     </div>
   </div>
@@ -133,5 +148,6 @@
   window.__UP_PARENT_P__ = new URLSearchParams(window.location.search).get("p") || "";
   window.__UP_CAN_EDIT__ = {{ 'true' if (current_user.is_authenticated and current_user.has_perm('edit_search')) else 'false' }};
 </script>
-<script src="{{ url_for('static', filename='js/unit_parent_page.js') }}?v=6-up2"></script>
+<script src="{{ url_for('static', filename='js/unit_parent_page.js') }}?v=7"></script>
+<script src="{{ url_for('static', filename='js/unit_dashboard.js') }}?v=7"></script>
 {% endblock %}
