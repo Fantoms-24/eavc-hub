@@ -42,6 +42,7 @@ from web_portal.lib.db import (
     get_intercept_session,
     list_intercept_callsigns,
     list_online_search_unit_avatar_files,
+    list_online_search_unit_families,
     list_units_tree,
     update_ai_job,
 )
@@ -106,6 +107,10 @@ from web_portal.application.analysis import (
     resolve_graph_timeline_window,
     save_full_report_graph_png,
 )
+from web_portal.application.online_search.media_urls import (
+    collect_family_unit_keys,
+    resolve_unit_avatar_urls,
+)
 
 _log = logging.getLogger("web_portal.webapp.routes.analysis")
 
@@ -138,19 +143,24 @@ def register_analysis_routes(app, ctx: AppContext):
         ensure_db(search_p)
         search_conn = connect(search_p)
         try:
-            avatar_files = list_online_search_unit_avatar_files(search_conn, unit_keys)
+            families = list_online_search_unit_families(search_conn)
+            avatar_keys = sorted(set(unit_keys) | set(collect_family_unit_keys(families)))
+            avatar_files = list_online_search_unit_avatar_files(search_conn, avatar_keys)
+            avatar_urls = resolve_unit_avatar_urls(
+                families,
+                avatar_files,
+                build_url=lambda filename: url_for(
+                    "api_online_search_unit_avatar_file",
+                    filename=filename,
+                ),
+            )
         finally:
             search_conn.close()
         for item in [*nodes, *edges]:
             if not isinstance(item, dict):
                 continue
             unit_key = str(item.get("unit_name") or "").strip()
-            avatar_file = avatar_files.get(unit_key)
-            item["avatar_url"] = (
-                url_for("api_online_search_unit_avatar_file", filename=avatar_file)
-                if avatar_file
-                else ""
-            )
+            item["avatar_url"] = avatar_urls.get(unit_key, "")
         return payload
 
     @app.before_request

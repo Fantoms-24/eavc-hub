@@ -3,15 +3,18 @@
 {% block container_class %}container-fluid px-0{% endblock %}
 {% block styles %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/analysis-group-md3.css') }}" />
-<link rel="stylesheet" href="{{ url_for('static', filename='css/unit_portal.css') }}?v=8-archive-spacing" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/unit_portal.css') }}?v=12-battalion-polish" />
 {% endblock %}
 {% block content %}
-<div class="unit-portal md3-unit-page py-2 px-2 px-sm-3" id="up-bn-root">
+<div class="unit-portal md3-unit-page up-battalion-page py-2 px-2 px-sm-3" id="up-bn-root">
   <div class="up-page-inner">
-  <a class="up-back" href="{{ url_for('search_online') }}">
-    <span class="up-back__ic" aria-hidden="true"><i class="bi bi-arrow-left"></i></span>
-    <span>К поиску онлайн</span>
-  </a>
+  <div class="up-bn-breadcrumb">
+    <a class="up-back" href="{{ url_for('search_online') }}">
+      <span class="up-back__ic" aria-hidden="true"><i class="bi bi-arrow-left"></i></span>
+      <span>К поиску онлайн</span>
+    </a>
+    <span class="up-bn-breadcrumb__context"><i class="bi bi-activity" aria-hidden="true"></i> Аналитика подразделения</span>
+  </div>
   <p class="up-skel" id="up-bn-loading">Загрузка…</p>
   <div id="up-bn-body" class="d-none">
     <header class="up-hero" id="up-hero">
@@ -22,30 +25,68 @@
       </div>
       <div class="up-hero__aurora" id="up-hero-aurora" aria-hidden="true"></div>
       <div class="up-hero__inner">
-        <div>
-          <h1 class="up-hero__title" id="up-bn-title">—</h1>
+        <div class="up-hero__copy">
+          <div class="up-bn-title-row">
+            <h1 class="up-hero__title" id="up-bn-title">—</h1>
+            <span class="up-bn-status"><span class="up-bn-live-dot" aria-hidden="true"></span>Вариант подразделения</span>
+          </div>
           <p class="up-hero__sub" id="up-bn-sub">Вариант note в online_search</p>
           <div class="up-hero__meta" id="up-bn-meta"></div>
         </div>
         <div class="up-hero__patch" id="up-bn-patch"><i class="bi bi-shield-shaded" aria-hidden="true"></i></div>
       </div>
     </header>
-    <div class="up-surface up-about">
-      <h2 class="up-section-title">О подразделении</h2>
-      <div class="up-about__text" id="up-bn-history">—</div>
-    </div>
-    <div class="up-spec mb-4" id="up-bn-spectrum">
-      <h2 class="up-section-title">Активные частоты (seanses + unit)</h2>
-      <p class="text-muted small">Пары, для которых в основной БД в таблице <code>unit</code> указано это подразделение, и есть сеансы.</p>
-      <div class="up-freq" id="up-bn-active"></div>
+
+    <section class="up-bn-metrics" aria-label="Ключевые показатели подразделения">
+      <article class="up-bn-metric up-bn-metric--primary">
+        <span class="up-bn-metric__icon"><i class="bi bi-database" aria-hidden="true"></i></span>
+        <span class="up-bn-metric__copy"><span class="up-bn-metric__label">Записи поиска</span><strong id="up-bn-total">—</strong></span>
+      </article>
+      <article class="up-bn-metric">
+        <span class="up-bn-metric__icon"><i class="bi bi-broadcast-pin" aria-hidden="true"></i></span>
+        <span class="up-bn-metric__copy"><span class="up-bn-metric__label">Активные пары</span><strong id="up-bn-active-total">—</strong></span>
+      </article>
+      <article class="up-bn-metric">
+        <span class="up-bn-metric__icon"><i class="bi bi-archive" aria-hidden="true"></i></span>
+        <span class="up-bn-metric__copy"><span class="up-bn-metric__label">В архиве</span><strong id="up-bn-archive-total">—</strong></span>
+      </article>
+      <article class="up-bn-metric">
+        <span class="up-bn-metric__icon"><i class="bi bi-clock-history" aria-hidden="true"></i></span>
+        <span class="up-bn-metric__copy"><span class="up-bn-metric__label">Последняя фиксация</span><strong id="up-bn-last-seen">—</strong></span>
+      </article>
+    </section>
+
+    <div class="up-bn-analysis-grid">
+      <section class="up-surface up-spec" id="up-bn-spectrum" aria-labelledby="up-bn-active-title">
+        <div class="up-bn-section-head">
+          <div class="up-bn-section-titleline">
+            <span class="up-bn-section-icon"><i class="bi bi-broadcast-pin" aria-hidden="true"></i></span>
+            <h2 class="up-section-title" id="up-bn-active-title">Активные частоты</h2>
+          </div>
+        </div>
+        <div class="up-bn-freq-head" aria-hidden="true"><span>Частота</span><span>Группа</span><span>Сеансы</span><span></span></div>
+        <div class="up-freq" id="up-bn-active"></div>
+      </section>
+
+      <aside class="up-surface up-about" aria-labelledby="up-bn-about-title">
+        <div class="up-bn-section-titleline">
+          <span class="up-bn-section-icon"><i class="bi bi-file-text" aria-hidden="true"></i></span>
+          <h2 class="up-section-title" id="up-bn-about-title">О подразделении</h2>
+        </div>
+        <div class="up-about__text" id="up-bn-history">—</div>
+        <div class="up-bn-context-row">
+          <span>Родительская группа</span>
+          <strong id="up-bn-parent">—</strong>
+        </div>
+      </aside>
     </div>
 
     <section class="up-archive-wrap" aria-labelledby="up-archive-title">
       <div class="up-archive-wrap__heading">
-        <h2 id="up-archive-title" class="up-section-title up-archive-wrap__title">Архив поиска</h2>
-        <p class="up-archive-wrap__lead text-muted">
-          История пар «частота / группа» по метке из <code>online_search</code>: первая и последняя дата записей. Выберите строку, чтобы открыть детали.
-        </p>
+        <div class="up-bn-section-titleline">
+          <span class="up-bn-section-icon"><i class="bi bi-archive" aria-hidden="true"></i></span>
+          <h2 id="up-archive-title" class="up-section-title up-archive-wrap__title">Архив частот и групп</h2>
+        </div>
       </div>
       <div id="up-bn-archive" class="up-archive-mount"></div>
     </section>
@@ -54,10 +95,10 @@
   </div>
   <div class="modal fade" id="up-freq-modal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
-      <div class="modal-content bg-dark text-light border-secondary">
-        <div class="modal-header border-secondary">
+      <div class="modal-content up-bn-modal-content">
+        <div class="modal-header">
           <h2 class="modal-title h5" id="up-freq-modal-title">Частота</h2>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
         </div>
         <div class="modal-body" id="up-freq-modal-body">
           <p class="text-muted small">Загрузка…</p>
@@ -84,7 +125,7 @@
   })();
 </script>
 <script
-  src="{{ url_for('static', filename='js/battalion_page.js') }}?v=6-archive-accordion"
+  src="{{ url_for('static', filename='js/battalion_page.js') }}?v=8-battalion-prototype"
   onerror="if (window.__wpOnBnScriptFail) { window.__wpOnBnScriptFail(); }"
 ></script>
 {% endblock %}

@@ -757,7 +757,11 @@ def merge_families_by_manual_groups(
                 else:
                     by_uk[uk] = {
                         "unit_key": uk,
-                        "label": ch.get("label") or "Записи",
+                        "label": (
+                            ch.get("label")
+                            if ch.get("label") and ch.get("label") != "Записи"
+                            else (f.get("parent_label") or uk)
+                        ),
                         "row_count": n,
                     }
         all_ch = list(by_uk.values())
@@ -809,7 +813,7 @@ def list_online_search_unit_families(conn: sqlite3.Connection) -> list[dict[str,
                 "children": [
                     {
                         "unit_key": uk,
-                        "label": "Записи" if uk != "__none__" else label,
+                        "label": label if uk != "__none__" else "Без подразделения",
                         "row_count": cnt,
                     }
                 ],
@@ -961,12 +965,17 @@ def list_distinct_online_search_units(conn: sqlite3.Connection) -> list[dict[str
     ).fetchall()
     out: list[dict[str, Any]] = []
     for r in rows or []:
-        uk = str(r["ukey"] or "__none__")
-        out.append({"unit_key": uk, "row_count": int(r["cnt"] or 0)})
+        if isinstance(r, (tuple, list)):
+            uk = str(r[0] or '__none__')
+            cnt = int(r[1] or 0)
+        else:
+            uk = str(r['ukey'] or '__none__')
+            cnt = int(r['cnt'] or 0)
+        out.append({'unit_key': uk, 'row_count': cnt})
     out.sort(
         key=lambda x: (
-            x["unit_key"] == "__none__",
-            (x["unit_key"] if x["unit_key"] != "__none__" else "").lower(),
+            x['unit_key'] == '__none__',
+            (x['unit_key'] if x['unit_key'] != '__none__' else '').lower(),
         )
     )
     return out

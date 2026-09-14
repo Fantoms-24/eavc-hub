@@ -12,6 +12,7 @@ from web_portal.application.online_search.media_urls import (
     collect_family_unit_keys,
     parse_hero_payload,
     resolve_family_avatar_url,
+    resolve_unit_avatar_urls,
 )
 from web_portal.application.online_search.unit_detail import (
     assemble_online_search_unit_detail_payload,
@@ -45,6 +46,7 @@ __all__ = [
     "execute_online_search_import_xlsx",
     "parse_hero_payload",
     "resolve_family_avatar_url",
+    "resolve_unit_avatar_urls",
     "validate_battalion_key",
     "validate_parent_key",
     "validate_unit_key",

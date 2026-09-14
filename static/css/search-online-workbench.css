@@ -1008,3 +1008,84 @@ body.eavc-page-search-online .os-wb-card {
   .so-workbench-ui .so-tools { grid-template-columns: 1fr; }
   .so-workbench-ui .so-page-footer { flex-direction: column; gap: .25rem; }
 }
+
+/* Модальное окно групп подразделений */
+.os-group-builder-card {
+  background: var(--so-surface-2, #f8fafc);
+  border: 1px solid var(--so-border, rgba(15, 23, 42, 0.08));
+  transition: all 0.25s ease;
+}
+
+html[data-wp-theme="dark"] .os-group-builder-card {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.os-units-checkbox-list {
+  background: var(--so-surface, #fff);
+  border-color: var(--so-border, rgba(15, 23, 42, 0.12)) !important;
+}
+
+html[data-wp-theme="dark"] .os-units-checkbox-list {
+  background: var(--so-surface-2, #141c2a) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.os-unit-check-item {
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+  border: 1px solid transparent;
+}
+
+.os-unit-check-item:hover {
+  background-color: var(--so-accent-soft, rgba(59, 130, 246, 0.08));
+}
+
+html[data-wp-theme="dark"] .os-unit-check-item:hover {
+  background-color: rgba(59, 130, 246, 0.18);
+}
+
+.os-group-card-item {
+  background: var(--so-surface, #fff);
+  border: 1px solid var(--so-border, rgba(15, 23, 42, 0.08));
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.os-group-card-item:hover {
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+}
+
+.os-group-card-item.is-editing {
+  border-color: var(--so-accent, #3b82f6) !important;
+  background: rgba(59, 130, 246, 0.03) !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
+}
+
+html[data-wp-theme="dark"] .os-group-card-item {
+  background: var(--so-surface-2, #141c2a);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+html[data-wp-theme="dark"] .os-group-card-item strong {
+  color: #f1f5f9 !important;
+}
+
+.os-group-unit-chip {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.76rem;
+  font-weight: 500;
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  background: var(--so-surface, #fff);
+  color: var(--so-text, #1e293b);
+  border: 1px solid var(--so-border, rgba(15, 23, 42, 0.1));
+}
+
+html[data-wp-theme="dark"] .os-group-unit-chip {
+  background: rgba(255, 255, 255, 0.06);
+  color: #e2e8f0;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+

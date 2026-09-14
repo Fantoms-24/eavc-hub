@@ -71,7 +71,7 @@ def assemble_online_search_unit_dashboard_payload(
         ticks[(dt, frequency, group)].add(call)
         last_pair.setdefault(call, (frequency, group))
 
-    labels = _labels(main_conn, names)
+    labels = _labels(main_conn, names, last_pair)
     callsigns = [
         {
             "id": code,
@@ -157,10 +157,45 @@ def _empty(family: dict[str, Any], days: list[str], start: datetime, end: dateti
     }
 
 
-def _labels(conn: sqlite3.Connection, names: list[str]) -> dict[str, str]:
-    marks, values = _in(names)
-    rows = conn.execute(f"SELECT TRIM(code), TRIM(label) FROM intercept_callsigns WHERE TRIM(COALESCE(unit_name, '')) IN ({marks})", values).fetchall()
-    return {str(r[0] or ""): str(r[1] or "") for r in rows if str(r[0] or "").strip() and str(r[1] or "").strip()}
+def _labels(
+    conn: sqlite3.Connection,
+    names: list[str],
+    last_pair: dict[str, tuple[str, str]],
+) -> dict[str, str]:
+    """Возвращает позывной корреспондента, предпочитая совпадение частоты и группы."""
+    if not last_pair:
+        return {}
+    code_marks, codes = _in(list(last_pair))
+    rows = conn.execute(
+        f"SELECT TRIM(code), TRIM(label), TRIM(COALESCE(unit_name, '')), "
+        f"TRIM(COALESCE(frequency, '')), TRIM(COALESCE(group_code, '')) "
+        f"FROM intercept_callsigns WHERE TRIM(code) IN ({code_marks})",
+        codes,
+    ).fetchall()
+    unit_names = {str(name or "").strip().casefold() for name in names if str(name or "").strip()}
+    selected: dict[str, tuple[int, str]] = {}
+    for row in rows:
+        code = str(row[0] or "").strip()
+        label = str(row[1] or "").strip()
+        if not code or not label:
+            continue
+        expected_frequency, expected_group = last_pair.get(code, ("", ""))
+        expected_frequency = expected_frequency.replace(",", ".").replace(" ", "")
+        row_frequency = str(row[3] or "").replace(",", ".").replace(" ", "")
+        row_group = str(row[4] or "").strip()
+        row_unit = str(row[2] or "").strip().casefold()
+        pair_match = bool(
+            expected_group
+            and row_group == expected_group
+            and (not expected_frequency or not row_frequency or row_frequency == expected_frequency)
+        )
+        unit_match = bool(row_unit and row_unit in unit_names)
+        if not pair_match and not unit_match:
+            continue
+        score = (20 if pair_match else 0) + (8 if unit_match else 0)
+        if score > selected.get(code, (-1, ""))[0]:
+            selected[code] = (score, label)
+    return {code: item[1] for code, item in selected.items()}
 
 
 def _last_intercepts(

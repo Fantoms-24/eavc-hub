@@ -890,46 +890,273 @@ function applySearchOnlineMobileUi() {
   root.classList.toggle("so-mobile-ui", window.matchMedia("(max-width: 767.98px)").matches);
 }
 
+let EDITING_GROUP_INDEX = -1;
+
+function startEditingGroup(index) {
+  if (index < 0 || index >= MANUAL_UNIT_GROUPS.length) return;
+  EDITING_GROUP_INDEX = index;
+  const group = MANUAL_UNIT_GROUPS[index];
+
+  if ($("os-group-label")) $("os-group-label").value = String(group.label || "");
+  SELECTED_MANUAL_GROUP_UNITS = new Set(group.units || []);
+
+  const modeBadge = $("os-group-mode-badge");
+  if (modeBadge) {
+    modeBadge.className = "badge rounded-pill bg-warning text-dark px-3 py-1.5 fw-semibold";
+    modeBadge.innerHTML = '<i class="bi bi-pencil-fill me-1"></i>Редактирование';
+  }
+  const modeTitle = $("os-group-mode-title");
+  if (modeTitle) {
+    modeTitle.textContent = `Редактирование: ${group.label || "Группа"}`;
+  }
+  const cancelBtn = $("os-group-cancel-edit-btn");
+  if (cancelBtn) cancelBtn.classList.remove("d-none");
+
+  const addBtnText = $("os-group-add-btn-text");
+  if (addBtnText) addBtnText.textContent = "Сохранить изменения";
+
+  const builderCard = $("os-group-builder-card");
+  if (builderCard) {
+    builderCard.classList.add("border-primary", "shadow-sm");
+    builderCard.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+
+  renderManualGroupUnitOptions();
+  renderManualGroups();
+  if ($("os-group-label")) $("os-group-label").focus();
+}
+
+function cancelEditingGroup() {
+  EDITING_GROUP_INDEX = -1;
+  if ($("os-group-label")) $("os-group-label").value = "";
+  SELECTED_MANUAL_GROUP_UNITS.clear();
+  MANUAL_GROUP_SEARCH_QUERY = "";
+  if ($("os-group-units-search")) $("os-group-units-search").value = "";
+
+  const modeBadge = $("os-group-mode-badge");
+  if (modeBadge) {
+    modeBadge.className = "badge rounded-pill bg-primary px-3 py-1.5 fw-semibold";
+    modeBadge.innerHTML = '<i class="bi bi-plus-circle me-1"></i>Новая группа';
+  }
+  const modeTitle = $("os-group-mode-title");
+  if (modeTitle) {
+    modeTitle.textContent = "Создание группы";
+  }
+  const cancelBtn = $("os-group-cancel-edit-btn");
+  if (cancelBtn) cancelBtn.classList.add("d-none");
+
+  const addBtnText = $("os-group-add-btn-text");
+  if (addBtnText) addBtnText.textContent = "Сохранить группу";
+
+  const builderCard = $("os-group-builder-card");
+  if (builderCard) {
+    builderCard.classList.remove("border-primary", "shadow-sm");
+  }
+
+  renderManualGroupUnitOptions();
+  renderManualGroups();
+}
+
 function renderManualGroups() {
   const list = $("os-groups-list");
   if (!list) return;
   list.innerHTML = "";
+
+  const totalBadge = $("os-groups-total-count");
+  if (totalBadge) totalBadge.textContent = String(MANUAL_UNIT_GROUPS.length);
+
   if (!MANUAL_UNIT_GROUPS.length) {
-    list.innerHTML = '<p class="small text-muted mb-0">Ручных групп пока нет.</p>';
+    list.innerHTML = `
+      <div class="text-center py-4 px-3 border rounded-3 bg-light text-muted">
+        <i class="bi bi-folder-x fs-2 d-block mb-1 opacity-50"></i>
+        <div class="small fw-semibold">Ручных групп пока нет</div>
+        <div class="small text-secondary">Создайте первую группу, выбрав нужные подразделения выше</div>
+      </div>`;
     return;
   }
+
   MANUAL_UNIT_GROUPS.forEach((group, index) => {
+    const isEditing = EDITING_GROUP_INDEX === index;
     const item = document.createElement("div");
-    item.className = "border rounded p-2 bg-light";
+    item.className = `os-group-card-item rounded-3 p-3 ${isEditing ? "is-editing" : ""}`;
+
+    const topRow = document.createElement("div");
+    topRow.className = "d-flex justify-content-between align-items-start gap-2 mb-2";
+
+    const titleWrap = document.createElement("div");
+    titleWrap.className = "d-flex align-items-center gap-2 flex-wrap";
+
+    const titleIcon = document.createElement("i");
+    titleIcon.className = "bi bi-folder2-fill text-primary fs-5";
+
     const title = document.createElement("strong");
+    title.className = "fs-6 fw-bold text-dark text-break";
     title.textContent = String(group.label || "Группа");
-    const members = document.createElement("div");
-    members.className = "small text-muted mt-1";
-    members.textContent = (group.units || []).join(", ");
+
+    const unitsCount = (group.units || []).length;
+    const countBadge = document.createElement("span");
+    countBadge.className = "badge bg-primary-subtle text-primary rounded-pill";
+    countBadge.textContent = `${unitsCount} подразд.`;
+
+    titleWrap.append(titleIcon, title, countBadge);
+
+    if (isEditing) {
+      const editBadge = document.createElement("span");
+      editBadge.className = "badge bg-warning text-dark rounded-pill small";
+      editBadge.innerHTML = '<i class="bi bi-pencil-fill me-1"></i>Редактируется';
+      titleWrap.appendChild(editBadge);
+    }
+
+    const actions = document.createElement("div");
+    actions.className = "d-flex gap-2 flex-shrink-0";
+
+    const editBtn = document.createElement("button");
+    editBtn.type = "button";
+    editBtn.className = "btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1";
+    editBtn.innerHTML = '<i class="bi bi-pencil"></i><span>Изменить</span>';
+    editBtn.title = "Редактировать название и состав группы";
+    editBtn.addEventListener("click", () => startEditingGroup(index));
+
     const remove = document.createElement("button");
     remove.type = "button";
-    remove.className = "btn btn-sm btn-outline-danger mt-2";
-    remove.textContent = "Удалить группу";
+    remove.className = "btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1";
+    remove.innerHTML = '<i class="bi bi-trash3"></i><span>Удалить</span>';
+    remove.title = "Удалить группу";
     remove.addEventListener("click", async () => {
+      if (!confirm(`Удалить группу "${group.label}"?`)) return;
+      if (EDITING_GROUP_INDEX === index) {
+        cancelEditingGroup();
+      } else if (EDITING_GROUP_INDEX > index) {
+        EDITING_GROUP_INDEX--;
+      }
       MANUAL_UNIT_GROUPS.splice(index, 1);
       await saveManualGroups();
     });
-    item.append(title, members, remove);
+
+    actions.append(editBtn, remove);
+    topRow.append(titleWrap, actions);
+
+    const membersWrap = document.createElement("div");
+    membersWrap.className = "d-flex flex-wrap gap-1 mt-2";
+
+    const unitsList = group.units || [];
+    if (unitsList.length) {
+      unitsList.forEach((u) => {
+        const chip = document.createElement("span");
+        chip.className = "os-group-unit-chip";
+        chip.innerHTML = `<i class="bi bi-diagram-2 me-1 text-primary small"></i><span>${escapeHtml(u)}</span>`;
+        membersWrap.appendChild(chip);
+      });
+    } else {
+      membersWrap.innerHTML = '<span class="text-muted small">Нет выбранных подразделений</span>';
+    }
+
+    item.append(topRow, membersWrap);
     list.appendChild(item);
   });
 }
 
+let SELECTED_MANUAL_GROUP_UNITS = new Set();
+let MANUAL_GROUP_SEARCH_QUERY = "";
+
+function updateManualGroupSelectedCount() {
+  const badge = $("os-group-selected-count");
+  if (badge) {
+    badge.textContent = `Выбрано: ${SELECTED_MANUAL_GROUP_UNITS.size}`;
+  }
+}
+
 function renderManualGroupUnitOptions() {
-  const select = $("os-group-units");
-  if (!select) return;
-  const assigned = new Set(MANUAL_UNIT_GROUPS.flatMap((group) => group.units || []));
-  select.innerHTML = "";
-  for (const unit of MANUAL_GROUP_UNITS) {
-    const option = document.createElement("option");
-    option.value = unit.unit_key;
-    option.textContent = `${unit.unit_key} — ${Number(unit.row_count || 0)} записей`;
-    option.disabled = assigned.has(unit.unit_key);
-    select.appendChild(option);
+  const container = $("os-group-units-container");
+  const fallbackSelect = $("os-group-units");
+  if (!container && !fallbackSelect) return;
+
+  // Если редактируем группу, её текущие подразделения не должны быть заблокированы
+  const assigned = new Set(
+    MANUAL_UNIT_GROUPS.flatMap((group, idx) => (idx === EDITING_GROUP_INDEX ? [] : (group.units || [])))
+  );
+  const query = MANUAL_GROUP_SEARCH_QUERY.trim().toLowerCase();
+
+  if (container) {
+    container.innerHTML = "";
+    let visibleCount = 0;
+
+    for (let i = 0; i < MANUAL_GROUP_UNITS.length; i++) {
+      const unit = MANUAL_GROUP_UNITS[i];
+      const key = String(unit.unit_key || "");
+      if (query && !key.toLowerCase().includes(query)) {
+        continue;
+      }
+      visibleCount++;
+
+      const isAssigned = assigned.has(key);
+      const isChecked = SELECTED_MANUAL_GROUP_UNITS.has(key);
+
+      const row = document.createElement("div");
+      row.className = `form-check py-1 px-2 rounded os-unit-check-item d-flex align-items-center gap-2 mb-1 ${isChecked ? "bg-primary-subtle" : ""}`;
+
+      const chk = document.createElement("input");
+      chk.className = "form-check-input flex-shrink-0 mt-0";
+      chk.type = "checkbox";
+      chk.id = `os-unit-chk-${i}`;
+      chk.value = key;
+      chk.checked = isChecked;
+      chk.disabled = isAssigned;
+
+      chk.addEventListener("change", (e) => {
+        if (e.target.checked) {
+          SELECTED_MANUAL_GROUP_UNITS.add(key);
+          row.classList.add("bg-primary-subtle");
+        } else {
+          SELECTED_MANUAL_GROUP_UNITS.delete(key);
+          row.classList.remove("bg-primary-subtle");
+        }
+        updateManualGroupSelectedCount();
+      });
+
+      const label = document.createElement("label");
+      label.className = "form-check-label d-flex justify-content-between align-items-center w-100 mb-0 user-select-none";
+      label.htmlFor = `os-unit-chk-${i}`;
+      label.style.cursor = isAssigned ? "not-allowed" : "pointer";
+
+      const nameSpan = document.createElement("span");
+      nameSpan.className = isAssigned ? "text-muted text-decoration-line-through small" : "fw-medium";
+      nameSpan.textContent = key;
+
+      const badgeSpan = document.createElement("span");
+      if (isAssigned) {
+        badgeSpan.className = "badge bg-secondary-subtle text-secondary small";
+        badgeSpan.textContent = "уже в другой группе";
+      } else {
+        badgeSpan.className = "badge bg-light text-dark border small";
+        badgeSpan.textContent = `${Number(unit.row_count || 0)} зап.`;
+      }
+
+      label.append(nameSpan, badgeSpan);
+      row.append(chk, label);
+      container.appendChild(row);
+    }
+
+    if (visibleCount === 0) {
+      const empty = document.createElement("div");
+      empty.className = "text-muted small text-center py-3";
+      empty.textContent = query ? "Подразделения по запросу не найдены" : "Список подразделений пуст";
+      container.appendChild(empty);
+    }
+
+    updateManualGroupSelectedCount();
+  }
+
+  if (fallbackSelect) {
+    fallbackSelect.innerHTML = "";
+    for (const unit of MANUAL_GROUP_UNITS) {
+      const option = document.createElement("option");
+      option.value = unit.unit_key;
+      option.textContent = `${unit.unit_key} — ${Number(unit.row_count || 0)} записей`;
+      option.disabled = assigned.has(unit.unit_key);
+      option.selected = SELECTED_MANUAL_GROUP_UNITS.has(unit.unit_key);
+      fallbackSelect.appendChild(option);
+    }
   }
 }
 
@@ -954,8 +1181,7 @@ async function openManualGroups() {
     ]);
     MANUAL_UNIT_GROUPS = Array.isArray(groupsData.groups) ? groupsData.groups : [];
     MANUAL_GROUP_UNITS = (unitsData.units || []).filter((unit) => unit.unit_key && unit.unit_key !== "__none__");
-    renderManualGroups();
-    renderManualGroupUnitOptions();
+    cancelEditingGroup();
     if (window.bootstrap) window.bootstrap.Modal.getOrCreateInstance($("os-groups-modal")).show();
   } catch (e) {
     showToast(e.message || String(e), "danger");
@@ -983,17 +1209,57 @@ document.addEventListener("DOMContentLoaded", async () => {
   if ($("manage-groups-btn")) {
     $("manage-groups-btn").addEventListener("click", openManualGroups);
   }
+  if ($("os-group-cancel-edit-btn")) {
+    $("os-group-cancel-edit-btn").addEventListener("click", cancelEditingGroup);
+  }
+  if ($("os-group-units-search")) {
+    $("os-group-units-search").addEventListener("input", (e) => {
+      MANUAL_GROUP_SEARCH_QUERY = (e.target.value || "");
+      renderManualGroupUnitOptions();
+    });
+  }
+  if ($("os-group-units-select-all")) {
+    $("os-group-units-select-all").addEventListener("click", () => {
+      const assigned = new Set(
+        MANUAL_UNIT_GROUPS.flatMap((group, idx) => (idx === EDITING_GROUP_INDEX ? [] : (group.units || [])))
+      );
+      const query = MANUAL_GROUP_SEARCH_QUERY.trim().toLowerCase();
+      for (const unit of MANUAL_GROUP_UNITS) {
+        const key = String(unit.unit_key || "");
+        if (assigned.has(key)) continue;
+        if (!query || key.toLowerCase().includes(query)) {
+          SELECTED_MANUAL_GROUP_UNITS.add(key);
+        }
+      }
+      renderManualGroupUnitOptions();
+    });
+  }
+  if ($("os-group-units-clear-selection")) {
+    $("os-group-units-clear-selection").addEventListener("click", () => {
+      SELECTED_MANUAL_GROUP_UNITS.clear();
+      renderManualGroupUnitOptions();
+    });
+  }
   if ($("os-group-add-btn")) {
     $("os-group-add-btn").addEventListener("click", async () => {
       const label = String($("os-group-label")?.value || "").trim();
-      const selected = Array.from($("os-group-units")?.selectedOptions || []).map((option) => option.value);
+      let selected = Array.from(SELECTED_MANUAL_GROUP_UNITS);
+      if (!selected.length && $("os-group-units")) {
+        selected = Array.from($("os-group-units")?.selectedOptions || []).map((option) => option.value);
+      }
       if (!label || !selected.length) {
         showToast("Укажите название и выберите хотя бы одно подразделение", "warning");
         return;
       }
-      MANUAL_UNIT_GROUPS.push({ label, units: selected });
-      if ($("os-group-label")) $("os-group-label").value = "";
+      const isEditing = EDITING_GROUP_INDEX >= 0;
+      if (isEditing) {
+        MANUAL_UNIT_GROUPS[EDITING_GROUP_INDEX] = { label, units: selected };
+      } else {
+        MANUAL_UNIT_GROUPS.push({ label, units: selected });
+      }
+      cancelEditingGroup();
       await saveManualGroups();
+      showToast(isEditing ? `Группа "${label}" обновлена` : `Группа "${label}" создана`, "success");
     });
   }
   if ($("import-btn") && $("import-xlsx")) {

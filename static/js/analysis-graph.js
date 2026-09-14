@@ -133,7 +133,6 @@
     if (ui.fsMlModelRuns && ui.mlModelRuns) ui.fsMlModelRuns.textContent = ui.mlModelRuns.textContent || "Последние модели: —";
     if (ui.fsStatus && ui.statusMsg) ui.fsStatus.textContent = ui.statusMsg.textContent || "—";
 
-    if (ui.fsMinutes && ui.minutes) ui.fsMinutes.value = ui.minutes.value;
     if (ui.fsStart && ui.start) ui.fsStart.value = ui.start.value;
     if (ui.fsEnd && ui.end) ui.fsEnd.value = ui.end.value;
     if (ui.fsMode && ui.mode) ui.fsMode.value = ui.mode.value;
@@ -318,12 +317,11 @@
   function buildGraphParams() {
     const params = new URLSearchParams();
     const range = readRange();
-    const minutes = Math.max(5, Number(ui.minutes ? ui.minutes.value : 60) || 60);
     if (range) {
       params.set("start", range.start);
       params.set("end", range.end);
     } else {
-      params.set("minutes", String(minutes));
+      params.set("days", String(getTimelineDays()));
     }
     buildScope(params);
     params.set("include_other", ui.includeOther && ui.includeOther.checked ? "1" : "0");
@@ -347,7 +345,7 @@
 
   function syncRangeLabel() {
     if (!ui.statusRange) return;
-    if (state.selectedBucketRange && state.selectedBucketRange.start && state.selectedBucketRange.end) {
+    if (state.timelineManual && state.selectedBucketRange && state.selectedBucketRange.start && state.selectedBucketRange.end) {
       ui.statusRange.textContent = `${fmtDateTime(state.selectedBucketRange.start)} — ${fmtDateTime(
         state.selectedBucketRange.end
       )}`;
@@ -357,8 +355,8 @@
     if (range) {
       ui.statusRange.textContent = `${fmtDateTime(range.start)} — ${fmtDateTime(range.end)}`;
     } else {
-      const m = Number(ui.minutes ? ui.minutes.value : 60) || 60;
-      ui.statusRange.textContent = `окно: последние ${m} мин`;
+      const labels = { 1: "Сутки", 3: "3 дня", 7: "Неделя", 30: "Месяц" };
+      ui.statusRange.textContent = labels[getTimelineDays()] || "Сутки";
     }
   }
 
@@ -507,7 +505,7 @@
 
     const gap = 54;
     const items = components.map((nodes) => {
-      const bb = nodes.boundingBox({ includeLabels: false, includeOverlays: false });
+      const bb = nodes.boundingBox({ includeLabels: true, includeOverlays: false });
       return {
         nodes,
         bb,
@@ -546,13 +544,14 @@
     if (!state.cy) return;
     const showAll = !!(ui.showLabels && ui.showLabels.checked);
     const zoom = Number(state.cy.zoom() || 1);
+    state.cy.nodes().style("font-size", Math.min(26, Math.max(13, 11 / zoom)));
     const weighted = state.cy.nodes("[kind = 'id']").map((node) => Number(node.data("weighted_degree") || 0)).sort((a, b) => b - a);
     const hubCutoff = weighted.length ? weighted[Math.min(weighted.length - 1, Math.floor(weighted.length * 0.16))] : 0;
     state.cy.batch(() => {
       state.cy.nodes("[kind = 'id']").forEach((node) => {
         const isFocused = node.selected() || node.id() === state.focusedElementId || node.id() === state.hoveredNodeId || node.hasClass("rg-related");
         const isHub = Number(node.data("weighted_degree") || 0) >= hubCutoff && Number(node.data("weighted_degree") || 0) > 0;
-        const visible = isFocused || (showAll && (zoom >= 1.08 || (zoom >= 0.62 && isHub)));
+        const visible = isFocused || showAll || (zoom >= 0.4 && isHub) || (weighted.length <= 45 && zoom >= 0.4) || zoom >= 1.35;
         if (!visible) {
           node.data("renderLabel", "");
           return;
@@ -844,6 +843,9 @@
       scheduleCyResize();
       return;
     }
+    const dark = document.documentElement.getAttribute("data-wp-theme") === "dark";
+    const labelColor = dark ? "#e2e8f0" : "#334155";
+    const labelBg = dark ? "#182336" : "#ffffff";
     state.cy = window.cytoscape({
       container: ui.canvas,
       elements,
@@ -855,24 +857,24 @@
           style: {
             "background-color": "data(nodeColor)",
             label: "data(renderLabel)",
-            "font-size": 10.5,
-            color: "#1f2937",
-            "text-background-color": "rgba(248, 250, 252, 0.88)",
-            "text-background-opacity": 1,
+            "font-size": 13,
+            "font-weight": 600,
+            color: labelColor,
+            "text-background-color": labelBg,
+            "text-background-opacity": 0.92,
             "text-background-shape": "roundrectangle",
-            "text-background-padding": 2,
-            "text-outline-color": "rgba(248, 250, 252, 0.2)",
-            "text-outline-width": 0.5,
+            "text-background-padding": 4,
+            "text-outline-width": 0,
             "text-wrap": "wrap",
             "text-max-width": 116,
             "text-justification": "center",
-            "text-valign": "top",
-            "text-margin-y": -14,
+            "text-valign": "bottom",
+            "text-margin-y": 9,
             "line-height": 1.05,
-            width: "mapData(weighted_degree, 0, 60, 15, 36)",
-            height: "mapData(weighted_degree, 0, 60, 15, 36)",
+            width: "mapData(weighted_degree, 0, 60, 18, 38)",
+            height: "mapData(weighted_degree, 0, 60, 18, 38)",
             "border-width": 2.2,
-            "border-color": "data(nodeColor)",
+            "border-color": dark ? "#233249" : "#ffffff",
           },
         },
         {
@@ -880,20 +882,20 @@
           style: {
             "background-color": "data(nodeColor)",
             label: "data(label)",
-            color: "#0f172a",
+            color: labelColor,
             "font-size": 12,
             "font-weight": 700,
-            width: 64,
-            height: 64,
+            width: 52,
+            height: 52,
             "border-width": 3,
             "border-color": "#ffffff",
             "border-opacity": 0.92,
             "text-wrap": "wrap",
             "text-max-width": 180,
-            "text-background-color": "rgba(241, 245, 249, 0.9)",
+            "text-background-color": labelBg,
             "text-background-opacity": 1,
             "text-background-shape": "roundrectangle",
-            "text-background-padding": 2,
+            "text-background-padding": 5,
             "text-outline-width": 0,
           },
         },
@@ -918,19 +920,19 @@
         {
           selector: "edge",
           style: {
-            width: "mapData(weight, 1, 25, 1, 6)",
+            width: "mapData(weight, 1, 25, 0.8, 3.2)",
             "line-color": "data(edgeColor)",
             "curve-style": "bezier",
             "line-cap": "round",
-            "line-opacity": "mapData(weight, 1, 25, 0.32, 0.8)",
+            "line-opacity": "mapData(weight, 1, 25, 0.22, 0.68)",
             opacity: 0.92,
           },
         },
         {
           selector: "edge.rg-unit-link",
           style: {
-            width: 1.4,
-            opacity: 0.26,
+            width: 1,
+            opacity: 0.18,
             "line-style": "dashed",
             "line-color": "data(edgeColor)",
             "curve-style": "straight",
@@ -1290,38 +1292,25 @@
   }
 
   function applyGraphTimeRange(params) {
-    const buckets = state.timelineBuckets || [];
-    const hasAnyData = buckets.some(bucketHasData);
-    const bucket = buckets[state.timelineIdx] || null;
-    if (bucketHasData(bucket) && state.selectedBucketRange) {
+    params.delete("minutes");
+    if (state.timelineManual && state.selectedBucketRange) {
       params.set("start", String(state.selectedBucketRange.start));
       params.set("end", String(state.selectedBucketRange.end));
       params.delete("minutes");
       params.delete("days");
       return "bucket";
     }
-    if (!hasAnyData) {
-      params.delete("start");
-      params.delete("end");
-      params.delete("minutes");
-      params.set("days", String(getTimelineDays()));
-      return "days";
-    }
-    if (state.timelineRange && state.timelineRange.start && state.timelineRange.end) {
-      params.set("start", String(state.timelineRange.start));
-      params.set("end", String(state.timelineRange.end));
-      params.delete("minutes");
+    const range = readRange();
+    if (range) {
+      params.set("start", range.start);
+      params.set("end", range.end);
       params.delete("days");
-      return "timeline";
+      return "custom";
     }
-    if (state.selectedBucketRange && state.selectedBucketRange.start && state.selectedBucketRange.end) {
-      params.set("start", String(state.selectedBucketRange.start));
-      params.set("end", String(state.selectedBucketRange.end));
-      params.delete("minutes");
-      params.delete("days");
-      return "bucket-empty";
-    }
-    return "minutes";
+    params.delete("start");
+    params.delete("end");
+    params.set("days", String(getTimelineDays()));
+    return "days";
   }
 
   function applyBucketSelectionByIdx(idx, manual) {
@@ -1416,26 +1405,12 @@
     if (ui.empty) ui.empty.style.display = data.nodes && data.nodes.length ? "none" : "";
     updateMetrics(data);
     buildCy(data);
-    if (state.cy && ui.showLabels) {
-      state.cy.batch(() => {
-        state.cy.nodes("[kind = 'id']").forEach((n) => {
-          if (!ui.showLabels.checked) {
-            n.data("renderLabel", "");
-            return;
-          }
-          const idLabel = String(n.data("displayLabel") || "");
-          const groupLabel = String(n.data("group") || "").trim();
-          n.data("renderLabel", `${idLabel}\n${formatGroupLabel(groupLabel)}`);
-        });
-      });
-      state.cy.style().update();
-      state.cy.fit(undefined, 28);
-    }
+    updateNodeLabels();
     applySearchFilter();
     if (ui.statusRange && data.start && data.end) {
       ui.statusRange.textContent = `${data.start} — ${data.end}`;
     }
-    if (!(data.nodes && data.nodes.length) && rangeMode === "bucket-empty") {
+    if (!(data.nodes && data.nodes.length) && rangeMode === "bucket") {
       showStatus("В выбранном интервале нет данных. Сдвиньте ползунок таймлайна или выберите больший период.", true);
     } else {
       showStatus(`Узлов: ${(data.nodes || []).length}, связей: ${(data.edges || []).length}`);
@@ -1483,11 +1458,18 @@
 
   async function loadDynamicWindow() {
     const params = buildGraphParams();
-    params.delete("minutes");
+    applyGraphTimeRange(params);
     const b = state.timelineBuckets[state.timelineIdx] || null;
     const cursorTs = (b && b.end) || state.dynamicCursorTs;
-    if (cursorTs) params.set("cursor_ts", String(cursorTs));
-    const data = await apiGet(`/api/analysis/graph-dynamic/window?${params.toString()}`);
+    const manual = state.timelineManual && state.selectedBucketRange;
+    if (manual && cursorTs) {
+      params.set("cursor_ts", String(cursorTs));
+      const start = new Date(String(manual.start).replace(" ", "T"));
+      const end = new Date(String(manual.end).replace(" ", "T"));
+      params.set("window_minutes", String(Math.max(5, Math.round((end - start) / 60000) || 5)));
+    }
+    const endpoint = manual ? "graph-dynamic/window" : "graph";
+    const data = await apiGet(`/api/analysis/${endpoint}?${params.toString()}`);
     state.graphData = data;
     if (ui.empty) ui.empty.style.display = data.nodes && data.nodes.length ? "none" : "";
     updateMetrics(data);
@@ -1976,7 +1958,11 @@
   }
 
   async function refresh(opts = {}) {
-    if (!state.active || state.loading) return;
+    if (!state.active) return;
+    if (state.loading) {
+      state.queuedRefresh = opts;
+      return;
+    }
     const animatePeriod = !!opts.animatePeriod;
     state.loading = true;
     if (animatePeriod) {
@@ -2007,6 +1993,11 @@
         requestAnimationFrame(() => setPeriodTransition(false));
       }
       state.loading = false;
+      if (state.queuedRefresh) {
+        const queued = state.queuedRefresh;
+        state.queuedRefresh = null;
+        refresh(queued);
+      }
     }
   }
 
@@ -2052,9 +2043,26 @@
     state.timer = null;
   }
 
+  function selectPeriod(value) {
+    const days = String(value || "1");
+    [ui.period, ui.fsPeriod].forEach((group) => {
+      if (!group) return;
+      group.querySelectorAll("[data-days]").forEach((button) => {
+        const active = button.getAttribute("data-days") === days;
+        button.classList.toggle("active", active);
+        button.setAttribute("aria-pressed", String(active));
+      });
+    });
+    [ui.start, ui.end, ui.fsStart, ui.fsEnd].forEach((input) => { if (input) input.value = ""; });
+    stopPlayback();
+    state.timelineManual = false;
+    state.selectedBucketRange = null;
+    refresh({ animatePeriod: true });
+  }
+
   function bindControls() {
     const onRefreshInput = () => scheduleRefresh(250);
-    [ui.scope, ui.minutes, ui.unitQuery, ui.groupQuery, ui.start, ui.end, ui.minWeight, ui.clusterBy, ui.maxNodesMode, ui.mode]
+    [ui.scope, ui.unitQuery, ui.groupQuery, ui.start, ui.end, ui.minWeight, ui.clusterBy, ui.maxNodesMode, ui.mode]
       .forEach((el) => {
         if (el) el.addEventListener("change", onRefreshInput);
       });
@@ -2234,10 +2242,7 @@
     if (ui.period) {
       ui.period.querySelectorAll("[data-days]").forEach((btn) => {
         btn.addEventListener("click", () => {
-          ui.period.querySelectorAll("[data-days]").forEach((x) => x.classList.remove("active"));
-          btn.classList.add("active");
-          state.timelineManual = false;
-          refresh({ animatePeriod: true });
+          selectPeriod(btn.getAttribute("data-days"));
         });
       });
     }
@@ -2249,21 +2254,8 @@
         refresh();
       });
     }
-    if (ui.dashboard) {
-      ui.dashboard.querySelectorAll("[data-rg-minutes]").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          const m = btn.getAttribute("data-rg-minutes");
-          if (ui.minutes && m) ui.minutes.value = m;
-          if (ui.start) ui.start.value = "";
-          if (ui.end) ui.end.value = "";
-          state.selectedBucketRange = null;
-          refresh();
-        });
-      });
-    }
     if (ui.fsApply) {
       ui.fsApply.addEventListener("click", () => {
-        if (ui.minutes && ui.fsMinutes) ui.minutes.value = ui.fsMinutes.value;
         if (ui.start && ui.fsStart) ui.start.value = ui.fsStart.value;
         if (ui.end && ui.fsEnd) ui.end.value = ui.fsEnd.value;
         if (ui.mode && ui.fsMode) ui.mode.value = ui.fsMode.value;
@@ -2296,8 +2288,7 @@
     if (ui.fsPeriod) {
       ui.fsPeriod.querySelectorAll("[data-days]").forEach((btn) => {
         btn.addEventListener("click", () => {
-          ui.fsPeriod.querySelectorAll("[data-days]").forEach((x) => x.classList.remove("active"));
-          btn.classList.add("active");
+          selectPeriod(btn.getAttribute("data-days"));
         });
       });
     }
@@ -2347,7 +2338,6 @@
     ui.statusMsg = $("rg-status-msg");
     ui.statusRange = $("rg-status-range");
     ui.scope = $("rg-scope");
-    ui.minutes = $("rg-minutes");
     ui.focusId = $("rg-focus-id");
     ui.maxNodes = $("rg-max-nodes");
     ui.maxEdges = $("rg-max-edges");
@@ -2435,7 +2425,6 @@
     ui.fsMlModelRuns = $("rg-fs-ml-model-runs");
     ui.fsStatus = $("rg-fs-status");
     ui.fsPeriod = $("rg-fs-period");
-    ui.fsMinutes = $("rg-fs-minutes");
     ui.fsStart = $("rg-fs-start");
     ui.fsEnd = $("rg-fs-end");
     ui.fsMode = $("rg-fs-mode");

@@ -110,9 +110,11 @@ function _addFreqBtn(container, k, f, g, sub) {
   const b = document.createElement("button");
   b.type = "button";
   b.className = "border-0";
-  b.innerHTML = `<span class="font-monospace fw-semibold">${_esc(f)}</span>
-    <span class="up-freq__g">G ${_esc(g)}</span>
-    <span class="d-block text-muted" style="font-size:0.65rem;">${_esc(sub || "")}</span>`;
+  b.innerHTML = `<span class="up-freq__signal" aria-hidden="true"><i class="bi bi-broadcast"></i></span>
+    <span class="up-freq__copy"><span class="up-freq__frequency"><span class="up-freq__value">${_esc(f)}</span><span class="up-freq__unit">MHz</span></span>
+    <span class="up-freq__g">Группа G ${_esc(g)}</span></span>
+    <span class="up-freq__sessions">${_esc(sub || "Открыть")}</span>
+    <i class="bi bi-arrow-up-right up-freq__arrow" aria-hidden="true"></i>`;
   b.addEventListener("click", () => {
     void _openFreqModal(k, f, g);
   });
@@ -142,6 +144,90 @@ function _ruPairsWord(n) {
   if (k10 === 1) return "пара";
   if (k10 >= 2 && k10 <= 4) return "пары";
   return "пар";
+}
+
+function _formatBnDate(value) {
+  var raw = String(value || "").trim();
+  var match = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  return match ? match[3] + "." + match[2] + "." + match[1] : raw || "—";
+}
+
+function _renderBattalionArchiveTable(container, k, rows) {
+  if (!container) return;
+  var data = (rows || []).slice().sort(function (a, b) {
+    return String(b.last_seen || "").localeCompare(String(a.last_seen || ""));
+  });
+  container.innerHTML = "";
+
+  var panel = document.createElement("div");
+  panel.className = "up-bn-archive-table";
+  var toolbar = document.createElement("div");
+  toolbar.className = "up-bn-archive-toolbar";
+  toolbar.innerHTML =
+    '<div class="up-bn-archive-stat"><strong>' +
+    String(data.length) +
+    "</strong> " +
+    _ruPairsWord(data.length) +
+    '</div><label class="up-bn-archive-search"><i class="bi bi-search" aria-hidden="true"></i><input type="search" autocomplete="off" placeholder="Поиск по частоте, группе…" aria-label="Фильтр архива"></label>';
+  panel.appendChild(toolbar);
+
+  var header = document.createElement("div");
+  header.className = "up-bn-archive-head";
+  header.innerHTML = "<span>Частота</span><span>Группа</span><span>Первая фиксация</span><span>Последняя фиксация</span><span>Статус</span><span></span>";
+  panel.appendChild(header);
+
+  var list = document.createElement("div");
+  list.className = "up-bn-archive-list";
+  var empty = document.createElement("div");
+  empty.className = "up-bn-archive-empty";
+  empty.textContent = data.length ? "По фильтру ничего не найдено." : "Архив пока пуст.";
+
+  data.forEach(function (row) {
+    var f = String(row.frequency || "");
+    var g = String(row.group || "");
+    var button = document.createElement("button");
+    button.type = "button";
+    button.className = "up-bn-archive-row";
+    button.dataset.search = (f + " " + g + " " + (row.first_seen || "") + " " + (row.last_seen || "")).toLowerCase();
+    button.innerHTML =
+      '<span class="up-bn-archive-frequency"><i aria-hidden="true"></i><strong>' +
+      _esc(f) +
+      '</strong><small>MHz</small></span><span class="up-bn-archive-group">G ' +
+      _esc(g) +
+      '</span><span class="up-bn-archive-date">' +
+      _esc(_formatBnDate(row.first_seen)) +
+      '</span><span class="up-bn-archive-date">' +
+      _esc(_formatBnDate(row.last_seen)) +
+      '</span><span><em class="up-bn-archive-status ' +
+      (row.in_seanses ? "is-live" : "") +
+      '"><i aria-hidden="true"></i>' +
+      (row.in_seanses ? "В сеансах" : "Архив") +
+      '</em></span><i class="bi bi-chevron-right up-bn-archive-go" aria-hidden="true"></i>';
+    button.addEventListener("click", function () {
+      void _openFreqModal(k, f, g);
+    });
+    list.appendChild(button);
+  });
+  if (!data.length) list.appendChild(empty);
+  panel.appendChild(list);
+  container.appendChild(panel);
+
+  var input = toolbar.querySelector("input");
+  if (input) {
+    input.addEventListener("input", function () {
+      var q = String(input.value || "").trim().toLowerCase();
+      var visible = 0;
+      list.querySelectorAll(".up-bn-archive-row").forEach(function (row) {
+        var show = !q || String(row.dataset.search || "").indexOf(q) !== -1;
+        row.hidden = !show;
+        if (show) visible += 1;
+      });
+      if (data.length) {
+        if (visible) empty.remove();
+        else if (!empty.parentNode) list.appendChild(empty);
+      }
+    });
+  }
 }
 
 /**
@@ -266,12 +352,12 @@ function _renderBattalionArchive(container, k, rows) {
     for (var gi = 0; gi < order.length; gi += 1) {
       var fq = order[gi];
       var list = byFreq[fq] || [];
-      var grpSection = document.createElement("section");
+      let grpSection = document.createElement("section");
       grpSection.className = "up-archive-group";
 
       var startOpen = gi < 8;
 
-      var sum = document.createElement("button");
+      let sum = document.createElement("button");
       sum.type = "button";
       sum.className = "up-archive-group__toggle";
       sum.setAttribute("aria-expanded", startOpen ? "true" : "false");
@@ -290,7 +376,7 @@ function _renderBattalionArchive(container, k, rows) {
         chipWord +
         "</span>";
 
-      var body = document.createElement("div");
+      let body = document.createElement("div");
       body.className = "up-archive-group__panel";
       if (!startOpen) body.setAttribute("hidden", "");
 
@@ -421,7 +507,30 @@ function _renderBattalionArchive(container, k, rows) {
     const title = document.getElementById("up-bn-title");
     if (title) title.textContent = k === "__none__" ? "Без подразделения" : k;
     const sub = document.getElementById("up-bn-sub");
-    if (sub) sub.textContent = "Записей в online_search: " + (data.total_in_db == null ? 0 : data.total_in_db);
+    if (sub) sub.textContent = "Оперативный профиль и история активности";
+    const activeRows = data.active_frequencies || [];
+    const archiveRows = data.archive_frequencies || [];
+    const totalRows = data.total_in_db == null ? 0 : data.total_in_db;
+    const lastSeen = archiveRows.reduce(function (latest, row) {
+      var value = String((row && row.last_seen) || "");
+      return value > latest ? value : latest;
+    }, "");
+    const totalEl = document.getElementById("up-bn-total");
+    const activeTotalEl = document.getElementById("up-bn-active-total");
+    const archiveTotalEl = document.getElementById("up-bn-archive-total");
+    const lastSeenEl = document.getElementById("up-bn-last-seen");
+    const activeCountEl = document.getElementById("up-bn-active-count");
+    const parentEl = document.getElementById("up-bn-parent");
+    if (totalEl) totalEl.textContent = String(totalRows);
+    if (activeTotalEl) activeTotalEl.textContent = String(activeRows.length);
+    if (archiveTotalEl) archiveTotalEl.textContent = String(archiveRows.length);
+    if (lastSeenEl) lastSeenEl.textContent = _formatBnDate(lastSeen);
+    if (activeCountEl) activeCountEl.textContent = String(activeRows.length);
+    var parentLabel = String(data.parent_label || "").trim();
+    if (parentLabel === k && k.indexOf(" · ") !== -1) {
+      parentLabel = k.split(" · ")[0].trim();
+    }
+    if (parentEl) parentEl.textContent = parentLabel || "Не определена";
     const prof = data.profile || {};
     const hist = document.getElementById("up-bn-history");
     if (hist) {
@@ -451,7 +560,7 @@ function _renderBattalionArchive(container, k, rows) {
     const act = document.getElementById("up-bn-active");
     if (act) {
       act.innerHTML = "";
-      const af = data.active_frequencies || [];
+      const af = activeRows;
       if (!af.length) {
         act.innerHTML = '<span class="text-muted small">Нет активных пар (нет сеансов с привязкой unit.name = этому note).</span>';
       } else {
@@ -466,7 +575,7 @@ function _renderBattalionArchive(container, k, rows) {
 
     const ar = document.getElementById("up-bn-archive");
     if (ar) {
-      _renderBattalionArchive(ar, k, data.archive_frequencies || []);
+      _renderBattalionArchiveTable(ar, k, archiveRows);
     }
   } catch (e) {
     if (err) {

@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/analysis-callsigns-tg.css') }}?v=3" />
 {% endif %}
 {% if mod == 'graph' and graph_server_available %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/analysis-graph-v2.css') }}?v=graph-ui-20260913" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/analysis-graph-v2.css') }}?v=graph-periods-20260914" />
 {% endif %}
 {% if mod == 'keys' %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/analysis-keys-v2.css') }}?v=2" />
@@ -443,20 +443,11 @@
             <option value="pair">Пара</option>
             <option value="unit">Подразделение</option>
           </select>
-          <select id="rg-minutes" class="form-select form-select-sm rg2__cmd-window" title="Окно графа">
-            <option value="15">15м</option>
-            <option value="30">30м</option>
-            <option value="60" selected>1ч</option>
-            <option value="120">2ч</option>
-            <option value="360">6ч</option>
-            <option value="720">12ч</option>
-          </select>
-          <div class="rg2__period-seg rg-md3-segmented" role="group" id="rg-period" aria-label="Период таймлайна">
-            <button type="button" class="rg-md3-segbtn" data-days="1">1д</button>
-            <button type="button" class="rg-md3-segbtn" data-days="3">3д</button>
-            <button type="button" class="rg-md3-segbtn" data-days="7">7д</button>
-            <button type="button" class="rg-md3-segbtn" data-days="14">14д</button>
-            <button type="button" class="rg-md3-segbtn active" data-days="30">30д</button>
+          <div class="rg2__period-seg rg-md3-segmented" role="group" id="rg-period" aria-label="Период графа">
+            <button type="button" class="rg-md3-segbtn active" data-days="1" aria-pressed="true">Сутки</button>
+            <button type="button" class="rg-md3-segbtn" data-days="3" aria-pressed="false">3 дня</button>
+            <button type="button" class="rg-md3-segbtn" data-days="7" aria-pressed="false">Неделя</button>
+            <button type="button" class="rg-md3-segbtn" data-days="30" aria-pressed="false">Месяц</button>
           </div>
           <button type="button" class="btn btn-outline-secondary btn-sm" id="rg-toggle-filters" aria-expanded="false" aria-controls="rg-filter-drawer">
             <i class="bi bi-sliders"></i><span class="d-none d-lg-inline ms-1">Фильтры</span>
@@ -503,16 +494,6 @@
               <label for="rg-focus-id">Фокус ID</label>
               <input id="rg-focus-id" class="form-control form-control-sm wp-mono" inputmode="numeric" placeholder="—" style="width:5.5rem;" />
             </div>
-            <div class="rg2__field rg2__field--span">
-              <label>Быстрое окно</label>
-              <div class="rg2__chip-row rg-md3-chip-row" aria-label="Быстрый выбор окна">
-                <button type="button" class="rg-md3-chip" data-rg-minutes="30">30′</button>
-                <button type="button" class="rg-md3-chip" data-rg-minutes="60">1ч</button>
-                <button type="button" class="rg-md3-chip" data-rg-minutes="120">2ч</button>
-                <button type="button" class="rg-md3-chip" data-rg-minutes="360">6ч</button>
-                <button type="button" class="rg-md3-chip" data-rg-minutes="720">12ч</button>
-              </div>
-            </div>
           </div>
           <div class="rg2__chips-row">
             <div class="rg2__toggles">
@@ -537,7 +518,7 @@
           </div>
         </section>
         <details class="rg2__advanced">
-          <summary><i class="bi bi-gear me-1"></i>Даты, лейаут и лимиты</summary>
+          <summary><i class="bi bi-gear me-1"></i>Даты, расположение и лимиты</summary>
           <div class="rg2__advanced-body" id="rg-adv-collapse">
           <div>
             <label class="form-label" for="rg-start">С</label>
@@ -551,12 +532,12 @@
             <button class="btn btn-outline-secondary btn-sm w-100" type="button" id="rg-range-clear">Сброс дат</button>
           </div>
           <div>
-            <label class="form-label" for="rg-layout">Лейаут</label>
+            <label class="form-label" for="rg-layout">Расположение</label>
             <select id="rg-layout" class="form-select form-select-sm">
-              <option value="cose" selected>Force</option>
-              <option value="concentric">Concentric</option>
-              <option value="circle">Circle</option>
-              <option value="grid">Grid</option>
+              <option value="cose" selected>Свободное</option>
+              <option value="concentric">По кругам</option>
+              <option value="circle">Круг</option>
+              <option value="grid">Сетка</option>
             </select>
           </div>
           <div>
@@ -665,20 +646,12 @@
                 </aside>
                 <aside class="rg-fs-panel rg-fs-right">
                   <div class="fw-semibold">Промежуток</div>
-                  <div class="rg-md3-segmented rg-md3-segmented--compact w-100 mt-2" role="group" id="rg-fs-period" aria-label="Период таймлайна">
-                    <button type="button" class="rg-md3-segbtn active" data-days="1">1д</button>
-                    <button type="button" class="rg-md3-segbtn" data-days="3">3д</button>
-                    <button type="button" class="rg-md3-segbtn" data-days="7">7д</button>
-                    <button type="button" class="rg-md3-segbtn" data-days="14">14д</button>
-                    <button type="button" class="rg-md3-segbtn" data-days="30">30д</button>
-                  </div>
-                  <label class="form-label small mt-2 mb-1">Окно</label>
-                  <select id="rg-fs-minutes" class="form-select form-select-sm">
-                    <option value="15">15 минут</option>
-                    <option value="30">30 минут</option>
-                    <option value="60" selected>60 минут</option>
-                    <option value="120">120 минут</option>
-                  </select>
+                  <div class="rg-md3-segmented rg-md3-segmented--compact w-100 mt-2" role="group" id="rg-fs-period" aria-label="Период графа">
+            <button type="button" class="rg-md3-segbtn active" data-days="1" aria-pressed="true">Сутки</button>
+            <button type="button" class="rg-md3-segbtn" data-days="3" aria-pressed="false">3 дня</button>
+            <button type="button" class="rg-md3-segbtn" data-days="7" aria-pressed="false">Неделя</button>
+            <button type="button" class="rg-md3-segbtn" data-days="30" aria-pressed="false">Месяц</button>
+          </div>
                   <label class="form-label small mt-2 mb-1">Дата с</label>
                   <input type="datetime-local" class="form-control form-control-sm" id="rg-fs-start" />
                   <label class="form-label small mt-2 mb-1">Дата по</label>
@@ -1434,7 +1407,7 @@
 {% endif %}
 {% if mod == 'graph' and graph_server_available %}
 <script defer src="{{ url_for('static', filename='js/vendor/cytoscape.min.js') }}?v=3.30.2"></script>
-<script defer src="{{ url_for('static', filename='js/analysis-graph.js') }}?v=server-20260913"></script>
+<script defer src="{{ url_for('static', filename='js/analysis-graph.js') }}?v=graph-periods-20260914"></script>
 {% endif %}
 {% if mod == 'crypto' %}
 <script defer src="{{ url_for('static', filename='js/crypto.js') }}"></script>

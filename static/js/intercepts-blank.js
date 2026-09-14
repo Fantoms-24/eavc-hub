@@ -1361,6 +1361,9 @@ function scheduleSave() {
   window.applyAiProofreadFixes = applyAiProofreadFixes;
   window.updateBlankViewMode = updateBlankViewMode;
   window.insertAtCursor = insertAtCursor;
+  window._autoUppercaseAfterDot = _autoUppercaseAfterDot;
+  window._autoScrollEditorIfNeeded = _autoScrollEditorIfNeeded;
+  window._fixDashIfTimeHeaderAtCursor = _fixDashIfTimeHeaderAtCursor;
   window.updateSuggestFromCursor = updateSuggestFromCursor;
   window.initCorrIdSuggestToggle = initCorrIdSuggestToggle;
   window.setSuggest = setSuggest;

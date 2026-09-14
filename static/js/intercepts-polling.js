@@ -307,6 +307,7 @@ function startPollingCurrent() {
 
 
 
+  window._scheduleItemPoll = _scheduleItemPoll;
   window.pollItemOnce = pollItemOnce;
   window.startPollingCurrent = startPollingCurrent;
   window.scheduleTypingPing = scheduleTypingPing;

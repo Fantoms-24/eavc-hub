@@ -254,6 +254,9 @@ function _applyCallsignDecorationsInPlain(textarea) {
 }
 
 
+  window._normalizeCorrespondentId = _normalizeCorrespondentId;
+  window._correspondentIdFromItem = _correspondentIdFromItem;
+  window._correspondentIdFromSegment = _correspondentIdFromSegment;
   window._colorForCode = _colorForCode;
   window._contentSig = _contentSig;
   window._callsignByCode = _callsignByCode;

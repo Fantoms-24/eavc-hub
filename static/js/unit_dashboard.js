@@ -21,16 +21,78 @@
       .trim();
   }
 
+  function pluralUnits(n) {
+    var abs = Math.abs(Number(n) || 0);
+    var mod10 = abs % 10;
+    var mod100 = abs % 100;
+    if (mod100 >= 11 && mod100 <= 19) return abs + " подразделений";
+    if (mod10 === 1) return abs + " подразделение";
+    if (mod10 >= 2 && mod10 <= 4) return abs + " подразделения";
+    return abs + " подразделений";
+  }
+
+  function pluralRecords(n) {
+    var val = Number(n) || 0;
+    var formatted = number(val);
+    var abs = Math.abs(val);
+    var mod10 = abs % 10;
+    var mod100 = abs % 100;
+    if (mod100 >= 11 && mod100 <= 19) return formatted + " записей";
+    if (mod10 === 1) return formatted + " запись";
+    if (mod10 >= 2 && mod10 <= 4) return formatted + " записи";
+    return formatted + " записей";
+  }
+
   function shortChildName(value, fallback) {
-    var text = formatUnitName(value || fallback);
-    var match = text.match(/(?:^|\s)(\d+)\s*(МСБ|МБ|ШБ|БАТ|ББПС|БМП|БОН)(?:\s|$)/iu);
-    return match ? match[1] + " " + match[2].toUpperCase() : formatUnitName(fallback || text);
+    var raw = "";
+    var vStr = String(value || "").trim();
+    var fStr = String(fallback || "").trim();
+    if (vStr && vStr !== "__none__" && vStr !== "Записи") {
+      raw = vStr;
+    } else if (fStr && fStr !== "Записи") {
+      raw = fStr;
+    } else if (vStr) {
+      raw = vStr;
+    } else {
+      raw = "Подразделение";
+    }
+    var text = formatUnitName(raw);
+    if (!text || text === "Записи") return "Подразделение";
+    var match = text.match(/(?:^|\s)(\d+)\s*(МСБ|МБ|ШБ|БАТ|ББПС|БМП|БОН|ДШБ)(?:\s|$)/iu);
+    if (match) {
+      return match[1] + " " + match[2].toUpperCase();
+    }
+    return text;
+  }
+
+  function childSubtitle(name, key) {
+    var full = (String(key || "") + " " + String(name || "")).toLowerCase();
+    var ordinal = String(name || "").match(/^\d+/);
+    if (ordinal) {
+      if (full.indexOf("шб") !== -1) return ordinal[0] + "-й штурмовой батальон";
+      if (full.indexOf("дшб") !== -1) return ordinal[0] + "-й десантно-штурмовой батальон";
+      if (full.indexOf("ббпс") !== -1) return ordinal[0] + "-й батальон БПЛА";
+      if (full.indexOf("бон") !== -1) return ordinal[0] + "-й батальон опер. назначения";
+      if (full.indexOf("бмп") !== -1) return ordinal[0] + "-й батальон морской пехоты";
+      if (full.indexOf("мсб") !== -1 || full.indexOf("мб") !== -1) return ordinal[0] + "-й мотострелковый батальон";
+      return ordinal[0] + "-е подразделение";
+    }
+    if (full.indexOf("взвод связи") !== -1) return "Взвод связи";
+    if (full.indexOf("развед") !== -1) return "Разведывательное подразделение";
+    if (full.indexOf("сухопутн") !== -1) return "Сухопутные войска";
+    if (full.indexOf("морск") !== -1) return "Морская пехота";
+    return "Формирование";
   }
 
   function unitSubtitle(name) {
     var normalized = String(name || "").toLowerCase();
     if (normalized.indexOf("омбр") !== -1) return "Отдельная морская бригада";
+    if (normalized.indexOf("ошп") !== -1) return "Отдельный штурмовой полк";
+    if (normalized.indexOf("ошбр") !== -1) return "Отдельная штурмовая бригада";
     if (normalized.indexOf("мсб") !== -1 || normalized.indexOf("мб") !== -1) return "Мотострелковый батальон";
+    if (normalized.indexOf("шб") !== -1) return "Штурмовой батальон";
+    if (normalized.indexOf("дшб") !== -1) return "Десантно-штурмовой батальон";
+    if (normalized.indexOf("ббпс") !== -1) return "Батальон БПЛА";
     return "Объединённое подразделение";
   }
 
@@ -225,22 +287,77 @@
     var children = (data.children || (profile && profile.children) || []).slice().sort(function (left, right) {
       return shortChildName(left.unit_key, left.label).localeCompare(shortChildName(right.unit_key, right.label), "ru", { numeric: true });
     });
+    var total = children.length;
     var parent = formatUnitName(data.parent_label || (profile && profile.parent_label) || data.parent_key);
-    var childHtml = children.slice(0, 3).map(function (child, index) {
+
+    var layoutModifier = total <= 1 ? "ud-structure--single" : (total === 2 ? "ud-structure--pair" : "ud-structure--multi");
+    root.className = "ud-structure " + layoutModifier + (root.classList.contains("is-expanded") ? " is-expanded" : "");
+
+    var childHtml = children.map(function (child, index) {
       var key = String(child.unit_key || "");
       var name = shortChildName(key, child.label);
-      var ordinal = name.match(/^\d+/);
-      var sub = ordinal ? ordinal[0] + "-й мотострелковый батальон" : "Подразделение";
-      return '<a class="ud-structure-child" href="/search-online/battalion?k=' + encodeURIComponent(key) + '" title="' + esc(formatUnitName(key)) + '">' +
-        '<i class="bi bi-chevron-down"></i><strong>' + esc(name) + '</strong><small>' + esc(sub) + '</small><em class="ud-structure-full">' + esc(formatUnitName(key)) + '</em><span><i class="bi bi-people"></i> ' + number(child.row_count) + ' записей</span></a>';
+      var sub = childSubtitle(name, key);
+      var fullName = formatUnitName(key || child.label || name);
+      var isExtra = index >= 3;
+      return '<a class="ud-structure-child' + (isExtra ? ' ud-structure-child--extra' : '') + '" href="/search-online/battalion?k=' + encodeURIComponent(key) + '" title="' + esc(fullName) + '">' +
+        '<div class="ud-structure-child__head">' +
+          '<span class="ud-structure-child__badge"><i class="bi bi-shield-shaded"></i></span>' +
+          '<i class="bi bi-arrow-up-right ud-structure-child__arrow"></i>' +
+        '</div>' +
+        '<strong class="ud-structure-child__name">' + esc(name) + '</strong>' +
+        '<small class="ud-structure-child__sub">' + esc(sub) + '</small>' +
+        (fullName && fullName !== name ? '<em class="ud-structure-full">' + esc(fullName) + '</em>' : '') +
+        '<span class="ud-structure-child__count"><i class="bi bi-people"></i> ' + esc(pluralRecords(child.row_count)) + '</span>' +
+      '</a>';
     }).join("");
-    root.innerHTML = '<div class="ud-structure-parent"><div class="ud-structure-emblem"><i class="bi bi-shield-shaded"></i></div><div><strong>' + esc(parent) + '</strong><small>' + esc(unitSubtitle(parent)) + '</small><span class="ud-structure-count">' + children.length + ' подразделения</span></div></div>' +
-      '<div class="ud-structure-children">' + childHtml + '</div>';
+
+    var moreBarHtml = "";
+    if (total > 3) {
+      var extraCount = total - 3;
+      moreBarHtml = '<button type="button" class="ud-structure-more-bar" id="udash-more-bar">' +
+        '<span><i class="bi bi-diagram-3-fill"></i> Ещё ' + esc(pluralUnits(extraCount)) + ' в составе</span>' +
+        '<span class="ud-structure-more-action">Показать все (' + total + ') <i class="bi bi-chevron-down"></i></span>' +
+      '</button>';
+    }
+
+    root.innerHTML = '<div class="ud-structure-parent">' +
+        '<div class="ud-structure-emblem"><i class="bi bi-shield-shaded"></i></div>' +
+        '<div>' +
+          '<strong>' + esc(parent) + '</strong>' +
+          '<small>' + esc(unitSubtitle(parent)) + '</small>' +
+          '<span class="ud-structure-count">' + esc(pluralUnits(total)) + '</span>' +
+        '</div>' +
+      '</div>' +
+      '<div class="ud-structure-children">' + (childHtml || '<div class="ud-structure-empty text-muted">Нет привязанных подразделений</div>') + '</div>' +
+      moreBarHtml;
+
     var expand = document.getElementById("udash-expand-structure");
-    if (expand) expand.onclick = function () {
-      root.classList.toggle("is-expanded");
-      expand.textContent = root.classList.contains("is-expanded") ? "Свернуть" : "Развернуть все";
-    };
+    function updateExpandBtn() {
+      var isExp = root.classList.contains("is-expanded");
+      if (expand) {
+        if (isExp) {
+          expand.textContent = "Свернуть";
+        } else {
+          expand.textContent = total > 3 ? "Развернуть все (" + total + ")" : "Развернуть все";
+        }
+      }
+    }
+    updateExpandBtn();
+
+    if (expand) {
+      expand.onclick = function () {
+        root.classList.toggle("is-expanded");
+        updateExpandBtn();
+      };
+    }
+
+    var moreBar = document.getElementById("udash-more-bar");
+    if (moreBar) {
+      moreBar.onclick = function () {
+        root.classList.add("is-expanded");
+        updateExpandBtn();
+      };
+    }
   }
 
   function detailMeta(call) {

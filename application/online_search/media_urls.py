@@ -40,6 +40,45 @@ def resolve_family_avatar_url(
     return None
 
 
+def resolve_unit_avatar_urls(
+    families: list[dict[str, Any]],
+    av_files: dict[str, str],
+    *,
+    build_url: Callable[[str], str],
+) -> dict[str, str]:
+    """Возвращает URL аватара для каждого ключа подразделения в семье.
+
+    Аватар родительской (включая ручную) группы наследуется всеми детьми.
+    Если у родителя фото нет, сохраняется прежний fallback на первый аватар
+    дочернего подразделения. Точные ключи вне семей получают собственное фото.
+    """
+    resolved: dict[str, str] = {}
+    for fam in families or []:
+        family_url = resolve_family_avatar_url(
+            fam,
+            av_files,
+            build_url=build_url,
+        )
+        if not family_url:
+            continue
+        parent_key = str(fam.get("parent_key") or "").strip()
+        if parent_key and parent_key != "__none__":
+            resolved[parent_key] = family_url
+        for child in fam.get("children") or []:
+            unit_key = str(child.get("unit_key") or "").strip()
+            if unit_key and unit_key != "__none__":
+                resolved[unit_key] = family_url
+
+    for unit_key, filename in av_files.items():
+        key = str(unit_key or "").strip()
+        if not key or key in resolved:
+            continue
+        url = avatar_url_for_file(filename, build_url=build_url)
+        if url:
+            resolved[key] = url
+    return resolved
+
+
 def collect_family_unit_keys(families: list[dict[str, Any]]) -> list[str]:
     ukeys: list[str] = []
     for fam in families:

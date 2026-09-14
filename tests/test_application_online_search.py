@@ -9,6 +9,7 @@ from web_portal.application.online_search.media_urls import (
     avatar_url_for_file,
     parse_hero_payload,
     resolve_family_avatar_url,
+    resolve_unit_avatar_urls,
 )
 from web_portal.application.online_search.validation import (
     validate_battalion_key,
@@ -67,3 +68,25 @@ def test_resolve_family_avatar_url_prefers_parent() -> None:
         fam, av_files, build_url=lambda f: f"/avatars/{f}"
     )
     assert url == f"/avatars/{fn}"
+
+
+def test_resolve_unit_avatar_urls_propagates_manual_group_avatar() -> None:
+    fn = "c" * 32 + ".png"
+    families = [
+        {
+            "parent_key": "__manual_group__:ДЕМО",
+            "children": [
+                {"unit_key": "ДЕМО · Вектор"},
+                {"unit_key": "ДЕМО · Спектр"},
+            ],
+        }
+    ]
+
+    urls = resolve_unit_avatar_urls(
+        families,
+        {"__manual_group__:ДЕМО": fn},
+        build_url=lambda filename: f"/avatars/{filename}",
+    )
+
+    assert urls["ДЕМО · Вектор"] == f"/avatars/{fn}"
+    assert urls["ДЕМО · Спектр"] == f"/avatars/{fn}"

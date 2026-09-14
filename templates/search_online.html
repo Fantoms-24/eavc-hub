@@ -4,7 +4,7 @@
 {% block styles %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/analysis-group-md3.css') }}" />
 <link rel="stylesheet" href="{{ url_for('static', filename='css/search_online_md3.css') }}?v=11" />
-<link rel="stylesheet" href="{{ url_for('static', filename='css/search-online-workbench.css') }}?v=studio-20260913-scroll-perf" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/search-online-workbench.css') }}?v=studio-20260914-edit-groups" />
 {% endblock %}
 
 {% block content %}
@@ -118,12 +118,85 @@
   </div>
   <input type="file" id="import-xlsx" class="d-none" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" aria-hidden="true" />
   <div class="modal fade os-unit-modal" id="os-unit-modal" tabindex="-1" aria-labelledby="os-unit-modal-title" aria-hidden="true"><div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl"><div class="modal-content os-unit-modal__content"><div class="modal-header os-unit-modal__header"><h2 class="modal-title h5 mb-0" id="os-unit-modal-title">Подразделение</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button></div><div class="modal-body p-0" id="os-unit-modal-body"></div></div></div></div>
-  <div class="modal fade" id="os-groups-modal" tabindex="-1" aria-labelledby="os-groups-modal-title" aria-hidden="true"><div class="modal-dialog modal-dialog-centered modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h2 class="modal-title h5 mb-0" id="os-groups-modal-title">Группы подразделений</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button></div><div class="modal-body"><p class="small text-muted">Совпадающие названия объединяются сами. Здесь можно вручную объединить разные подразделения в большую группу.</p><label class="form-label" for="os-group-label">Название новой группы</label><input id="os-group-label" class="form-control mb-2" maxlength="180" placeholder="Например: Северное направление" /><label class="form-label" for="os-group-units">Подразделения в группе</label><select id="os-group-units" class="form-select" multiple size="9" aria-describedby="os-group-help"></select><div id="os-group-help" class="form-text">Выберите одно или несколько подразделений, затем сохраните группу.</div><div class="d-flex justify-content-end mt-3"><button type="button" id="os-group-add-btn" class="btn btn-primary">Сохранить группу</button></div><hr /><div id="os-groups-list" class="vstack gap-2" aria-live="polite"></div></div></div></div></div>
+  <div class="modal fade" id="os-groups-modal" tabindex="-1" aria-labelledby="os-groups-modal-title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+      <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+        <div class="modal-header border-bottom px-4 pt-4 pb-3">
+          <div class="d-flex align-items-center gap-3">
+            <div class="os-group-modal-icon d-flex align-items-center justify-content-center bg-primary-subtle text-primary rounded-3" style="width: 44px; height: 44px; font-size: 1.35rem;">
+              <i class="bi bi-collection-fill"></i>
+            </div>
+            <div>
+              <h2 class="modal-title h5 mb-0 fw-bold" id="os-groups-modal-title">Группы подразделений</h2>
+              <p class="small text-muted mb-0">Ручное объединение разных подразделений в общую группу</p>
+            </div>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+        </div>
+        <div class="modal-body px-4 py-3">
+          <!-- Карточка создания / редактирования группы -->
+          <div class="os-group-builder-card p-3 rounded-3 border mb-4" id="os-group-builder-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <div class="d-flex align-items-center gap-2">
+                <span class="badge rounded-pill bg-primary px-3 py-1.5 fw-semibold" id="os-group-mode-badge"><i class="bi bi-plus-circle me-1"></i>Новая группа</span>
+                <span class="fw-semibold small text-secondary" id="os-group-mode-title">Создание группы</span>
+              </div>
+              <button type="button" class="btn btn-sm btn-outline-secondary d-none" id="os-group-cancel-edit-btn">
+                <i class="bi bi-x-circle me-1"></i>Отменить редактирование
+              </button>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small fw-semibold text-secondary" for="os-group-label">Название группы</label>
+              <input id="os-group-label" class="form-control" maxlength="180" placeholder="Например: 155 омбр или Северное направление" />
+            </div>
+
+            <div class="mb-2">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <label class="form-label small fw-semibold text-secondary mb-0" for="os-group-units-search">Подразделения в составе группы</label>
+                <span class="badge rounded-pill bg-primary-subtle text-primary fw-medium px-2.5 py-1" id="os-group-selected-count">Выбрано: 0</span>
+              </div>
+
+              <div class="input-group input-group-sm mb-2 shadow-sm rounded-2">
+                <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                <input type="search" id="os-group-units-search" class="form-control border-start-0" placeholder="Поиск подразделения по названию..." autocomplete="off" />
+                <button type="button" id="os-group-units-select-all" class="btn btn-outline-secondary" title="Выбрать все найденные"><i class="bi bi-check-all me-1"></i>Все</button>
+                <button type="button" id="os-group-units-clear-selection" class="btn btn-outline-secondary" title="Снять выбор"><i class="bi bi-slash-circle me-1"></i>Сбросить</button>
+              </div>
+
+              <div id="os-group-units-container" class="os-units-checkbox-list border rounded-3 p-2 mb-2" style="max-height: 230px; overflow-y: auto;"></div>
+              <select id="os-group-units" class="d-none" multiple aria-hidden="true"></select>
+              <div id="os-group-help" class="form-text small text-muted"><i class="bi bi-info-circle me-1"></i>Отметьте галочками нужные подразделения. При фильтрации отмеченные сохраняются.</div>
+            </div>
+
+            <div class="d-flex justify-content-end mt-3">
+              <button type="button" id="os-group-add-btn" class="btn btn-primary px-4 py-2 fw-semibold d-inline-flex align-items-center gap-2 shadow-sm">
+                <i class="bi bi-check2-circle fs-6"></i>
+                <span id="os-group-add-btn-text">Сохранить группу</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Список уже созданных групп -->
+          <div class="os-groups-section">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h3 class="h6 fw-bold mb-0 text-secondary d-flex align-items-center gap-2">
+                <i class="bi bi-collection text-primary"></i>
+                <span>Сохранённые группы</span>
+                <span class="badge bg-secondary-subtle text-secondary rounded-pill fw-medium" id="os-groups-total-count">0</span>
+              </h3>
+            </div>
+            <div id="os-groups-list" class="vstack gap-3" aria-live="polite"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
   <div class="column-filter-popup" id="column-filter-popup" style="display: none;" role="dialog" aria-label="Фильтр столбца" aria-modal="true"><div class="column-filter-content"><div class="d-flex align-items-center justify-content-between mb-2"><div class="fw-semibold" id="filter-title">Фильтр</div><button type="button" class="btn btn-sm btn-close" id="filter-close" aria-label="Закрыть"></button></div><div id="filter-body"></div><div class="d-flex gap-2 mt-3"><button type="button" class="btn btn-sm btn-primary" id="filter-apply">Применить</button><button type="button" class="btn btn-sm btn-outline-secondary" id="filter-clear">Очистить</button></div></div></div>
 </div>
 {% endblock %}
 {% block scripts %}
 <div id="web-perms" data-edit-search="{{ '1' if current_user.has_perm('edit_search') else '0' }}" style="display:none"></div>
 <script src="{{ url_for('static', filename='js/online_search_unit_modal.js') }}?v=1"></script>
-<script src="{{ url_for('static', filename='js/search_online.js') }}?v=studio-20260913-groups"></script>
+<script src="{{ url_for('static', filename='js/search_online.js') }}?v=studio-20260914-edit-groups"></script>
 {% endblock %}

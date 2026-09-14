@@ -9,13 +9,25 @@ import logging
 _log = logging.getLogger("web_portal.hub_main")
 
 def _ensure_import_path_for_web_portal() -> None:
-    here = Path(__file__).resolve().parent
-    for c in (
-        here.parent,
-        getattr(sys, "_MEIPASS", None) and Path(sys._MEIPASS),
-    ):
-        if c and c.is_dir() and str(c) not in sys.path:
-            sys.path.insert(0, str(c))
+    """Регистрирует текущий каталог как ``web_portal`` при запуске исходников.
+
+    Рабочая папка может называться как угодно (например, ``Copy``), поэтому
+    одного добавления родительского пути в ``sys.path`` недостаточно.
+    """
+    root = Path(__file__).resolve().parent
+    parent = root.parent
+    if str(parent) not in sys.path:
+        sys.path.insert(0, str(parent))
+    bootstrap = root / "_pkg_bootstrap.py"
+    if getattr(sys, "frozen", False) or not bootstrap.exists():
+        return
+    import importlib.util as importlib_util
+
+    spec = importlib_util.spec_from_file_location("_pkg_bootstrap", bootstrap)
+    if spec is not None and spec.loader is not None:
+        module = importlib_util.module_from_spec(spec)
+        sys.modules.setdefault("_pkg_bootstrap", module)
+        spec.loader.exec_module(module)
 
 
 def _root_dir() -> Path:
@@ -91,6 +103,7 @@ def main() -> None:
     Entrypoint для сборки HUB в EXE.
     На офлайн-ПК можно просто запустить HUB.exe — данные будут храниться рядом, в папке data-hub/.
     """
+    _ensure_import_path_for_web_portal()
     root = _root_dir()
     cfg_path = (root / "hub_config.json").resolve()
     cfg = _load_or_create_config(cfg_path)
