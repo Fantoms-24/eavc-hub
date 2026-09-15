@@ -1,4 +1,4 @@
-# -*- mode: python ; coding: utf-8 -*-
+﻿# -*- mode: python ; coding: utf-8 -*-
 
 import os
 import atexit
@@ -83,6 +83,19 @@ a = Analysis(
         "soundfile",
         "_soundfile_data",
         "jiwer",
+        # Scientific stack accidentally pulled from fat .venv-build (~200MB).
+        # Compact HUB (like compact-2026-09-14) does not need these.
+        "scipy",
+        "sklearn",
+        "scikit_learn",
+        "scikit-learn",
+        "llvmlite",
+        "numba",
+        "pandas",
+        "matplotlib",
+        "cv2",
+        "opencv",
+        "opencv-python",
     ],
     win_no_prefer_redirects=False,
     win_private_assemblies=False,

@@ -331,6 +331,137 @@ html[data-wp-theme="dark"] .md3-aviation.av-workbench-ui {
   opacity: 1;
 }
 
+/* ─── Aviation prototype v2: command-console skin, original controls intact ─── */
+.md3-aviation.av-workbench-ui {
+  --av-accent: #2563eb;
+  --av-signal: #06b6d4;
+  --av-alert: #f97316;
+  --av-bg: #f1f5f9;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(6, 182, 212, .10), transparent 28rem),
+    linear-gradient(135deg, #f8fafc 0%, var(--av-bg) 55%, #e8eff8 100%);
+}
+
+html[data-wp-theme="dark"] .md3-aviation.av-workbench-ui {
+  --av-bg: #09111f;
+  --av-surface: #101b2d;
+  --av-surface-2: #14233a;
+  --av-border: rgba(148, 163, 184, .16);
+  background:
+    radial-gradient(circle at 100% 0%, rgba(14, 165, 233, .13), transparent 30rem),
+    linear-gradient(135deg, #07101d 0%, #0a1424 58%, #0d1b2e 100%);
+}
+
+.av-workbench-ui .av-sidebar {
+  padding: .8rem;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--av-surface) 94%, var(--av-accent) 6%), var(--av-surface));
+}
+
+.av-workbench-ui .av-sidebar__block {
+  padding: .85rem;
+  border-radius: 18px;
+  box-shadow: 0 16px 38px rgba(15, 23, 42, .07);
+}
+
+.av-ops-mark {
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+  padding: .1rem 0 .9rem;
+  margin-bottom: .6rem;
+  border-bottom: 1px solid var(--av-border);
+}
+
+.av-ops-mark__radar {
+  display: grid;
+  place-items: center;
+  width: 2.35rem;
+  height: 2.35rem;
+  color: #fff;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--av-accent), var(--av-signal));
+  box-shadow: 0 7px 18px color-mix(in srgb, var(--av-accent) 32%, transparent);
+}
+
+.av-ops-mark b, .av-ops-mark small { display: block; }
+.av-ops-mark b { font-size: .78rem; letter-spacing: .01em; }
+.av-ops-mark small { margin-top: .1rem; color: var(--av-muted); font-size: .66rem; text-transform: uppercase; letter-spacing: .08em; }
+
+.av-workbench-ui .av-sidebar__title { font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; }
+.av-workbench-ui .av-label { font-size: .66rem; letter-spacing: .075em; text-transform: uppercase; }
+.av-workbench-ui .av-hint { font-size: .69rem; }
+.av-workbench-ui #work-date, .av-workbench-ui #freq-search-input { border-radius: 10px; }
+
+.av-workbench-ui .av-main { background: transparent; }
+.av-workbench-ui .av-main__head {
+  min-height: 4.25rem;
+  padding: .65rem 1rem;
+  background: color-mix(in srgb, var(--av-surface) 86%, transparent);
+  backdrop-filter: blur(14px);
+}
+
+.av-workbench-ui .av-main__tabs {
+  padding: .25rem;
+  border-radius: 13px;
+  background: color-mix(in srgb, var(--av-surface-2) 86%, transparent);
+}
+
+.av-workbench-ui .av-main__tab { border-radius: 9px; padding: .5rem .78rem; }
+.av-workbench-ui .av-main__tab.active,
+.av-workbench-ui .av-main__tab[aria-selected="true"] {
+  color: #fff;
+  background: linear-gradient(135deg, var(--av-accent), #3b82f6);
+  box-shadow: 0 7px 16px rgba(37, 99, 235, .22);
+}
+
+.av-main__live {
+  display: inline-flex;
+  align-items: center;
+  gap: .38rem;
+  margin-left: .35rem;
+  padding: .35rem .58rem;
+  border: 1px solid color-mix(in srgb, #10b981 30%, var(--av-border));
+  border-radius: 999px;
+  color: color-mix(in srgb, #059669 80%, var(--av-text));
+  font-size: .68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+}
+.av-main__live-dot { width: .42rem; height: .42rem; border-radius: 50%; background: #10b981; box-shadow: 0 0 0 4px rgba(16,185,129,.12); }
+
+.av-workbench-ui .av-status-bar {
+  min-height: 2rem;
+  padding: .45rem 1rem;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--av-signal) 8%, var(--av-surface)), color-mix(in srgb, var(--av-accent) 5%, var(--av-surface)));
+}
+
+.av-workbench-ui .av-panel__toolbar {
+  padding: 1rem;
+  background: transparent;
+  border: 0;
+}
+.av-workbench-ui .av-panel__subtitle { font-size: .92rem; }
+.av-workbench-ui .av-editor-wrap { padding: 0 1rem 1rem; }
+.av-workbench-ui .av-editor,
+.av-workbench-ui #aviation-text.av-editor {
+  border: 1px solid color-mix(in srgb, var(--av-border) 70%, var(--av-accent) 10%);
+  border-radius: 16px;
+  padding: 1rem 1.1rem;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, .06), inset 0 1px 0 rgba(255,255,255,.45);
+  background-image: linear-gradient(to bottom, transparent 30px, color-mix(in srgb, var(--av-border) 50%, transparent) 31px);
+  background-size: 100% 31px;
+}
+html[data-wp-theme="dark"] .av-workbench-ui #aviation-text.av-editor { box-shadow: 0 18px 45px rgba(0,0,0,.18); }
+
+.av-workbench-ui .av-panel__foot { padding: .6rem 1rem; background: transparent; }
+.av-workbench-ui .btn-primary { border: 0; background: linear-gradient(135deg, var(--av-accent), #3b82f6); box-shadow: 0 7px 16px rgba(37,99,235,.18); }
+.av-workbench-ui .btn-outline-primary { border-color: color-mix(in srgb, var(--av-accent) 30%, var(--av-border)); }
+
+@media (max-width: 900px) {
+  .av-main__live { display: none; }
+}
+
 @keyframes av-pulse {
   50% { opacity: 0.35; }
 }

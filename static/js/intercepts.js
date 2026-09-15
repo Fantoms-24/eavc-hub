@@ -108,15 +108,36 @@ function syncIxChatHeader() {
         subEl.hidden = false;
       }
       if (avatarEl && avatarLetterEl) {
-        const digits = freq.replace(/\D/g, "");
-        const label = (grp || digits.slice(-2) || freq.slice(0, 2) || unit.slice(0, 2) || "?")
-          .slice(0, 2)
-          .toUpperCase();
-        avatarLetterEl.textContent = label;
-        const hue = _ixHueFromSeed(`${freq}|${grp}|${unit}`);
-        avatarEl.style.background = `linear-gradient(145deg, hsl(${hue} 46% 46%) 0%, hsl(${hue} 52% 36%) 100%)`;
-        avatarEl.classList.remove("tg-chat__avatar--empty");
-        avatarEl.hidden = false;
+        const avatarUrl = String(ACTIVE_CAT.avatar_url || "").trim();
+        let img = avatarEl.querySelector("img.tg-chat__avatar-photo");
+        if (avatarUrl) {
+          if (!img) {
+            img = document.createElement("img");
+            img.className = "tg-chat__avatar-photo";
+            img.alt = "";
+            avatarEl.appendChild(img);
+          }
+          img.src = avatarUrl;
+          img.hidden = false;
+          avatarLetterEl.textContent = "";
+          avatarLetterEl.hidden = true;
+          avatarEl.style.background = "";
+          avatarEl.classList.add("tg-chat__avatar--photo");
+          avatarEl.classList.remove("tg-chat__avatar--empty");
+          avatarEl.hidden = false;
+        } else {
+          if (img) img.hidden = true;
+          avatarLetterEl.hidden = false;
+          const digits = freq.replace(/\D/g, "");
+          const label = (grp || digits.slice(-2) || freq.slice(0, 2) || unit.slice(0, 2) || "?")
+            .slice(0, 2)
+            .toUpperCase();
+          avatarLetterEl.textContent = label;
+          const hue = _ixHueFromSeed(`${freq}|${grp}|${unit}`);
+          avatarEl.style.background = `linear-gradient(145deg, hsl(${hue} 46% 46%) 0%, hsl(${hue} 52% 36%) 100%)`;
+          avatarEl.classList.remove("tg-chat__avatar--empty", "tg-chat__avatar--photo");
+          avatarEl.hidden = false;
+        }
       }
     } else {
       titleEl.textContent = unit || "Чат";
@@ -129,7 +150,11 @@ function syncIxChatHeader() {
     }
     if (avatarEl && avatarLetterEl) {
       avatarLetterEl.textContent = "";
+      avatarLetterEl.hidden = false;
+      const img = avatarEl.querySelector("img.tg-chat__avatar-photo");
+      if (img) img.hidden = true;
       avatarEl.classList.add("tg-chat__avatar--empty");
+      avatarEl.classList.remove("tg-chat__avatar--photo");
       avatarEl.hidden = true;
       avatarEl.style.background = "";
     }

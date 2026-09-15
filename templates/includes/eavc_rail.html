@@ -20,7 +20,7 @@
     {% if current_user.has_perm('tab_intercepts') %}
     <a class="eavc-rail__link eavc-rail__link--desktop-only {{ 'eavc-rail__link--active' if ep == 'intercepts' else '' }}"
       href="{{ url_for('intercepts') }}" title="Перехваты"{% if ep == 'intercepts' %} aria-current="page"{% endif %}>
-      <span class="eavc-rail__indicator" aria-hidden="true"></span>
+      <span class="eavc-rail__indicator eavc-rail__activity-dot" data-activity-marker="intercepts" aria-hidden="true" hidden></span>
       <span class="eavc-rail__icon"><i class="bi bi-journal-text" aria-hidden="true"></i></span>
       <span class="eavc-rail__label">Перехваты</span>
     </a>
@@ -28,7 +28,7 @@
     {% if current_user.has_perm('tab_aviation') %}
     <a class="eavc-rail__link eavc-rail__link--desktop-only {{ 'eavc-rail__link--active' if ep == 'aviation' else '' }}"
       href="{{ url_for('aviation') }}" title="Авиация"{% if ep == 'aviation' %} aria-current="page"{% endif %}>
-      <span class="eavc-rail__indicator" aria-hidden="true"></span>
+      <span class="eavc-rail__indicator eavc-rail__activity-dot" data-activity-marker="aviation" aria-hidden="true" hidden></span>
       <span class="eavc-rail__icon"><i class="bi bi-airplane" aria-hidden="true"></i></span>
       <span class="eavc-rail__label">Авиация</span>
     </a>

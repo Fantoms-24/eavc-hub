@@ -40,6 +40,7 @@ from web_portal.lib.aviation_db_sync import (
     get_aviation_callsign_sync_payload,
     get_aviation_frequency_sync_payload,
     get_aviation_intercept_sync_payload,
+    get_aviation_daily_intercept_sync_payload,
 )
 from web_portal.lib.db import connect, enqueue_sync_outbox, ensure_db
 from web_portal.webapp.auth import require_tab
@@ -324,14 +325,17 @@ def register_aviation_routes(app, ctx: AppContext):
                 intercept_id = create_or_update_aviation_intercept(
                     conn, frequency_id=frequency_id, content=content
                 )
-            # Синхронизация (как прежде — только общий бланк aviation_intercepts)
-            if ctx.is_sync_hub() and not wd:
+            # Синхронизация как обычного, так и дневного бланка.
+            if ctx.is_sync_hub():
                 try:
-                    payload = get_aviation_intercept_sync_payload(
-                        conn, intercept_id=intercept_id
-                    )
+                    if wd:
+                        payload = get_aviation_daily_intercept_sync_payload(conn, intercept_id=intercept_id)
+                        sync_kind = "aviation:daily_intercept"
+                    else:
+                        payload = get_aviation_intercept_sync_payload(conn, intercept_id=intercept_id)
+                        sync_kind = "aviation:intercept"
                     enqueue_sync_outbox(
-                        conn, kind="aviation:intercept", payload=payload
+                        conn, kind=sync_kind, payload=payload
                     )
                     # Почти realtime: сразу отправить outbox на сервер
                     try:

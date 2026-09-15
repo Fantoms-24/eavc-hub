@@ -62,7 +62,16 @@ a = Analysis(
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=['tkinter', 'tkinter.*'],
+    # ML/ASR are optional at runtime. Excluding them keeps the SERVER package
+    # small enough for field deployment; core data, sync, reports and UI stay.
+    excludes=[
+        'tkinter', 'tkinter.*',
+        'torch', 'torchaudio', 'torchvision', 'whisper', 'openai_whisper',
+        'transformers', 'sentencepiece', 'librosa', 'soundfile',
+        '_soundfile_data', 'jiwer', 'scipy', 'sklearn', 'scikit_learn',
+        'scikit-learn', 'llvmlite', 'numba', 'pandas', 'matplotlib', 'cv2',
+        'opencv', 'opencv-python',
+    ],
     win_no_prefer_redirects=False,
     win_private_assemblies=False,
     cipher=block_cipher,

@@ -21,6 +21,7 @@ from web_portal.lib.aviation_db_sync import (
     upsert_aviation_callsign_from_sync,
     upsert_aviation_frequency_from_sync,
     upsert_aviation_intercept_from_sync,
+    upsert_aviation_daily_intercept_from_sync,
 )
 from web_portal.lib.db import (
     apply_intercept_catalog_delete_from_sync,
@@ -52,6 +53,7 @@ BULK_SYNC_PUSH_KINDS: frozenset[str] = frozenset(
         "unit:batch",
         "aviation:frequency",
         "aviation:intercept",
+        "aviation:daily_intercept",
         "aviation:callsign",
         "aviation:frequency_delete",
         "aviation:callsign_delete",
@@ -192,6 +194,9 @@ def apply_sync_push_event(
         return 1
     if k == "aviation:intercept":
         upsert_aviation_intercept_from_sync(conn, data=data)
+        return 1
+    if k == "aviation:daily_intercept":
+        upsert_aviation_daily_intercept_from_sync(conn, data=data)
         return 1
     if k == "aviation:callsign":
         upsert_aviation_callsign_from_sync(conn, data=data)

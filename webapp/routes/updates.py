@@ -12,6 +12,7 @@ import subprocess
 import sys
 import threading
 import time
+import socket
 from pathlib import Path
 from urllib import request as urlrequest
 
@@ -27,6 +28,8 @@ from web_portal.config import (
     updates_dir,
 )
 from web_portal.lib.hub_updates import (
+    append_hub_update_report,
+    list_hub_update_reports,
     list_release_packages,
     publish_release,
     read_current_release,
@@ -100,6 +103,8 @@ def _download_package(*, upstream: str, sync_key: str, release: dict) -> Path:
         headers={"X-Sync-Key": sync_key},
     )
     received = 0
+    last_pct = -1
+    last_write = 0.0
     try:
         with urlrequest.urlopen(req, timeout=30) as response, partial.open("wb") as dst:
             while chunk := response.read(1024 * 1024):
@@ -108,10 +113,37 @@ def _download_package(*, upstream: str, sync_key: str, release: dict) -> Path:
                     raise RuntimeError("Размер скачанного обновления не совпадает с манифестом")
                 digest.update(chunk)
                 dst.write(chunk)
+                now = time.monotonic()
+                pct = int(received * 100 / size) if size else 0
+                if (
+                    size
+                    and (pct != last_pct or now - last_write >= 0.4)
+                    and (pct >= last_pct + 1 or now - last_write >= 0.4 or received == size)
+                ):
+                    last_pct = pct
+                    last_write = now
+                    _write_update_request_status(
+                        {
+                            "state": "downloading",
+                            "revision": revision,
+                            "percent": max(0, min(100, pct)),
+                            "bytes_received": received,
+                            "bytes_total": size,
+                        }
+                    )
         if size and received != size:
             raise RuntimeError("Пакет обновления скачан не полностью")
         if not hmac.compare_digest(digest.hexdigest(), checksum):
             raise RuntimeError("Контрольная сумма пакета не совпадает")
+        _write_update_request_status(
+            {
+                "state": "verifying",
+                "revision": revision,
+                "percent": 100,
+                "bytes_received": received,
+                "bytes_total": size or received,
+            }
+        )
         os.replace(partial, final)
         return final
     except Exception:
@@ -355,3 +387,105 @@ def register_update_routes(app, ctx: AppContext) -> None:
 
         threading.Thread(target=_shutdown_after_reply, daemon=True, name="hub-update-shutdown").start()
         return jsonify({"ok": True, "message": "Пакет проверен. HUB перезапустится через несколько секунд."}), 202
+
+
+    @app.post("/api/updates/hub-report")
+    def api_server_hub_update_report():
+        """HUB сообщает SERVER об успешном обновлении (X-Sync-Key)."""
+        if not _is_central_server() or not _require_sync_key():
+            return jsonify({"ok": False, "error": "forbidden"}), 403
+        data = request.get_json(silent=True) or {}
+        try:
+            entry = append_hub_update_report(
+                updates_dir(),
+                {
+                    "hub_id": data.get("hub_id") or request.remote_addr or "unknown",
+                    "hub_name": data.get("hub_name") or "",
+                    "revision": data.get("revision") or "",
+                    "ip_address": request.remote_addr or "",
+                },
+            )
+        except ValueError as exc:
+            return jsonify({"ok": False, "error": str(exc)}), 400
+        if ctx.log_portal_event is not None:
+            ctx.log_portal_event(
+                level="INFO",
+                category="updates",
+                action="hub_updated",
+                message=f"HUB {entry['hub_name']} обновился до {entry['revision']}",
+                username="",
+                path="/api/updates/hub-report",
+                method="POST",
+                details=entry,
+            )
+        return jsonify({"ok": True, "report": entry})
+
+    @app.get("/api/admin/updates/hub-reports")
+    @login_required
+    def api_admin_hub_update_reports():
+        if not _is_release_admin():
+            return jsonify({"ok": False, "error": "forbidden"}), 403
+        if not _is_central_server():
+            return jsonify({"ok": False, "error": "Только на SERVER", "reports": []}), 409
+        limit = request.args.get("limit", 30, type=int)
+        return jsonify({"ok": True, "reports": list_hub_update_reports(updates_dir(), limit=limit)})
+
+    @app.post("/api/hub-update/notify-server")
+    @login_required
+    def api_hub_notify_server_updated():
+        """После успешного обновления HUB один раз отчитывается на SERVER."""
+        if not ctx.is_sync_hub():
+            return jsonify({"ok": False, "error": "Только на HUB"}), 409
+        data = request.get_json(silent=True) or {}
+        revision = str(data.get("revision") or "").strip() or _read_installed_revision()
+        if not revision:
+            return jsonify({"ok": False, "error": "Нет revision"}), 400
+        status_path = DATA_DIR / "update_status.json"
+        try:
+            st = json.loads(status_path.read_text(encoding="utf-8") or "{}")
+        except Exception:
+            st = {}
+        if isinstance(st, dict) and st.get("server_notified") and str(st.get("revision") or "") == revision:
+            return jsonify({"ok": True, "already": True})
+        hostname = socket.gethostname() or "HUB"
+        try:
+            ip_addr = socket.gethostbyname(hostname)
+        except Exception:
+            ip_addr = ""
+        body = json.dumps(
+            {
+                "hub_id": ip_addr or hostname,
+                "hub_name": hostname,
+                "revision": revision,
+            },
+            ensure_ascii=False,
+        ).encode("utf-8")
+        req = urlrequest.Request(
+            f"{ctx.sync_upstream.rstrip('/')}/api/updates/hub-report",
+            data=body,
+            method="POST",
+            headers={
+                "Content-Type": "application/json",
+                "X-Sync-Key": ctx.sync_key,
+            },
+        )
+        try:
+            with urlrequest.urlopen(req, timeout=12) as response:
+                raw = response.read() or b"{}"
+            payload = json.loads(raw.decode("utf-8") or "{}")
+            if not isinstance(payload, dict) or payload.get("ok") is not True:
+                raise RuntimeError(str(payload.get("error") if isinstance(payload, dict) else "bad response"))
+        except Exception as exc:
+            return jsonify({"ok": False, "error": f"Не удалось отчитаться на SERVER: {exc}"}), 502
+        merged = st if isinstance(st, dict) else {}
+        merged.update(
+            {
+                "state": "completed",
+                "revision": revision,
+                "server_notified": True,
+                "percent": 100,
+            }
+        )
+        _write_update_request_status(merged)
+        return jsonify({"ok": True})
+

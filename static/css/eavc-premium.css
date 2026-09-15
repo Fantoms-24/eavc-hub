@@ -237,6 +237,20 @@ html[data-wp-theme="dark"] .eavc-rail__lettermark--dark {
   display: none;
 }
 
+/* Server activity: independent of the selected navigation item. */
+.eavc-rail__activity-dot:not([hidden]) {
+  display: block;
+  position: absolute;
+  top: .34rem;
+  right: .38rem;
+  width: .52rem;
+  height: .52rem;
+  border-radius: 50%;
+  background: #dc2626;
+  border: 2px solid var(--eavc-surface, #fff);
+  box-shadow: 0 0 0 2px color-mix(in srgb, #dc2626 18%, transparent);
+}
+
 .eavc-rail__icon {
   display: inline-flex;
   align-items: center;

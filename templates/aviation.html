@@ -3,7 +3,7 @@
 {% block container_class %}container-fluid px-0 py-0{% endblock %}
 {% block styles %}
 <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="{{ url_for('static', filename='css/aviation-workbench.css') }}?v=1" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/aviation-workbench.css') }}?v=2" />
 <link rel="stylesheet" href="{{ url_for('static', filename='css/aviation-mobile.css') }}?v=1" />
 {% endblock %}
 
@@ -32,6 +32,10 @@
 
           <aside class="av-sidebar av-mobile-section av-mobile-section--freq" aria-label="Частоты">
             <section class="av-sidebar__block">
+              <div class="av-ops-mark" aria-hidden="true">
+                <span class="av-ops-mark__radar"><i class="bi bi-airplane-engines"></i></span>
+                <span><b>Воздушная обстановка</b><small>Оперативный журнал</small></span>
+              </div>
               <div class="av-sidebar__head-row">
                 <h2 class="av-sidebar__title"><i class="bi bi-broadcast"></i>Частоты</h2>
                 <button type="button" id="add-frequency-btn" class="btn btn-outline-primary btn-sm"
@@ -69,6 +73,9 @@
                   <i class="bi bi-table"></i><span>Сводка</span>
                 </button>
               </nav>
+              <div class="av-main__live" aria-label="Статус журнала">
+                <span class="av-main__live-dot" aria-hidden="true"></span>В работе
+              </div>
               <div class="av-main__actions">
                 <button type="button" id="callsigns-panel-btn" class="btn btn-outline-primary btn-sm"
                   title="Все позывные" aria-label="Все позывные">

@@ -57,7 +57,15 @@
 .net-empty { display: grid; place-items: center; min-height: 100%; color: #8090aa; font-size: .82rem; }
 .net-page__content { margin-top: 0; }.net-page__content #net-order-card { box-shadow: none; }
 
-html[data-wp-theme="dark"] .net-redesign { --net-bg: #0c1422; --net-card: #121e30; --net-ink: #e8effb; --net-muted: #9aaccc; --net-line: #263752; background: radial-gradient(circle at 92% 0, rgba(0, 201, 196, .09), transparent 25rem), var(--net-bg); }.net-redesign .net-redesign__filters, html[data-wp-theme="dark"] .net-redesign .net-panel, html[data-wp-theme="dark"] .net-redesign .net-kpi { background: var(--net-card); border-color: var(--net-line); }.net-redesign .net-redesign__previous, html[data-wp-theme="dark"] .net-redesign .net-redesign__quick, html[data-wp-theme="dark"] .net-redesign .net-units-table-wrap thead th { background: #17253a; color: #aab9d1; }.net-redesign .net-units-table-wrap tbody td { color: #d3def0; border-color: #23334d; }.net-redesign .net-units-table-wrap tbody tr:hover { background: #17253a; }
+html[data-wp-theme="dark"] .net-redesign { --net-bg: #0c1422; --net-card: #121e30; --net-ink: #e8effb; --net-muted: #9aaccc; --net-line: #263752; background: radial-gradient(circle at 92% 0, rgba(0, 201, 196, .09), transparent 25rem), var(--net-bg); }
+html[data-wp-theme="dark"] .net-redesign .net-redesign__filters,
+html[data-wp-theme="dark"] .net-redesign .net-panel,
+html[data-wp-theme="dark"] .net-redesign .net-kpi { background: var(--net-card); border-color: var(--net-line); }
+html[data-wp-theme="dark"] .net-redesign .net-redesign__previous,
+html[data-wp-theme="dark"] .net-redesign .net-redesign__quick,
+html[data-wp-theme="dark"] .net-redesign .net-units-table-wrap thead th { background: #17253a; color: #aab9d1; }
+html[data-wp-theme="dark"] .net-redesign .net-units-table-wrap tbody td { color: #d3def0; border-color: #23334d; }
+html[data-wp-theme="dark"] .net-redesign .net-units-table-wrap tbody tr:hover { background: #17253a; }
 
 @media (max-width: 1280px) { .net-redesign__filters { grid-template-columns: repeat(3, minmax(0, 1fr)); }.net-redesign__quick, .net-redesign__actions { justify-self: start; }.net-kpi-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 820px) { .net-redesign { padding: 12px; }.net-redesign__hero { display: block; }.net-redesign__status { text-align: left; margin-top: 10px; }.net-redesign__filters, .net-insight-grid { grid-template-columns: 1fr; }.net-redesign__quick, .net-redesign__actions { width: 100%; }.net-redesign__quick button, .net-redesign__actions .btn { flex: 1; }.net-kpi-grid { grid-template-columns: 1fr; gap: 9px; }.net-units-panel__head { align-items: start; flex-direction: column; }.net-units-panel__controls { justify-content: flex-start; }.net-search-input input, .net-export-unit { width: min(190px, 45vw); } }

@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
 {% set is_audio = page_mode == 'audio' %}
 {% block title %}{{ 'Аудиоперехваты' if is_audio else 'Перехваты' }}{% endblock %}
 {% block container_class %}{{ 'container-fluid px-2 px-md-3 py-2 py-lg-3' if is_audio else 'container-fluid px-0 py-0' }}{% endblock %}
@@ -1795,10 +1795,10 @@
 {% if not is_audio %}
 <script defer src="{{ url_for('static', filename='js/online_search_unit_modal.js') }}?v=1"></script>
 {% endif %}
-<script defer src="{{ url_for('static', filename='js/intercepts.js') }}?v=strip-shell-1"></script>
+<script defer src="{{ url_for('static', filename='js/intercepts.js') }}?v=unit-avatar-1"></script>
 <script defer src="{{ url_for('static', filename='js/intercepts-preview.js') }}?v=editor-helpers-2"></script>
 <script defer src="{{ url_for('static', filename='js/intercepts-session.js') }}?v=extract-1"></script>
-<script defer src="{{ url_for('static', filename='js/intercepts-catalog.js') }}?v=extract-1"></script>
+<script defer src="{{ url_for('static', filename='js/intercepts-catalog.js') }}?v=unit-avatar-1"></script>
 <script defer src="{{ url_for('static', filename='js/intercepts-callsigns.js') }}?v=extract-1"></script>
 <script defer src="{{ url_for('static', filename='js/intercepts-blank.js') }}?v=editor-helpers-2"></script>
 <script defer src="{{ url_for('static', filename='js/intercepts-polling.js') }}?v=export-scheduler-2"></script>

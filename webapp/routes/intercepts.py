@@ -13,7 +13,7 @@ import threading
 import time
 from pathlib import Path
 
-from flask import jsonify, render_template, request, send_file
+from flask import jsonify, render_template, request, send_file, url_for
 from flask_login import current_user, login_required
 
 from web_portal.app_perf import perf_route as _perf_route
@@ -66,7 +66,7 @@ from web_portal.application.intercepts.state_sig import (
     compute_intercept_item_content_sig,
     normalize_intercept_item_content_sig,
 )
-from web_portal.config import DEFAULT_DB_NAME, db_path, portal_db_path
+from web_portal.config import DEFAULT_DB_NAME, db_path, portal_db_path, search_online_db_path
 from web_portal.lib.auth_db import (
     connect_portal,
     get_asr_training_policy,
@@ -93,6 +93,8 @@ from web_portal.lib.db import (
     list_intercept_audio_tasks,
     list_intercept_callsigns,
     list_intercept_catalog,
+    list_online_search_unit_avatar_files,
+    list_online_search_unit_families,
     mark_intercept_audio_listened,
     search_intercept_items,
     set_asr_settings,
@@ -117,8 +119,57 @@ from web_portal.positions import (
 )
 from web_portal.webapp.auth import require_tab
 from web_portal.webapp.context import AppContext
+from web_portal.application.online_search.media_urls import (
+    collect_family_unit_keys,
+    lookup_unit_avatar_url,
+    resolve_unit_avatar_urls,
+)
 
 _log = logging.getLogger("web_portal.webapp.routes.intercepts")
+
+
+def _attach_intercept_catalog_avatars(catalog: list) -> list:
+    """Подставляет avatar_url из онлайн-поиска (фото группы → дочерние unit_name)."""
+    rows = [c for c in (catalog or []) if isinstance(c, dict)]
+    unit_keys = sorted(
+        {
+            str(c.get("unit_name") or "").strip()
+            for c in rows
+            if str(c.get("unit_name") or "").strip()
+        }
+    )
+    if not unit_keys:
+        for c in rows:
+            c.setdefault("avatar_url", "")
+        return catalog
+    try:
+        search_p = search_online_db_path()
+        ensure_db(search_p)
+        search_conn = connect(search_p)
+        try:
+            families = list_online_search_unit_families(search_conn)
+            avatar_keys = sorted(set(unit_keys) | set(collect_family_unit_keys(families)))
+            avatar_files = list_online_search_unit_avatar_files(search_conn, avatar_keys)
+            avatar_map = resolve_unit_avatar_urls(
+                families,
+                avatar_files,
+                build_url=lambda filename: url_for(
+                    "api_online_search_unit_avatar_file",
+                    filename=filename,
+                ),
+            )
+        finally:
+            search_conn.close()
+    except Exception:
+        _log.debug("attach intercept catalog avatars failed", exc_info=True)
+        avatar_map = {}
+    for c in rows:
+        c["avatar_url"] = lookup_unit_avatar_url(
+            avatar_map, str(c.get("unit_name") or "")
+        )
+    return catalog
+
+
 
 
 def _missing_optional(dep: str):
@@ -289,6 +340,8 @@ def register_intercepts_routes(app, ctx: AppContext):
 
         def _respond_state(payload: dict):
             merged = _merge_user_ui_fields(payload)
+            if isinstance(merged.get("catalog"), list):
+                _attach_intercept_catalog_avatars(merged["catalog"])
             if skip_catalog:
                 merged = dict(merged)
                 merged.pop("catalog", None)
@@ -364,6 +417,7 @@ def register_intercepts_routes(app, ctx: AppContext):
             return jsonify({"ok": False, "error": "Нет доступа к позиции"}), 403
         conn = get_request_main_db()
         catalog = list_intercept_catalog(conn, pos) or []
+        _attach_intercept_catalog_avatars(catalog)
         callsigns = list_intercept_callsigns(conn, pos) or []
         cat_max = ""
         for c in catalog:

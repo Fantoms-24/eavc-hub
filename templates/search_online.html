@@ -1,10 +1,10 @@
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
 {% block title %}Поиск · ЕАВС{% endblock %}
 {% block container_class %}container-fluid px-0 py-0{% endblock %}
 {% block styles %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/analysis-group-md3.css') }}" />
 <link rel="stylesheet" href="{{ url_for('static', filename='css/search_online_md3.css') }}?v=11" />
-<link rel="stylesheet" href="{{ url_for('static', filename='css/search-online-workbench.css') }}?v=studio-20260914-edit-groups" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/search-online-workbench.css') }}?v=studio-20260915-units-sort" />
 {% endblock %}
 
 {% block content %}
@@ -202,5 +202,5 @@
 {% block scripts %}
 <div id="web-perms" data-edit-search="{{ '1' if current_user.has_perm('edit_search') else '0' }}" style="display:none"></div>
 <script src="{{ url_for('static', filename='js/online_search_unit_modal.js') }}?v=1"></script>
-<script src="{{ url_for('static', filename='js/search_online.js') }}?v=studio-20260914-edit-groups"></script>
+<script src="{{ url_for('static', filename='js/search_online.js') }}?v=studio-20260915-units-sort"></script>
 {% endblock %}

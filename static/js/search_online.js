@@ -1098,23 +1098,32 @@ function renderManualGroupUnitOptions() {
 
   // Если редактируем группу, её текущие подразделения не должны быть заблокированы
   const assigned = new Set(
-    MANUAL_UNIT_GROUPS.flatMap((group, idx) => (idx === EDITING_GROUP_INDEX ? [] : (group.units || [])))
+    MANUAL_UNIT_GROUPS.flatMap((group, idx) =>
+      idx === EDITING_GROUP_INDEX
+        ? []
+        : (group.units || []).map((u) => normalizeManualGroupNote(u))
+    )
   );
   const query = MANUAL_GROUP_SEARCH_QUERY.trim().toLowerCase();
 
+  const visibleUnits = MANUAL_GROUP_UNITS
+    .map((unit, index) => {
+      const key = String(unit.unit_key || "");
+      const normKey = normalizeManualGroupNote(key);
+      return { unit, index, key, normKey, isAssigned: assigned.has(normKey) || assigned.has(key) };
+    })
+    .filter((row) => !query || row.key.toLowerCase().includes(query))
+    // Свободные сверху, уже распределённые (вычеркнутые) — вниз
+    .sort((a, b) => {
+      if (a.isAssigned !== b.isAssigned) return a.isAssigned ? 1 : -1;
+      return a.key.localeCompare(b.key, "ru", { sensitivity: "base" });
+    });
+
   if (container) {
     container.innerHTML = "";
-    let visibleCount = 0;
 
-    for (let i = 0; i < MANUAL_GROUP_UNITS.length; i++) {
-      const unit = MANUAL_GROUP_UNITS[i];
-      const key = String(unit.unit_key || "");
-      if (query && !key.toLowerCase().includes(query)) {
-        continue;
-      }
-      visibleCount++;
-
-      const isAssigned = assigned.has(key);
+    visibleUnits.forEach((item, renderIndex) => {
+      const { unit, key, isAssigned } = item;
       const isChecked = SELECTED_MANUAL_GROUP_UNITS.has(key);
 
       const row = document.createElement("div");
@@ -1123,7 +1132,7 @@ function renderManualGroupUnitOptions() {
       const chk = document.createElement("input");
       chk.className = "form-check-input flex-shrink-0 mt-0";
       chk.type = "checkbox";
-      chk.id = `os-unit-chk-${i}`;
+      chk.id = `os-unit-chk-${renderIndex}`;
       chk.value = key;
       chk.checked = isChecked;
       chk.disabled = isAssigned;
@@ -1141,7 +1150,7 @@ function renderManualGroupUnitOptions() {
 
       const label = document.createElement("label");
       label.className = "form-check-label d-flex justify-content-between align-items-center w-100 mb-0 user-select-none";
-      label.htmlFor = `os-unit-chk-${i}`;
+      label.htmlFor = `os-unit-chk-${renderIndex}`;
       label.style.cursor = isAssigned ? "not-allowed" : "pointer";
 
       const nameSpan = document.createElement("span");
@@ -1160,9 +1169,9 @@ function renderManualGroupUnitOptions() {
       label.append(nameSpan, badgeSpan);
       row.append(chk, label);
       container.appendChild(row);
-    }
+    });
 
-    if (visibleCount === 0) {
+    if (visibleUnits.length === 0) {
       const empty = document.createElement("div");
       empty.className = "text-muted small text-center py-3";
       empty.textContent = query ? "Подразделения по запросу не найдены" : "Список подразделений пуст";
@@ -1174,27 +1183,72 @@ function renderManualGroupUnitOptions() {
 
   if (fallbackSelect) {
     fallbackSelect.innerHTML = "";
-    for (const unit of MANUAL_GROUP_UNITS) {
+    for (const item of visibleUnits) {
       const option = document.createElement("option");
-      option.value = unit.unit_key;
-      option.textContent = `${unit.unit_key} — ${Number(unit.row_count || 0)} записей`;
-      option.disabled = assigned.has(unit.unit_key);
-      option.selected = SELECTED_MANUAL_GROUP_UNITS.has(unit.unit_key);
+      option.value = item.key;
+      option.textContent = `${item.key} — ${Number(item.unit.row_count || 0)} записей`;
+      option.disabled = item.isAssigned;
+      option.selected = SELECTED_MANUAL_GROUP_UNITS.has(item.key);
       fallbackSelect.appendChild(option);
     }
   }
 }
 
+function normalizeManualGroupNote(value) {
+  let text = String(value || "").trim();
+  text = text.replace(/[«»]/g, '"');
+  text = text.replace(/[\u2018\u2019\u02bc]/g, "'");
+  return text.split(/\s+/).filter(Boolean).join(" ");
+}
+
+function prepareManualGroupsPayload(groups) {
+  const prepared = [];
+  const labels = new Set();
+  const assigned = new Map();
+  for (const raw of groups || []) {
+    const label = normalizeManualGroupNote(raw && raw.label);
+    if (!label || label === "__none__") {
+      throw new Error("Укажите название группы");
+    }
+    const labelKey = label.toLowerCase();
+    if (labels.has(labelKey)) {
+      throw new Error(`Название группы «${label}» уже используется`);
+    }
+    labels.add(labelKey);
+    const members = [];
+    const seen = new Set();
+    for (const item of (raw && raw.units) || []) {
+      const unit = normalizeManualGroupNote(item);
+      if (!unit || unit === "__none__") continue;
+      if (unit.toLowerCase() === labelKey) continue;
+      if (seen.has(unit)) continue;
+      if (assigned.has(unit)) {
+        throw new Error(
+          `Подразделение «${unit}» уже в группе «${assigned.get(unit)}», нельзя добавить в «${label}»`
+        );
+      }
+      assigned.set(unit, label);
+      seen.add(unit);
+      members.push(unit);
+    }
+    if (members.length) prepared.push({ label, units: members });
+  }
+  return prepared;
+}
+
 async function saveManualGroups() {
   try {
-    const data = await apiPost("/api/online-search/manual-groups", { groups: MANUAL_UNIT_GROUPS });
+    const payload = prepareManualGroupsPayload(MANUAL_UNIT_GROUPS);
+    const data = await apiPost("/api/online-search/manual-groups", { groups: payload });
     MANUAL_UNIT_GROUPS = Array.isArray(data.groups) ? data.groups : [];
     renderManualGroups();
     renderManualGroupUnitOptions();
     await refreshUnitsList();
     showToast("Группы подразделений сохранены", "success");
+    return true;
   } catch (e) {
     showToast(e.message || String(e), "danger");
+    return false;
   }
 }
 
@@ -1254,12 +1308,17 @@ document.addEventListener("DOMContentLoaded", async () => {
   if ($("os-group-units-select-all")) {
     $("os-group-units-select-all").addEventListener("click", () => {
       const assigned = new Set(
-        MANUAL_UNIT_GROUPS.flatMap((group, idx) => (idx === EDITING_GROUP_INDEX ? [] : (group.units || [])))
+        MANUAL_UNIT_GROUPS.flatMap((group, idx) =>
+          idx === EDITING_GROUP_INDEX
+            ? []
+            : (group.units || []).map((u) => normalizeManualGroupNote(u))
+        )
       );
       const query = MANUAL_GROUP_SEARCH_QUERY.trim().toLowerCase();
       for (const unit of MANUAL_GROUP_UNITS) {
         const key = String(unit.unit_key || "");
-        if (assigned.has(key)) continue;
+        const normKey = normalizeManualGroupNote(key);
+        if (assigned.has(normKey) || assigned.has(key)) continue;
         if (!query || key.toLowerCase().includes(query)) {
           SELECTED_MANUAL_GROUP_UNITS.add(key);
         }
@@ -1285,14 +1344,25 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
       }
       const isEditing = EDITING_GROUP_INDEX >= 0;
+      const labelKey = normalizeManualGroupNote(label).toLowerCase();
+      const duplicateLabel = MANUAL_UNIT_GROUPS.some((group, idx) => {
+        if (isEditing && idx === EDITING_GROUP_INDEX) return false;
+        return normalizeManualGroupNote(group.label).toLowerCase() === labelKey;
+      });
+      if (duplicateLabel) {
+        showToast(`Название группы «${label}» уже используется`, "warning");
+        return;
+      }
       if (isEditing) {
         MANUAL_UNIT_GROUPS[EDITING_GROUP_INDEX] = { label, units: selected };
       } else {
         MANUAL_UNIT_GROUPS.push({ label, units: selected });
       }
       cancelEditingGroup();
-      await saveManualGroups();
-      showToast(isEditing ? `Группа "${label}" обновлена` : `Группа "${label}" создана`, "success");
+      const saved = await saveManualGroups();
+      if (saved) {
+        showToast(isEditing ? `Группа "${label}" обновлена` : `Группа "${label}" создана`, "success");
+      }
     });
   }
   if ($("import-btn") && $("import-xlsx")) {

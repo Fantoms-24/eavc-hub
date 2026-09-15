@@ -113,6 +113,61 @@ def get_aviation_intercept_sync_payload(
     }
 
 
+def get_aviation_daily_intercept_sync_payload(
+    conn: sqlite3.Connection, intercept_id: int
+) -> dict[str, Any]:
+    """Payload for a dated aviation blank (the form used by the current UI)."""
+    cur = conn.cursor()
+    row = cur.execute(
+        """SELECT d.uuid, d.work_date, d.content, d.updated_at, f.uuid
+           FROM aviation_daily_intercepts d JOIN aviation_frequencies f ON f.id=d.frequency_id
+           WHERE d.id=?""", (intercept_id,)
+    ).fetchone()
+    if not row:
+        raise ValueError("daily intercept not found")
+    if not str(row[0] or "").strip() or not str(row[4] or "").strip():
+        raise ValueError("daily intercept/frequency uuid is required")
+    return {"uuid": str(row[0]), "work_date": str(row[1]), "content": str(row[2] or ""),
+            "updated_at": str(row[3] or ""), "frequency_uuid": str(row[4])}
+
+
+def upsert_aviation_daily_intercept_from_sync(conn: sqlite3.Connection, *, data: dict[str, Any]) -> int:
+    """Idempotently apply a dated aviation blank from a HUB."""
+    init_aviation(conn)
+    d = data or {}
+    uid, fuid = str(d.get("uuid") or "").strip(), str(d.get("frequency_uuid") or "").strip()
+    work_date, content, updated_at = str(d.get("work_date") or "").strip(), str(d.get("content") or ""), str(d.get("updated_at") or "").strip()
+    if not uid or not fuid or not work_date:
+        raise ValueError("uuid/frequency_uuid/work_date обязательны")
+    cur = conn.cursor()
+    freq = cur.execute("SELECT id FROM aviation_frequencies WHERE uuid=?", (fuid,)).fetchone()
+    if not freq:
+        raise ValueError("frequency with uuid not found")
+    frequency_id = int(freq[0])
+    existing = cur.execute("SELECT id, updated_at FROM aviation_daily_intercepts WHERE uuid=?", (uid,)).fetchone()
+    if existing:
+        iid, local_updated = int(existing[0]), str(existing[1] or "")
+        if updated_at and local_updated >= updated_at:
+            return iid
+        cur.execute("UPDATE aviation_daily_intercepts SET frequency_id=?, work_date=?, content=?, updated_at=? WHERE id=?",
+                    (frequency_id, work_date, content, updated_at or None, iid))
+    else:
+        natural = cur.execute("SELECT id, updated_at FROM aviation_daily_intercepts WHERE frequency_id=? AND work_date=?",
+                              (frequency_id, work_date)).fetchone()
+        if natural:
+            iid, local_updated = int(natural[0]), str(natural[1] or "")
+            if updated_at and local_updated >= updated_at:
+                return iid
+            cur.execute("UPDATE aviation_daily_intercepts SET uuid=?, content=?, updated_at=? WHERE id=?",
+                        (uid, content, updated_at or None, iid))
+        else:
+            cur.execute("INSERT INTO aviation_daily_intercepts (uuid, frequency_id, work_date, content, updated_at) VALUES (?, ?, ?, ?, ?)",
+                        (uid, frequency_id, work_date, content, updated_at or None))
+            iid = int(cur.lastrowid)
+    conn.commit()
+    return iid
+
+
 def get_aviation_callsign_sync_payload(
     conn: sqlite3.Connection, callsign_id: int
 ) -> dict[str, Any]:

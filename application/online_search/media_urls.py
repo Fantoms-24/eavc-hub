@@ -51,8 +51,24 @@ def resolve_unit_avatar_urls(
     Аватар родительской (включая ручную) группы наследуется всеми детьми.
     Если у родителя фото нет, сохраняется прежний fallback на первый аватар
     дочернего подразделения. Точные ключи вне семей получают собственное фото.
+
+    Дополнительно кладём алиасы: parent_label, нормализованный casefold-ключ и
+    «голое» имя ручной группы без префикса ``__manual_group__:`` — чтобы
+    перехваты с unit_name вроде «1 мб 155 омбр» находили фото группы.
     """
+    from web_portal.lib.db.units import _norm_unit_note
+
     resolved: dict[str, str] = {}
+
+    def _alias(key: str, url: str) -> None:
+        k = str(key or "").strip()
+        if not k or not url:
+            return
+        resolved.setdefault(k, url)
+        nk = _norm_unit_note(k).casefold()
+        if nk:
+            resolved.setdefault(nk, url)
+
     for fam in families or []:
         family_url = resolve_family_avatar_url(
             fam,
@@ -63,11 +79,16 @@ def resolve_unit_avatar_urls(
             continue
         parent_key = str(fam.get("parent_key") or "").strip()
         if parent_key and parent_key != "__none__":
-            resolved[parent_key] = family_url
+            _alias(parent_key, family_url)
+            if parent_key.startswith("__manual_group__:"):
+                _alias(parent_key.split(":", 1)[1], family_url)
+        parent_label = str(fam.get("parent_label") or "").strip()
+        if parent_label and parent_label != "__none__":
+            _alias(parent_label, family_url)
         for child in fam.get("children") or []:
             unit_key = str(child.get("unit_key") or "").strip()
             if unit_key and unit_key != "__none__":
-                resolved[unit_key] = family_url
+                _alias(unit_key, family_url)
 
     for unit_key, filename in av_files.items():
         key = str(unit_key or "").strip()
@@ -75,8 +96,31 @@ def resolve_unit_avatar_urls(
             continue
         url = avatar_url_for_file(filename, build_url=build_url)
         if url:
-            resolved[key] = url
+            _alias(key, url)
     return resolved
+
+
+def lookup_unit_avatar_url(avatar_map: dict[str, str], unit_name: str) -> str:
+    """Ищет фото по unit_name: точное → нормализованное → родитель из note."""
+    from web_portal.lib.db.units import _norm_unit_note, parse_note_unit_parent_child
+
+    key = str(unit_name or "").strip()
+    if not key or not avatar_map:
+        return ""
+    if key in avatar_map:
+        return str(avatar_map[key] or "")
+    nk = _norm_unit_note(key).casefold()
+    if nk and nk in avatar_map:
+        return str(avatar_map[nk] or "")
+    parent, _child = parse_note_unit_parent_child(key)
+    parent = str(parent or "").strip()
+    if parent and parent != key:
+        if parent in avatar_map:
+            return str(avatar_map[parent] or "")
+        pn = _norm_unit_note(parent).casefold()
+        if pn and pn in avatar_map:
+            return str(avatar_map[pn] or "")
+    return ""
 
 
 def collect_family_unit_keys(families: list[dict[str, Any]]) -> list[str]:

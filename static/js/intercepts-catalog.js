@@ -809,7 +809,8 @@ function renderGroups(catalog) {
         frequency: c.frequency || "",
         group_code: c.group_code || "",
         location: String(c.location || "").trim(),
-        archived_only: c.archived_only || false
+        archived_only: c.archived_only || false,
+        avatar_url: String(c.avatar_url || "").trim(),
       };
       const isActive = _catalogMatchesActive(c);
       const isFav = favSet.has(_catalogRowKey(c));
@@ -853,8 +854,12 @@ function renderGroups(catalog) {
         const hue = _tgAvatarHue(`${c.frequency}${c.group_code}`);
         const letter = String(c.group_code || c.frequency || "?").trim().charAt(0).toUpperCase() || "?";
         const previewHtml = _formatCatalogPreviewHtml(c);
+        const avatarUrl = String(c.avatar_url || "").trim();
+        const avatarHtml = avatarUrl
+          ? `<span class="tg-chat-item__avatar tg-chat-item__avatar--photo"><img src="${_escapeAttr(avatarUrl)}" alt="" loading="lazy" decoding="async" /></span>`
+          : `<span class="tg-chat-item__avatar" style="background:hsl(${hue},48%,46%)">${escapeHtml(letter)}</span>`;
         btn.innerHTML = `
-          <span class="tg-chat-item__avatar" style="background:hsl(${hue},48%,46%)">${escapeHtml(letter)}</span>
+          ${avatarHtml}
           <span class="tg-chat-item__body">
             <span class="tg-chat-item__top">
               <span class="tg-chat-item__title">${escapeHtml(c.frequency || "")} ${escapeHtml(c.group_code || "")}</span>

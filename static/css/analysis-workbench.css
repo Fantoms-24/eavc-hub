@@ -403,21 +403,37 @@ html[data-wp-theme="dark"] .md3-analysis-group.an-workbench-ui {
   }
 }
 
-/* Общий анализ радиосети: прокрутка внутри card-body (таблица + диаграммы) */
+/* Общий анализ радиосети: скрыть панель «Модули», прокрутка для net-redesign */
+@media (min-width: 768px) {
+  body.eavc-page-analysis .md3-analysis-group.an-workbench-ui[data-an-container="network"] .an-sidebar {
+    display: none !important;
+  }
+}
+
 body.eavc-page-analysis .md3-analysis-group.an-workbench-ui[data-an-container="network"] .an-main {
   overflow: hidden !important;
   min-height: 0;
 }
 
-body.eavc-page-analysis .md3-analysis-group.an-workbench-ui[data-an-container="network"] .sessions-main,
 body.eavc-page-analysis .md3-analysis-group.an-workbench-ui[data-an-container="network"] .sessions-main > .card.wp-card,
-body.eavc-page-analysis .md3-analysis-group.an-workbench-ui[data-an-container="network"] .sessions-main.net-page,
 body.eavc-page-analysis .md3-analysis-group.an-workbench-ui[data-an-container="network"] .sessions-main.net-page > .net-page__card {
   flex: 1 1 auto;
   min-height: 0;
   overflow: hidden;
 }
 
+/* Redesign: нет .net-page__card — скролл на самом .net-page */
+body.eavc-page-analysis .md3-analysis-group.an-workbench-ui[data-an-container="network"] .sessions-main.net-page.net-redesign,
+body.eavc-page-analysis .md3-analysis-group.an-workbench-ui[data-an-container="network"] .sessions-main.net-page:not(:has(> .net-page__card)) {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* Legacy: скролл внутри card-body / net-page__body */
 body.eavc-page-analysis .md3-analysis-group.an-workbench-ui[data-an-container="network"] .sessions-main > .card.wp-card > .card-body,
 body.eavc-page-analysis .md3-analysis-group.an-workbench-ui[data-an-container="network"] .sessions-main.net-page > .net-page__card > .net-page__body {
   flex: 1 1 auto;

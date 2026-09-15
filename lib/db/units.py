@@ -783,7 +783,7 @@ def save_unit_parent_manual_groups(groups: list[dict[str, Any]]) -> list[list[st
     группу, чтобы результат каталога оставался однозначным.
     """
     prepared: list[list[str]] = []
-    assigned: set[str] = set()
+    assigned: dict[str, str] = {}
     labels: set[str] = set()
     for raw in groups or []:
         if not isinstance(raw, dict):
@@ -792,17 +792,27 @@ def save_unit_parent_manual_groups(groups: list[dict[str, Any]]) -> list[list[st
         if not label or label == "__none__":
             raise ValueError("Укажите название группы")
         if label.casefold() in labels:
-            raise ValueError("Названия групп не должны повторяться")
+            raise ValueError(f"Название группы «{label}» уже используется")
         labels.add(label.casefold())
         units = raw.get("units") if isinstance(raw.get("units"), list) else []
         members: list[str] = []
+        seen_in_group: set[str] = set()
         for item in units:
             unit = _norm_unit_note(" ".join(str(item or "").split()))
             if not unit or unit == "__none__":
                 continue
-            if unit in assigned:
-                raise ValueError(f"Подразделение «{unit}» назначено более чем в одну группу")
-            assigned.add(unit)
+            if unit.casefold() == label.casefold():
+                # название группы не должно дублироваться как участник
+                continue
+            if unit in seen_in_group:
+                continue
+            owner = assigned.get(unit)
+            if owner is not None:
+                raise ValueError(
+                    f"Подразделение «{unit}» уже в группе «{owner}», нельзя добавить в «{label}»"
+                )
+            assigned[unit] = label
+            seen_in_group.add(unit)
             members.append(unit)
         if members:
             prepared.append([label, *members])

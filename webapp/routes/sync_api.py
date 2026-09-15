@@ -6,6 +6,7 @@ import hmac
 import logging
 
 from flask import jsonify, request
+from flask_login import current_user, login_required
 
 from web_portal.config import DEFAULT_DB_NAME, db_path, portal_db_path
 from web_portal.app_perf import perf_route as _perf_route
@@ -20,6 +21,11 @@ from web_portal.lib.heavy_workers import run_sync_pull_blocking as _run_sync_pul
 from web_portal.lib.sync_pull_builder import build_sync_pull_payload as _build_sync_pull_payload
 from web_portal.webapp.context import AppContext
 from web_portal.webapp.timeutils import _utc_now_str
+from web_portal.lib.sync_activity_notifications import (
+    get_unread_sync_activity,
+    mark_sync_activity_read,
+    record_sync_activity,
+)
 
 _log = logging.getLogger("web_portal.webapp.routes.sync_api")
 logger = logging.getLogger(__name__)
@@ -98,6 +104,11 @@ def register_sync_routes(app, ctx: AppContext):
                     if kind == "intercepts:item":
                         ctx.bump_intercept_item_live_from_sync(conn, payload)
                         ctx.intercepts_state_cache_clear()
+                    if not ctx.is_sync_hub():
+                        record_sync_activity(
+                            conn, kind=kind, payload=payload,
+                            source_hub=str(position_name or hub_name or hub_id),
+                        )
                 except Exception as exc:
                     phase_errors.append(f"{kind}: {exc}")
                     if fail_fast:
@@ -151,10 +162,16 @@ def register_sync_routes(app, ctx: AppContext):
             _apply_phase(priority_ev, fail_fast=True, split_external=False)
             # Фаза 2: seans/search/portal без блокировки main; unit/aviation — короткий commit.
             _apply_phase(bulk_ev, fail_fast=False, split_external=True)
+            # External handlers commit their own data, while the activity marker
+            # is inserted through this main connection after each handler.
+            conn.commit()
 
-            body: dict = {"ok": True, "applied": applied, "now": _now_ts()}
+            # A 200/ok response must mean every event was stored. Otherwise HUB
+            # advances its cursor and a failed seanses batch is lost forever.
+            body: dict = {"ok": not phase_errors, "applied": applied, "now": _now_ts()}
             if phase_errors:
                 body["errors"] = phase_errors[:8]
+                body["error"] = "sync_push_partial_failure"
             return jsonify(body)
         except Exception as exc:
             try:
@@ -320,6 +337,39 @@ def register_sync_routes(app, ctx: AppContext):
                     },
                 )
         return jsonify(result)
+
+    @app.get("/api/activity-notifications")
+    @login_required
+    def api_activity_notifications():
+        """Unread HUB data markers; deliberately disabled on HUB."""
+        if ctx.is_sync_hub():
+            return jsonify({"ok": True, "enabled": False, "sections": {}})
+        p = db_path(DEFAULT_DB_NAME)
+        ensure_db(p)
+        conn = connect(p)
+        try:
+            sections = get_unread_sync_activity(conn, user_id=int(current_user.id))
+            conn.commit()
+            return jsonify({"ok": True, "enabled": True, "sections": sections})
+        finally:
+            conn.close()
+
+    @app.post("/api/activity-notifications/<section>/read")
+    @login_required
+    def api_activity_notifications_read(section: str):
+        if ctx.is_sync_hub():
+            return jsonify({"ok": True, "enabled": False})
+        p = db_path(DEFAULT_DB_NAME)
+        ensure_db(p)
+        conn = connect(p)
+        try:
+            mark_sync_activity_read(conn, user_id=int(current_user.id), section=section)
+            conn.commit()
+            return jsonify({"ok": True})
+        except ValueError:
+            return jsonify({"ok": False, "error": "unknown section"}), 404
+        finally:
+            conn.close()
 
     @app.get("/api/sync/status")
     def api_sync_status():

@@ -585,6 +585,30 @@ html[data-wp-theme="dark"] .md3-intercepts.ix-messenger-ui #groups-list .ix-cata
   font-family: var(--tg-font-ui);
 }
 
+.md3-intercepts.ix-messenger-ui .tg-chat-item__avatar--photo {
+  padding: 0;
+  overflow: hidden;
+  background: #d7dee8;
+}
+.md3-intercepts.ix-messenger-ui .tg-chat-item__avatar--photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 50%;
+}
+.md3-intercepts.ix-messenger-ui .tg-chat__avatar--photo {
+  overflow: hidden;
+  background: #d7dee8;
+}
+.md3-intercepts.ix-messenger-ui .tg-chat__avatar-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 50%;
+}
+
 .md3-intercepts.ix-messenger-ui .tg-chat-item__body {
   flex: 1;
   min-width: 0;

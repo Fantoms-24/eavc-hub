@@ -207,6 +207,64 @@ def release_package_path(directory: Path, package: str) -> Path:
     return result
 
 
+
+HUB_UPDATE_ACKS_NAME = "hub_update_acks.json"
+_MAX_HUB_UPDATE_ACKS = 200
+
+
+def _acks_path(directory: Path) -> Path:
+    return Path(directory) / HUB_UPDATE_ACKS_NAME
+
+
+def append_hub_update_report(directory: Path, report: dict[str, Any]) -> dict[str, Any]:
+    """Сохраняет отчёт HUB об успешном обновлении (дедуп по hub_id+revision)."""
+    directory = Path(directory)
+    directory.mkdir(parents=True, exist_ok=True)
+    hub_id = str(report.get("hub_id") or "").strip() or "unknown"
+    hub_name = str(report.get("hub_name") or hub_id).strip() or hub_id
+    revision = str(report.get("revision") or "").strip()
+    if not revision:
+        raise ValueError("revision обязателен")
+    entry = {
+        "hub_id": hub_id,
+        "hub_name": hub_name,
+        "revision": revision,
+        "ip_address": str(report.get("ip_address") or "").strip(),
+        "reported_at": _utc_now(),
+        "id": f"{hub_id}|{revision}",
+    }
+    path = _acks_path(directory)
+    rows: list[dict[str, Any]] = []
+    if path.is_file():
+        try:
+            raw = json.loads(path.read_text(encoding="utf-8") or "[]")
+            if isinstance(raw, list):
+                rows = [r for r in raw if isinstance(r, dict)]
+        except Exception:
+            rows = []
+    rows = [r for r in rows if str(r.get("id") or "") != entry["id"]]
+    rows.insert(0, entry)
+    rows = rows[:_MAX_HUB_UPDATE_ACKS]
+    tmp = path.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(rows, ensure_ascii=False, indent=2), encoding="utf-8")
+    os.replace(tmp, path)
+    return entry
+
+
+def list_hub_update_reports(directory: Path, *, limit: int = 50) -> list[dict[str, Any]]:
+    path = _acks_path(Path(directory))
+    if not path.is_file():
+        return []
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8") or "[]")
+    except Exception:
+        return []
+    if not isinstance(raw, list):
+        return []
+    out = [r for r in raw if isinstance(r, dict)]
+    return out[: max(1, min(int(limit or 50), 200))]
+
+
 def release_signature(release: dict[str, Any], sync_key: str) -> str:
     """HMAC манифеста: HUB проверяет, что его опубликовал именно SERVER."""
     body = json.dumps(release or {}, ensure_ascii=False, sort_keys=True, separators=(",", ":"))

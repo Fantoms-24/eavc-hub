@@ -99,7 +99,7 @@
 {% elif ep == 'search_online_unit_parent_page' %}{% set eavc_page_class = 'eavc-page-unit-dashboard' %}
 {% elif ep == 'admin_users' %}{% set eavc_page_class = 'eavc-page-admin' %}
 {% endif %}
-<body class="{% if ep != 'login' %}wp-has-app-background{% endif %}{% if use_eavc_shell %} eavc-app{% endif %} {{ eavc_page_class }}"{% if current_user.is_authenticated %} data-wp-deploy-poll="1" data-wp-id-watch-poll="1"{% endif %}>
+<body class="{% if ep != 'login' %}wp-has-app-background{% endif %}{% if use_eavc_shell %} eavc-app{% endif %} {{ eavc_page_class }}"{% if current_user.is_authenticated %} data-wp-deploy-poll="1" data-wp-id-watch-poll="1"{% endif %}{% if ep in ['intercepts', 'aviation'] %} data-activity-section="{{ ep }}"{% endif %}>
   {% if use_eavc_shell %}
   <script>
     (function () {
@@ -569,8 +569,9 @@
 
   <script src="{{ url_for('static', filename='vendor/bootstrap/bootstrap.bundle.min.js') }}"></script>
   {% if current_user.is_authenticated %}
-  <script defer src="{{ url_for('static', filename='js/deploy-notify.js') }}?v=3"></script>
+  <script defer src="{{ url_for('static', filename='js/deploy-notify.js') }}?v=4"></script>
   <script defer src="{{ url_for('static', filename='js/id-watch-notify.js') }}?v=5"></script>
+  <script defer src="{{ url_for('static', filename='js/sync-activity-notify.js') }}?v=1"></script>
   {% endif %}
   <script defer src="{{ url_for('static', filename='js/wp-ui.js') }}"></script>
   {% if use_eavc_shell %}
