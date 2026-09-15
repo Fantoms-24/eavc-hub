@@ -216,3 +216,38 @@ def test_unit_family_children_labels_and_hierarchy(monkeypatch) -> None:
     assert "1-й батальон" in child_labels
     assert "Разведвзвод" in child_labels
     assert "Минометная батарея" in child_labels
+
+
+def test_manual_group_removes_normalized_member_from_general_list() -> None:
+    from web_portal.lib.db.online_search import merge_families_by_manual_groups
+
+    families = [
+        {
+            "parent_key": "1 МСБ   155 ОМБр",
+            "parent_label": "1 МСБ   155 ОМБр",
+            "row_count": 2,
+            "children": [{"unit_key": "1 МСБ   155 ОМБр", "label": "1 МСБ   155 ОМБр", "row_count": 2}],
+        },
+        {
+            "parent_key": "2 МСБ 155 ОМБр",
+            "parent_label": "2 МСБ 155 ОМБр",
+            "row_count": 1,
+            "children": [{"unit_key": "2 МСБ 155 ОМБр", "label": "2 МСБ 155 ОМБр", "row_count": 1}],
+        },
+        {
+            "parent_key": "Отдельное подразделение",
+            "parent_label": "Отдельное подразделение",
+            "row_count": 1,
+            "children": [{"unit_key": "Отдельное подразделение", "label": "Отдельное подразделение", "row_count": 1}],
+        },
+    ]
+
+    result = merge_families_by_manual_groups(
+        families,
+        [["155 омбр", "1 мсб 155 омбр", "2 мсб 155 омбр"]],
+    )
+
+    assert [family["parent_label"] for family in result] == ["155 омбр", "Отдельное подразделение"]
+    grouped = result[0]
+    assert grouped["row_count"] == 3
+    assert len(grouped["children"]) == 2

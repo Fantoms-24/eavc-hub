@@ -962,8 +962,22 @@ function renderManualGroups() {
   if (!list) return;
   list.innerHTML = "";
 
+  const query = MANUAL_GROUPS_SEARCH_QUERY.trim().toLowerCase();
+  const visibleGroups = MANUAL_UNIT_GROUPS
+    .map((group, index) => ({ group, index }))
+    .filter(({ group }) => {
+      if (!query) return true;
+      const label = String(group.label || "").toLowerCase();
+      const members = (group.units || []).some((unit) => String(unit || "").toLowerCase().includes(query));
+      return label.includes(query) || members;
+    });
+
   const totalBadge = $("os-groups-total-count");
-  if (totalBadge) totalBadge.textContent = String(MANUAL_UNIT_GROUPS.length);
+  if (totalBadge) {
+    totalBadge.textContent = query
+      ? `${visibleGroups.length} из ${MANUAL_UNIT_GROUPS.length}`
+      : String(MANUAL_UNIT_GROUPS.length);
+  }
 
   if (!MANUAL_UNIT_GROUPS.length) {
     list.innerHTML = `
@@ -975,7 +989,17 @@ function renderManualGroups() {
     return;
   }
 
-  MANUAL_UNIT_GROUPS.forEach((group, index) => {
+  if (!visibleGroups.length) {
+    list.innerHTML = `
+      <div class="text-center py-4 px-3 border rounded-3 bg-light text-muted">
+        <i class="bi bi-search fs-2 d-block mb-1 opacity-50"></i>
+        <div class="small fw-semibold">Группы по запросу не найдены</div>
+        <div class="small text-secondary">Попробуйте название группы или подразделения из её состава</div>
+      </div>`;
+    return;
+  }
+
+  visibleGroups.forEach(({ group, index }) => {
     const isEditing = EDITING_GROUP_INDEX === index;
     const item = document.createElement("div");
     item.className = `os-group-card-item rounded-3 p-3 ${isEditing ? "is-editing" : ""}`;
@@ -1058,6 +1082,7 @@ function renderManualGroups() {
 
 let SELECTED_MANUAL_GROUP_UNITS = new Set();
 let MANUAL_GROUP_SEARCH_QUERY = "";
+let MANUAL_GROUPS_SEARCH_QUERY = "";
 
 function updateManualGroupSelectedCount() {
   const badge = $("os-group-selected-count");
@@ -1181,6 +1206,8 @@ async function openManualGroups() {
     ]);
     MANUAL_UNIT_GROUPS = Array.isArray(groupsData.groups) ? groupsData.groups : [];
     MANUAL_GROUP_UNITS = (unitsData.units || []).filter((unit) => unit.unit_key && unit.unit_key !== "__none__");
+    MANUAL_GROUPS_SEARCH_QUERY = "";
+    if ($("os-groups-search")) $("os-groups-search").value = "";
     cancelEditingGroup();
     if (window.bootstrap) window.bootstrap.Modal.getOrCreateInstance($("os-groups-modal")).show();
   } catch (e) {
@@ -1216,6 +1243,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     $("os-group-units-search").addEventListener("input", (e) => {
       MANUAL_GROUP_SEARCH_QUERY = (e.target.value || "");
       renderManualGroupUnitOptions();
+    });
+  }
+  if ($("os-groups-search")) {
+    $("os-groups-search").addEventListener("input", (e) => {
+      MANUAL_GROUPS_SEARCH_QUERY = e.target.value || "";
+      renderManualGroups();
     });
   }
   if ($("os-group-units-select-all")) {

@@ -52,6 +52,9 @@ from web_portal.lib.sync_delivery import (
 
 _log = logging.getLogger("web_portal.sync_agent")
 _PULL_CURSOR_OVERLAP_SEC = 2
+# Полная сверка справочника нужна при восстановлении/переустановке SERVER:
+# курсор HUB мог уже уйти вперёд, а таблица unit на SERVER — оказаться пустой.
+_UNIT_FULL_SYNC_INTERVAL_SEC = 300
 
 
 def _now_ts() -> str:
@@ -832,8 +835,43 @@ def sync_push_unit_once(
     last_rowid = int(load_cursor(p, "unit_last_rowid") or 0)
     with read_source(p) as conn:
         rows = list_unit_rows_after_rowid(conn, after_rowid=last_rowid, limit=limit, initialize=False)
+    is_full_reconciliation = False
+    full_sync_rowid = 0
     if not rows:
-        return {"ok": True, "sent": 0}
+        last_full_raw = load_cursor(p, "unit_last_full_sync_at")
+        full_sync_rowid = int(load_cursor(p, "unit_full_sync_rowid") or 0)
+        try:
+            last_full_at = float(last_full_raw or 0)
+        except (TypeError, ValueError):
+            last_full_at = 0.0
+        # Ненулевой rowid означает, что предыдущая полная сверка ещё идёт:
+        # продолжаем её сразу, не ждём следующего пятиминутного окна.
+        if (
+            not full_sync_rowid
+            and (time.time() - last_full_at) < _UNIT_FULL_SYNC_INTERVAL_SEC
+        ):
+            return {"ok": True, "sent": 0}
+        # Повторно отправляем весь актуальный справочник. Принимающая сторона
+        # применяет только действительно новые значения, поэтому такая сверка
+        # не создаёт бесконечный обмен и не перезаписывает свежую правку SERVER.
+        with read_source(p) as conn:
+            rows = list_unit_rows_after_rowid(
+                conn,
+                after_rowid=full_sync_rowid,
+                limit=limit,
+                initialize=False,
+            )
+        if not rows:
+            save_cursors(
+                p,
+                {
+                    "unit_last_full_sync_at": str(time.time()),
+                    "unit_full_sync_rowid": "0",
+                },
+            )
+            return {"ok": True, "sent": 0, "full": True}
+        is_full_reconciliation = True
+
     max_rowid = max(int(r.get("rowid") or 0) for r in rows)
     pos_list = _normalize_positions(position_names)
     pos_str = ",".join(pos_list)
@@ -853,8 +891,21 @@ def sync_push_unit_once(
         timeout=10.0,
     )
     if resp.get("ok") is True:
-        save_cursors(p, {"unit_last_rowid": str(max_rowid)})
-        return {"ok": True, "sent": len(rows), "max_rowid": max_rowid}
+        cursors = {"unit_last_rowid": str(max_rowid)}
+        if is_full_reconciliation:
+            if len(rows) >= limit:
+                cursors["unit_full_sync_rowid"] = str(max_rowid)
+            else:
+                cursors["unit_last_full_sync_at"] = str(time.time())
+                cursors["unit_full_sync_rowid"] = "0"
+        save_cursors(p, cursors)
+        return {
+            "ok": True,
+            "sent": len(rows),
+            "max_rowid": max_rowid,
+            "full": is_full_reconciliation,
+            "more": bool(is_full_reconciliation and len(rows) >= limit),
+        }
     return {"ok": False, "error": str(resp.get("error") or "push failed")}
 
 

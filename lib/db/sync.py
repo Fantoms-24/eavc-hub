@@ -238,6 +238,10 @@ def upsert_unit_rows_from_sync(
     """
     Применение unit на принимающей стороне.
     Держим инвариант: для (frequency, group_) должна быть одна строка name.
+
+    В синхронизации SERVER и HUB могут прислать одну и ту же строку обратно
+    друг другу. Не переписываем совпадающее значение и не затираем локальную
+    более свежую правку устаревшим пакетом.
     """
     from web_portal.lib.db.connection import init_db
     from web_portal.lib.db.connection import _commit_if_needed
@@ -245,6 +249,8 @@ def upsert_unit_rows_from_sync(
     if not rows:
         return {"applied": 0}
     applied = 0
+    unchanged = 0
+    skipped_newer = 0
     cur = conn.cursor()
     for r in rows or []:
         f = str(r.get("frequency") or "")
@@ -254,6 +260,28 @@ def upsert_unit_rows_from_sync(
         ts = str(r.get("updated_at") or "").strip()
         if not f or not g:
             continue
+        existing = cur.execute(
+            """
+            SELECT name, COALESCE(manual, 0), COALESCE(updated_at, '')
+            FROM unit
+            WHERE frequency=? AND group_=?
+            LIMIT 1
+            """,
+            (f, g),
+        ).fetchone()
+        if existing is not None:
+            current_name = str(existing[0] or "")
+            current_manual = int(existing[1] or 0)
+            current_ts = str(existing[2] or "").strip()
+            if current_name == n and current_manual == manual:
+                unchanged += 1
+                continue
+            # SQLite CURRENT_TIMESTAMP и синхронный updated_at имеют один
+            # лексикографически сортируемый UTC-формат. Пустой timestamp у
+            # старого отправителя считаем более старым, чем локальная правка.
+            if current_ts and (not ts or current_ts > ts):
+                skipped_newer += 1
+                continue
         # заменяем все варианты имени на новое
         cur.execute("DELETE FROM unit WHERE frequency=? AND group_=?", (f, g))
         cur.execute(
@@ -262,7 +290,11 @@ def upsert_unit_rows_from_sync(
         )
         applied += 1
     _commit_if_needed(conn)
-    return {"applied": applied}
+    return {
+        "applied": applied,
+        "unchanged": unchanged,
+        "skipped_newer": skipped_newer,
+    }
 
 
 def _sync_blocks_quietly(

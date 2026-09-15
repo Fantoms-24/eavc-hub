@@ -163,6 +163,42 @@ def register_analysis_routes(app, ctx: AppContext):
             item["avatar_url"] = avatar_urls.get(unit_key, "")
         return payload
 
+    def attach_network_summary_avatars(payload: dict) -> dict:
+        """Добавляет к сводке ссылки на аватары подразделений из «Поиска».
+
+        ``resolve_unit_avatar_urls`` уже знает иерархию групп: если фото задано
+        у группы, тот же URL возвращается и для её дочерних подразделений.
+        """
+        unit_keys = sorted(
+            {
+                str(name or "").strip()
+                for name in (payload.get("clusters") or [])
+                if str(name or "").strip()
+            }
+        )
+        if not unit_keys:
+            payload["avatars"] = {}
+            return payload
+        search_p = search_online_db_path()
+        ensure_db(search_p)
+        search_conn = connect(search_p)
+        try:
+            families = list_online_search_unit_families(search_conn)
+            avatar_keys = sorted(set(unit_keys) | set(collect_family_unit_keys(families)))
+            avatar_files = list_online_search_unit_avatar_files(search_conn, avatar_keys)
+            avatar_urls = resolve_unit_avatar_urls(
+                families,
+                avatar_files,
+                build_url=lambda filename: url_for(
+                    "api_online_search_unit_avatar_file",
+                    filename=filename,
+                ),
+            )
+        finally:
+            search_conn.close()
+        payload["avatars"] = {key: avatar_urls.get(key, "") for key in unit_keys}
+        return payload
+
     @app.before_request
     def reject_graph_rendering_on_hub():
         """HUB не строит графы и не тратит ресурсы на тяжёлые запросы графа."""
@@ -2119,7 +2155,7 @@ def register_analysis_routes(app, ctx: AppContext):
         cache_key = _analysis_cache_key("network-summary", pos=position_filter)
         cached_payload = _analysis_cache_get(cache_key)
         if cached_payload is not None:
-            return jsonify(cached_payload)
+            return jsonify(attach_network_summary_avatars(cached_payload))
 
         try:
             main_conn = get_request_main_db()
@@ -2140,6 +2176,7 @@ def register_analysis_routes(app, ctx: AppContext):
                 ).strip(),
                 user_id=int(current_user.id),
             )
+            attach_network_summary_avatars(payload)
             _analysis_cache_set(cache_key, payload)
             return jsonify(payload)
         except Exception as e:

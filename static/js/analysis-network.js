@@ -370,6 +370,124 @@ function renderNetworkActivityBlocks(payload) {
   }
 }
 
+/* Редизайн: таблица и сводка показывают только подразделения, без технических
+ * сущностей (частоты, рабочие группы и т.п.). */
+function _netMetric(payload, name, field) {
+  return Number((payload.current && payload.current[name] && payload.current[name][field]) || 0);
+}
+
+function _netPreviousMetric(payload, name, field) {
+  return Number((payload.previous && payload.previous[name] && payload.previous[name][field]) || 0);
+}
+
+function _netFilteredClusters(payload) {
+  const clusters = Array.isArray(payload.clusters) ? payload.clusters : [];
+  const query = String($("net-unit-search")?.value || "").trim().toLocaleLowerCase();
+  if (!query) return clusters;
+  return clusters.filter((name) => String(name).toLocaleLowerCase().includes(query));
+}
+
+function _netInitials(name) {
+  const words = String(name || "").trim().split(/\s+/).filter(Boolean);
+  return (words.slice(0, 2).map((word) => word[0]).join("") || "П").toUpperCase();
+}
+
+function renderNetworkTable(payload) {
+  const headRow = $("net-head-row");
+  const body = $("net-body");
+  if (!headRow || !body) return;
+  const clusters = _netFilteredClusters(payload);
+  const allClusters = Array.isArray(payload.clusters) ? payload.clusters : [];
+  const maxSessions = Math.max(1, ...allClusters.map((name) => _netMetric(payload, name, "sessions")));
+  const optionList = $("net-unit-options");
+  if (optionList) optionList.innerHTML = allClusters.map((name) => `<option value="${escapeHtml(name)}"></option>`).join("");
+
+  headRow.innerHTML = "<th>Подразделение</th><th>Сеансы</th><th>Предыдущий период</th><th>Изменение</th><th>Корреспонденты</th><th>Интенсивность</th><th aria-label=\"Избранное\"></th>";
+  if (!clusters.length) {
+    body.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-4">Подразделения по заданному фильтру не найдены.</td></tr>`;
+    return;
+  }
+  body.innerHTML = clusters.map((name, index) => {
+    const current = _netMetric(payload, name, "sessions");
+    const previous = _netPreviousMetric(payload, name, "sessions");
+    const correspondents = _netMetric(payload, name, "correspondents");
+    const delta = current - previous;
+    const deltaClass = delta > 0 ? "up" : delta < 0 ? "down" : "same";
+    const deltaText = `${delta > 0 ? "+" : ""}${delta}`;
+    const intensity = Math.round((current / maxSessions) * 100);
+    const avatar = String((payload.avatars && payload.avatars[name]) || "").trim();
+    const avatarMarkup = avatar
+      ? `<img class="net-unit-avatar" src="${escapeHtml(avatar)}" alt="">`
+      : `<span class="net-unit-avatar net-unit-avatar--fallback">${escapeHtml(_netInitials(name))}</span>`;
+    const favorites = window.__NET_FAVORITES__ instanceof Set ? window.__NET_FAVORITES__ : new Set();
+    const isFavorite = favorites.has(name);
+    return `<tr>
+      <td><div class="net-unit-cell">${avatarMarkup}<div><div class="net-unit-name">${escapeHtml(name)}</div><div class="net-unit-sub">Подразделение</div></div></div></td>
+      <td class="fw-semibold">${current}</td>
+      <td>${previous}</td>
+      <td><span class="net-delta net-delta--${deltaClass}">${deltaText}</span></td>
+      <td>${correspondents}</td>
+      <td><div class="net-intensity"><span class="net-intensity__bar"><b style="width:${intensity}%"></b></span><span class="net-intensity__value">${intensity}%</span></div></td>
+      <td><button type="button" class="net-fav-btn ${isFavorite ? "net-fav-btn--active" : ""}" data-net-fav-index="${index}" title="Избранное"><i class="bi bi-star${isFavorite ? "-fill" : ""}"></i></button></td>
+    </tr>`;
+  }).join("");
+  body.querySelectorAll("[data-net-fav-index]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const name = clusters[Number(button.dataset.netFavIndex)];
+      if (!name) return;
+      const favorites = window.__NET_FAVORITES__ instanceof Set ? window.__NET_FAVORITES__ : new Set();
+      if (favorites.has(name)) favorites.delete(name); else favorites.add(name);
+      window.__NET_FAVORITES__ = favorites;
+      saveNetworkFavorites(window.__NET_POS__ || "__all__", favorites);
+      renderNetworkTable(payload);
+      renderNetworkActivityBlocks(payload);
+    });
+  });
+}
+
+function renderNetworkActivityBlocks(payload) {
+  const clusters = Array.isArray(payload.clusters) ? payload.clusters : [];
+  const totalCurrent = clusters.reduce((sum, name) => sum + _netMetric(payload, name, "sessions"), 0);
+  const totalPrevious = clusters.reduce((sum, name) => sum + _netPreviousMetric(payload, name, "sessions"), 0);
+  const totalCorrespondents = clusters.reduce((sum, name) => sum + _netMetric(payload, name, "correspondents"), 0);
+  const kpis = $("net-kpis");
+  const totalDelta = totalCurrent - totalPrevious;
+  if (kpis) {
+    kpis.innerHTML = [
+      ["bi-broadcast", "Сеансы связи", totalCurrent, `изменение ${totalDelta > 0 ? "+" : ""}${totalDelta} к прошлому`, "aqua"],
+      ["bi-person-lines-fill", "Корреспонденты", totalCorrespondents, "уникальные за период", ""],
+      ["bi-diagram-3", "Активные подразделения", clusters.filter((name) => _netMetric(payload, name, "sessions") > 0).length, `из ${clusters.length} в отчёте`, "violet"],
+      ["bi-calendar3", "Период", clusters.length, "подразделений в анализе", ""],
+    ].map(([icon, label, value, hint, cls]) => `<article class="net-kpi net-kpi--${cls}"><div class="net-kpi__icon"><i class="bi ${icon}"></i></div><div><div class="net-kpi__label">${label}</div><div class="net-kpi__value">${value}</div><div class="net-kpi__hint">${hint}</div></div></article>`).join("");
+  }
+  const chart = $("net-activity-chart");
+  const chartNames = clusters.slice(0, 9);
+  if (chart) {
+    if (!chartNames.length) {
+      chart.innerHTML = '<div class="net-empty">Нет данных за этот период.</div>';
+    } else {
+      const values = chartNames.flatMap((name) => [_netMetric(payload, name, "sessions"), _netPreviousMetric(payload, name, "sessions")]);
+      const maxValue = Math.max(1, ...values);
+      const width = 720; const height = 230; const left = 20; const right = 18; const top = 14; const bottom = 35;
+      const x = (index) => left + (chartNames.length === 1 ? (width - left - right) / 2 : index * (width - left - right) / (chartNames.length - 1));
+      const y = (value) => top + (height - top - bottom) * (1 - value / maxValue);
+      const points = (field, previous) => chartNames.map((name, index) => `${x(index)},${y(previous ? _netPreviousMetric(payload, name, field) : _netMetric(payload, name, field))}`).join(" ");
+      const currentPoints = points("sessions", false);
+      const prevPoints = points("sessions", true);
+      const area = `${left},${height - bottom} ${currentPoints} ${x(chartNames.length - 1)},${height - bottom}`;
+      const labels = chartNames.map((name, index) => `<text class="net-chart-label" x="${x(index)}" y="${height - 11}" text-anchor="middle">${escapeHtml(String(name).slice(0, 10))}</text>`).join("");
+      const grid = [0, 1, 2, 3].map((n) => `<line class="net-chart-grid" x1="${left}" x2="${width - right}" y1="${top + n * (height - top - bottom) / 3}" y2="${top + n * (height - top - bottom) / 3}"></line>`).join("");
+      const dots = chartNames.map((name, index) => `<circle class="net-chart-dot" cx="${x(index)}" cy="${y(_netMetric(payload, name, "sessions"))}" r="4"><title>${escapeHtml(name)}: ${_netMetric(payload, name, "sessions")} сеансов</title></circle>`).join("");
+      chart.innerHTML = `<svg class="net-chart-svg" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" role="img" aria-label="Сравнение сеансов по подразделениям">${grid}<polygon class="net-chart-area" points="${area}"></polygon><polyline class="net-chart-line-prev" points="${prevPoints}"></polyline><polyline class="net-chart-line-now" points="${currentPoints}"></polyline>${dots}${labels}</svg>`;
+    }
+  }
+  const changes = $("net-changes-list");
+  if (changes) {
+    const sorted = clusters.map((name) => ({ name, current: _netMetric(payload, name, "sessions"), delta: _netMetric(payload, name, "sessions") - _netPreviousMetric(payload, name, "sessions") })).sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta)).slice(0, 5);
+    changes.innerHTML = sorted.length ? sorted.map((item) => `<div class="net-change"><div><div class="net-change__name">${escapeHtml(item.name)}</div><div class="net-change__meta">${item.current} сеансов за период</div></div><div class="net-change__value net-change__value--${item.delta > 0 ? "up" : item.delta < 0 ? "down" : "same"}">${item.delta > 0 ? "+" : ""}${item.delta}</div></div>`).join("") : '<div class="net-empty">Нет данных.</div>';
+  }
+}
+
 async function buildNetworkSummary() {
   const startEl = $("net-start");
   const endEl = $("net-end");
@@ -384,20 +502,13 @@ async function buildNetworkSummary() {
     return;
   }
   if (status) status.textContent = "Загрузка…";
-  const vizSec = $("net-viz-section");
-  if (vizSec) {
-    vizSec.style.display = "none";
-    vizSec.hidden = true;
-  }
   if (exportBtn) exportBtn.disabled = true;
   if (orderBtn) orderBtn.disabled = true;
   const exportUnitBtn = $("net-export-unit-btn");
   if (exportUnitBtn) exportUnitBtn.disabled = true;
   const sessionsFavoritesPromise = apiGet("/api/sessions/favorites?with_unit_names=1").catch(() => null);
   try {
-    const unitFilter = _networkExportUnitName();
     let url = `/api/analysis/network-summary?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}`;
-    if (unitFilter) url += `&unit_name=${encodeURIComponent(unitFilter)}`;
     const data = await apiGet(url);
     const posKey = data.all_positions ? "__all__" : (data.position || "__all__");
     window.__NET_POS__ = posKey;
@@ -1110,10 +1221,10 @@ function initNetworkOrderUI(positionKey, clusters, hidden, favorites) {
       netPrev.textContent = fmtPrevRange(pr.prevStart, pr.prevEnd);
     };
     if (netStart && netEnd) {
-      // default: last 2 hours
+      // По умолчанию — неделя: для общего анализа это информативнее старого 2-часового интервала.
       const now = new Date();
       const end = new Date(now.getTime());
-      const start = new Date(now.getTime() - 2 * 60 * 60 * 1000);
+      const start = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
       const toIsoMin = (d) => {
         const pad = (n) => String(n).padStart(2, "0");
         return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(
@@ -1131,9 +1242,6 @@ function initNetworkOrderUI(positionKey, clusters, hidden, favorites) {
     if ($("net-export-unit-btn")) {
       $("net-export-unit-btn").addEventListener("click", exportNetworkUnitSummary);
     }
-    if ($("net-merge-6h-btn")) {
-      $("net-merge-6h-btn").addEventListener("click", mergeIntensity2hTo6h);
-    }
     if ($("net-preset-today")) {
       $("net-preset-today").addEventListener("click", () => applyNetworkDatePreset("today"));
     }
@@ -1147,6 +1255,13 @@ function initNetworkOrderUI(positionKey, clusters, hidden, favorites) {
     if (netUnitExport) {
       netUnitExport.addEventListener("input", _updateNetworkExportUnitBtn);
       netUnitExport.addEventListener("change", _updateNetworkExportUnitBtn);
+    }
+    const netUnitSearch = $("net-unit-search");
+    if (netUnitSearch) {
+      netUnitSearch.addEventListener("input", () => {
+        const payload = window.__NET_LAST_PAYLOAD__;
+        if (payload) renderNetworkTable(payload);
+      });
     }
   }
 

@@ -112,6 +112,28 @@ def test_bulk_failure_does_not_advance_cursor(source, monkeypatch):
     assert load_cursor(source, "seanses_last_rowid") == ""
 
 
+def test_unit_full_reconciliation_recovers_rows_after_incremental_cursor(source, monkeypatch):
+    """Повторная сверка восстанавливает привязки на очищенном SERVER."""
+    delivered = []
+    monkeypatch.setattr(
+        sync_agent,
+        "_http_json",
+        lambda _method, _url, *, body, **_kw: delivered.append(body) or {"ok": True},
+    )
+    # Имитируем HUB, который уже отправил инкрементальную строку раньше.
+    save_cursors(source, {"unit_last_rowid": "1"})
+
+    result = sync_agent.sync_push_unit_once(
+        upstream_base="http://test", sync_key="test"
+    )
+
+    assert result["full"] is True
+    assert result["sent"] == 1
+    event = delivered[0]["events"][0]
+    assert event["kind"] == "unit:batch"
+    assert event["payload"]["rows"][0]["name"] == "unit1"
+
+
 @pytest.mark.parametrize("sender, table", [
     ("sync_push_seanses_once", "seanses"),
     ("sync_push_unit_once", "unit"),

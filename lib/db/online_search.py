@@ -719,10 +719,18 @@ def merge_families_by_manual_groups(
     if not groups:
         return families
     mkey_to_fam: dict[str, dict[str, Any]] = {}
+    # Значения в файле ручных групп проходят _norm_unit_note при сохранении,
+    # а исходные note в БД могут отличаться лишними пробелами или регистром.
+    # Сопоставляем по одной и той же нормализованной форме, но в словаре
+    # храним исходный ключ: он нужен для корректного исключения карточки.
+    raw_keys_by_match_key: dict[str, set[str]] = {}
     for f in families:
         k = str(f.get("parent_key") or "").strip()
         if k:
             mkey_to_fam[k] = f
+            match_key = _norm_unit_note(k).casefold()
+            if match_key:
+                raw_keys_by_match_key.setdefault(match_key, set()).add(k)
 
     for g in groups:
         canon = g[0].strip()
@@ -736,13 +744,15 @@ def merge_families_by_manual_groups(
         mkeys: set[str] = {str(x).strip() for x in g[1:] if str(x).strip()}
         # Совместимость со старым файлом: если название группы одновременно было
         # названием подразделения, включаем его в группу.
-        if canon in mkey_to_fam:
+        if _norm_unit_note(canon).casefold() in raw_keys_by_match_key:
             mkeys.add(canon)
         to_merge: list[dict[str, Any]] = []
         for mk in mkeys:
-            f = mkey_to_fam.pop(mk, None)
-            if f:
-                to_merge.append(f)
+            match_key = _norm_unit_note(mk).casefold()
+            for raw_key in raw_keys_by_match_key.get(match_key, set()):
+                f = mkey_to_fam.pop(raw_key, None)
+                if f:
+                    to_merge.append(f)
         if not to_merge:
             continue
         by_uk: dict[str, dict[str, Any]] = {}
